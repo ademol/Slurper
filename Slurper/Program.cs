@@ -26,6 +26,7 @@ namespace Slurper
         
         static void Main(string[] args)
         {
+            //todo: more elegant handeling of parameters
             // help ?
             if (args.Length > 0 && args[0].Equals("/h")) { help(); }
 
@@ -49,6 +50,7 @@ namespace Slurper
 
         static void help()
         {
+            //todo: nicer help
             String txt = "Copy files that have their filename matched, to ./rip/<hostname><timestamp> directory \n\n";
             txt += "In default mode (without cfg file) it matches jpg files with regex \n(i?).*\\\\.jpg\n\n";
             txt += "use the /d flag for verbose output => slurper.exe /d \n";
@@ -167,7 +169,8 @@ namespace Slurper
                 if (Debug) { Console.WriteLine("ripping [{0}] => [{1}]", filename, targetFileName); }
                 try
                 {
-                     File.Copy(filename, targetFileName);
+                    //todo: move to http://alphafs.alphaleonis.com/ 
+                    File.Copy(filename, targetFileName);
                 }
                 catch (Exception e)
                 {
