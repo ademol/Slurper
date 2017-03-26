@@ -26,7 +26,7 @@ namespace Slurper
         private static String targetDirBasePath;                                // relative directory for file to be copied to
 
         private static char pathSep = Path.DirectorySeparatorChar;
-        private static string DefaultRegexPattern = @".:    (?i).*\.jpg";       // the default pattern that is used to search for jpg files
+        private static string DefaultRegexPattern = @"(?i).*\.jpg";             // the default pattern that is used to search for jpg files
 
         private static ArrayList filePatternsTolookfor = new ArrayList();       // patterns to search  
         private static ArrayList drivesRequestedToBeSearched = new ArrayList(); // drives requested to searched base on configuration  ('c:'  'd:'  etc..  '.:'  means all)
@@ -88,10 +88,10 @@ namespace Slurper
             txt += "#################################\n";
             txt += "# sample config file            #\n";
             txt += "#################################\n";
-            txt += "c:	(?i).*\\.jpg\n";
-            txt += "f:	(?i).*\\.doc\n";
-            txt += ".:	(?i).*\\.mp3\n";
-            txt += "c:	(?i).*\\.txt\n";
+            txt += "c:(?i).*\\.jpg\n";
+            txt += "f:(?i).*\\.doc\n";
+            txt += ".:(?i).*\\.mp3\n";
+            txt += "c:(?i).*\\.txt\n";
             txt += "#################################\n";
             txt += "This searches for:\n";
             txt += "    jpg & txt files on the c: drive\n";
@@ -259,23 +259,12 @@ namespace Slurper
 
             foreach (DriveInfo d in allDrives)
             {
+                // D:\  -> D:
+                String driveID = d.Name.Substring(0, 2).ToUpper();
+                
                 // check if drive will be included
                 Boolean driveToBeIncluded = false;
                 String reason = "configuration";
-
-                //// use the drive if its is part of a requested configuration   
-                //foreach (String driveRequested in drivesRequestedToBeSearched)
-                //{
-                //    // check is drive found matches 
-                //    if (new Regex(driveRequested.ToUpper()).Match(d.Name.ToUpper()).Success)
-                //    {
-                //        driveToBeIncluded = true;
-                //        reason = "configuration for drive " + driveRequested.ToUpper();
-                //        continue;
-                //    }
-                //}
-
-
 
                 // check for wildcard
                 if ( driveFilePatternsTolookfor.ContainsKey(".:"))
@@ -284,10 +273,10 @@ namespace Slurper
                     reason = "configuration for drive .:";
                 }
                 // check for specific drive
-                if (driveFilePatternsTolookfor.ContainsKey(d.Name.ToUpper()))
+                if (driveFilePatternsTolookfor.ContainsKey(driveID))
                 {
                     driveToBeIncluded = true;
-                    reason = "configuration for drive " + d.Name.ToUpper();
+                    reason = "configuration for drive " + driveID;
                 }
 
 
@@ -304,7 +293,7 @@ namespace Slurper
                     drivesToSearch.Add(d.Name);
                 }
 
-                if (VERBOSE) { Console.WriteLine("GetDriveInfo: found drive [{0}]   drive included? [{1}]\t reason[{2}]", d.Name, driveToBeIncluded, reason); }
+                if (VERBOSE) { Console.WriteLine("GetDriveInfo: found drive [{0}]\t included? [{1}]\t reason[{2}]", driveID, driveToBeIncluded, reason); }
 
             }
 
@@ -314,7 +303,7 @@ namespace Slurper
         {
             String curDir = Directory.GetCurrentDirectory();
             String hostname = (System.Environment.MachineName).ToLower();
-            String dateTime = String.Format("{0:yyyyMMdd_hh-mm-ss}", DateTime.Now);
+            String dateTime = String.Format("{0:yyyyMMdd_HH-mm-ss}", DateTime.Now);
             if (VERBOSE) { Console.WriteLine("CreateTargetLocation: [{0}][{1}][{2}]", hostname, curDir, dateTime); }
 
             targetDirBasePath = string.Concat(curDir, pathSep, ripDir, pathSep, hostname, "_", dateTime);
@@ -368,7 +357,7 @@ namespace Slurper
             if (File.Exists(cfgFileName))
             {
                 String line;
-                String REGEXpattern = @"^([^#]:)\t(.*)";               // pattern to match valid lines from config file   <driveLetter:><tab><regex>
+                String REGEXpattern = @"^([^#]:)(.*)";               // pattern to match valid lines from config file   <driveLetter:><regex>
                 Regex r = new Regex(REGEXpattern);
                 try
                 {
