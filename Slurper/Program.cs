@@ -1,7 +1,8 @@
 ﻿using System;
-using System.IO;
+//using System.IO;
 using System.Text.RegularExpressions;
 using System.Collections;
+using Alphaleonis.Win32.Filesystem;
 
 namespace Slurper
 {
@@ -169,8 +170,8 @@ namespace Slurper
                 if (Debug) { Console.WriteLine("ripping [{0}] => [{1}]", filename, targetFileName); }
                 try
                 {
-                    //todo: move to http://alphafs.alphaleonis.com/ 
                     File.Copy(filename, targetFileName);
+          
                 }
                 catch (Exception e)
                 {
@@ -252,7 +253,8 @@ namespace Slurper
                 Regex r = new Regex(REGEXpattern);
                 try
                 {
-                    using (StreamReader sr = new StreamReader(cfgFileName))
+                    //todo: also move to http://alphafs.alphaleonis.com/  ?
+                    using (System.IO.StreamReader sr = new System.IO.StreamReader(cfgFileName))
                     {
                         while (!sr.EndOfStream)
                         {
@@ -270,10 +272,7 @@ namespace Slurper
                             {
                                 if (Debug) { Console.WriteLine("[{0}] => regex:[{1}]", line, "---skipped---"); }
                             }
-
-
                         }
-
                     }
                     cfgLoaded = true;
                 }
@@ -285,6 +284,5 @@ namespace Slurper
             }
             return cfgLoaded;
         }
-
     }
 }
