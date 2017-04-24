@@ -3,6 +3,8 @@ using System.Text.RegularExpressions;
 using System.Collections;
 using Alphaleonis.Win32.Filesystem;
 using System.Collections.Generic;
+using System.Reflection;
+
 
 namespace Slurper
 {
@@ -38,8 +40,14 @@ namespace Slurper
         private static char[] spinChars = new char[] { '|', '/', '-', '\\' };
         private static int spinCharIdx = 0;
 
+        private static string sampleConfig;
+
+
         static void Main(string[] args)
         {
+            // init
+            Init();
+
             // handle arguments
             Arguments(args);
 
@@ -57,21 +65,71 @@ namespace Slurper
 
         }
 
+        private static void Init()
+        {
+            // sample config
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "Slurper.slurper.cfg.txt";
+
+            using (System.IO.Stream stream = assembly.GetManifestResourceStream(resourceName))
+            using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
+            {
+                sampleConfig = reader.ReadToEnd();
+            }
+            
+            //
+           
+        }
+
         static void Arguments(string[] args)
         {
-            //todo: more elegant handeling of parameters  and allow for multiple param selection....
-            // help ?
-            if (args.Length > 0 && args[0].Equals("/h")) { help(); }
+            // concat the arguments, handle each char as switch selection  (ignore any '/' or '-')
+            string concat = String.Join("",args);
+            foreach ( char c in concat )
+            {
+                switch ( c )
+                {
+                    case 'h':
+                        help();
+                        break;
+                    case 'v':
+                        VERBOSE = true;
+                        break;
+                    case 'd':
+                        DRYRUN = true;
+                        break;
+                    case 't':
+                        TRACE = true;
+                        VERBOSE = true;
+                        break;
+                    case '/':
+                        break;
+                    case '-':
+                        break;
+                    case 'g':
+                        generateConfig();
+                        Environment.Exit(0);
+                        break;
+                    default:
+                        Console.WriteLine("option [{0}] not supported", c);
+                        help();
+                        break;
+                }
+            }
+            if (VERBOSE) { Console.WriteLine("Arguments: VERBOSE[{0}] DRYRUN[{1}] TRACE[{2}]", VERBOSE, DRYRUN, TRACE); }
 
-            // Verbose ?
-            if (args.Length > 0 && args[0].Equals("/v")) { VERBOSE = true; }
 
-            // dryrun
-            if (args.Length > 0 && args[0].Equals("/d")) { DRYRUN = true; VERBOSE = true; }
+        }
 
-            // trace
-            if (args.Length > 0 && args[0].Equals("/t")) { VERBOSE = true; TRACE = true;  }
-
+        private static void generateConfig()
+        {
+            Console.WriteLine("generating sample config file [{0}]",cfgFileName); 
+            try
+            {
+                System.IO.File.WriteAllText(cfgFileName, sampleConfig);
+            } catch (Exception e) {
+                Console.WriteLine("generateConfig: failed to generate [{0}][{1}]", cfgFileName, e.Message);
+            }
         }
 
         static void help()
@@ -81,23 +139,13 @@ namespace Slurper
             txt += "Copy files that have their filename matched, to ./rip/<hostname><timestamp> directory \n\n";
             txt += "In default mode (without cfg file) it matches jpg files by the jpg extenstion\n";
             txt += "use the /v flag for verbose output => slurper.exe /v \n";
-            txt += "use the /d flag for dryrun + verbose output (no filecopy mode) => slurper.exe /d      \n";
+            txt += "use the /d flag for dryrun (no filecopy mode) => slurper.exe /d \n";
+            txt += "use the /t flag for trace => slurper.exe /t    (note: setting trace sets verbose) \n";
+            txt += "use the /g flag to generate a sample cfg file\n";
             txt += "\n";
-            txt += "(optional) uses a configfile (./slurper.cfg) to specify custom regexes to match \n";
+            txt += "(optional) when a configfile exits (./slurper.cfg) it is used to specify custom regexes to match \n";
             txt += "\n";
-            txt += "#################################\n";
-            txt += "# sample config file            #\n";
-            txt += "#################################\n";
-            txt += "c:(?i).*\\.jpg\n";
-            txt += "f:(?i).*\\.doc\n";
-            txt += ".:(?i).*\\.mp3\n";
-            txt += "c:(?i).*\\.txt\n";
-            txt += "#################################\n";
-            txt += "This searches for:\n";
-            txt += "    jpg & txt files on the c: drive\n";
-            txt += "    doc files on the f: drive\n";
-            txt += "    mp3 files on all (.:) drives\n";
-
+            txt += sampleConfig;
 
             Console.WriteLine(txt);
             Environment.Exit(0);
@@ -234,16 +282,12 @@ namespace Slurper
                         Directory.CreateDirectory(targetPath);
                         File.Copy(filename, targetFileNameFullPath);
                     }
-
-
-
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine("RipFile: copy of [{0}] failed with [{1}]", filename, e.Message);
                 }
             }
-
         }
 
         static void GetDriveInfo()

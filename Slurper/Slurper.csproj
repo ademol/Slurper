@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icons\Ahmadhania-Spherical-File-download.ico" />
+    <EmbeddedResource Include="slurper.cfg.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
