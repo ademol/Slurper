@@ -5,3 +5,5 @@ The files found are then copied to a subdirectory in the location from where the
 notes: 
 * The drive that the program is run from, is excluded from searching.
 * suggested use is to run this program from an portable location (USB/HD) 
+
+.
