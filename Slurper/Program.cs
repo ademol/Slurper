@@ -39,13 +39,13 @@ namespace Slurper
 
 
 
-        private static string sampleConfig;
+        
 
 
         static void Main(string[] args)
         {
             // init
-            Init();
+            SampleConfig.Init();
 
             // handle arguments
             Arguments(args);
@@ -64,21 +64,7 @@ namespace Slurper
 
         }
 
-        private static void Init()
-        {
-            // sample config
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "Slurper.slurper.cfg.txt";
 
-            using (System.IO.Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
-            {
-                sampleConfig = reader.ReadToEnd();
-            }
-            
-            //
-           
-        }
 
         static void Arguments(string[] args)
         {
@@ -89,7 +75,7 @@ namespace Slurper
                 switch ( c )
                 {
                     case 'h':
-                        help();
+                        DisplayMessages.help();
                         break;
                     case 'v':
                         VERBOSE = true;
@@ -111,7 +97,7 @@ namespace Slurper
                         break;
                     default:
                         Console.WriteLine("option [{0}] not supported", c);
-                        help();
+                        DisplayMessages.help();
                         break;
                 }
             }
@@ -125,30 +111,13 @@ namespace Slurper
             Console.WriteLine("generating sample config file [{0}]",cfgFileName); 
             try
             {
-                System.IO.File.WriteAllText(cfgFileName, sampleConfig);
+                System.IO.File.WriteAllText(cfgFileName, SampleConfig.sampleConfig);
             } catch (Exception e) {
                 Console.WriteLine("generateConfig: failed to generate [{0}][{1}]", cfgFileName, e.Message);
             }
         }
 
-        static void help()
-        {
-            //todo: nicer help
-            String txt = "";
-            txt += "Copy files that have their filename matched, to ./rip/<hostname><timestamp> directory \n\n";
-            txt += "In default mode (without cfg file) it matches jpg files by the jpg extenstion\n";
-            txt += "use the /v flag for verbose output => slurper.exe /v \n";
-            txt += "use the /d flag for dryrun (no filecopy mode) => slurper.exe /d \n";
-            txt += "use the /t flag for trace => slurper.exe /t    (note: setting trace sets verbose) \n";
-            txt += "use the /g flag to generate a sample cfg file\n";
-            txt += "\n";
-            txt += "(optional) when a configfile exits (./slurper.cfg) it is used to specify custom regexes to match \n";
-            txt += "\n";
-            txt += sampleConfig;
 
-            Console.WriteLine(txt);
-            Environment.Exit(0);
-        }
 
       
         static void SearchAndCopyFiles()
