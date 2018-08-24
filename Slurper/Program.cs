@@ -37,8 +37,7 @@ namespace Slurper
 
         private static ArrayList filesRipped = new ArrayList();                 // files grabbed, to prevent multiple copies (in case of multiple matching patterns)
 
-        private static char[] spinChars = new char[] { '|', '/', '-', '\\' };
-        private static int spinCharIdx = 0;
+
 
         private static string sampleConfig;
 
@@ -151,23 +150,7 @@ namespace Slurper
             Environment.Exit(0);
         }
 
-        static void spin()
-        {
-            // fold back to begin char when needed
-            if (spinCharIdx + 1 == spinChars.Length)
-            { spinCharIdx = 0; }
-            else
-            { spinCharIdx++; }
-
-            char spinChar = spinChars[spinCharIdx];
-
-            //set the spinner position
-            Console.CursorLeft = 0;
-
-            //write the new character to the console
-            Console.Write(spinChar);
-        }
-
+      
         static void SearchAndCopyFiles()
         {
             // process each drive
@@ -203,7 +186,7 @@ namespace Slurper
                 foreach (string f in getFiles(d) ?? new String[0])
                 {
                     //if (Debug) { Console.WriteLine(f); }
-                    spin();
+                    Spinner.Spin();
 
                     if (TRACE) {Console.WriteLine("TRACE:-[{0}]-",f); }
 
