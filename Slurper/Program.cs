@@ -20,6 +20,7 @@ namespace Slurper
          *           
          */
 
+        static ILogger logger = new ConsoleLogger();
 
         static void Main(string[] args)
         {
@@ -85,7 +86,7 @@ namespace Slurper
                 {
                     Spinner.Spin();
 
-                    ConsoleLogger.Log($"[{f}]", ConsoleLogger.logLevel.TRACE);
+                    logger.Log($"[{f}]", logLevel.TRACE);
 
 
                     // check if file is wanted by any of the specified patterns
@@ -101,7 +102,7 @@ namespace Slurper
                 }
                 catch (Exception e)
                 {
-                    ConsoleLogger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", ConsoleLogger.logLevel.ERROR);
+                    logger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", logLevel.ERROR);
                 }
             }
 
@@ -117,7 +118,7 @@ namespace Slurper
             }
             catch (Exception e)
             {
-                ConsoleLogger.Log($"getFiles: Failed to retrieve fileList from [{dir}][{e.Message}]", ConsoleLogger.logLevel.ERROR);
+                logger.Log($"getFiles: Failed to retrieve fileList from [{dir}][{e.Message}]", logLevel.ERROR);
             }
             return null;
         }
@@ -131,7 +132,7 @@ namespace Slurper
             }
             catch (Exception e)
             {
-                ConsoleLogger.Log($"getDirs: Failed to retrieve dirList from [{sDir}][{e.Message}]", ConsoleLogger.logLevel.ERROR);
+                logger.Log($"getDirs: Failed to retrieve dirList from [{sDir}][{e.Message}]", logLevel.ERROR);
             }
             return null;
         }
@@ -206,7 +207,7 @@ namespace Slurper
             }
             catch (Exception e)
             {
-                ConsoleLogger.Log($"CreateTargetLocation: failed to create director [{FilePath.targetDirBasePath}][{e.Message}]", ConsoleLogger.logLevel.ERROR);
+                logger.Log($"CreateTargetLocation: failed to create director [{FilePath.targetDirBasePath}][{e.Message}]", logLevel.ERROR);
             }
 
         }
@@ -216,8 +217,8 @@ namespace Slurper
             if (!Configuration.LoadConfigFile() || Configuration.driveFilePatternsTolookfor.Count == 0)
             {
                 // default config            
-                ConsoleLogger.Log($"Configure: config file [{Configuration.cfgFileName}] not found, " +
-                    $"or no valid patterns in file found => using default pattern [{Configuration.DefaultRegexPattern}]", ConsoleLogger.logLevel.WARN);
+                logger.Log($"Configure: config file [{Configuration.cfgFileName}] not found, " +
+                    $"or no valid patterns in file found => using default pattern [{Configuration.DefaultRegexPattern}]", logLevel.WARN);
 
                 //// add a regex set as a default.
                 //filePatternsTolookfor.Add(DefaultRegexPattern);
@@ -236,7 +237,7 @@ namespace Slurper
                     Configuration.driveFilePatternsTolookfor.TryGetValue(drive, out patterns);
                     foreach (String pattern in patterns)
                     {
-                       ConsoleLogger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ", ConsoleLogger.logLevel.VERBOSE);
+                        logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ", logLevel.VERBOSE);
                     }
                 }
             }

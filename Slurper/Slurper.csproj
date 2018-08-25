@@ -124,6 +124,7 @@
     <Compile Include="Logic\FilePath.cs" />
     <Compile Include="Logic\Fileripper.cs" />
     <Compile Include="Logic\ConsoleLogger.cs" />
+    <Compile Include="Contract\ILogger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Logic\Configuration.cs" />
@@ -163,9 +164,7 @@
       <FileType>Assembly</FileType>
     </PublishFile>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Contract\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>powershell Remove-Item Q:\publish\slurper\rip -recurse -force

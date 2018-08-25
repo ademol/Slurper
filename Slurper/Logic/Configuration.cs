@@ -12,6 +12,10 @@ namespace Slurper
 {
     public class Configuration
     {
+
+        static ILogger logger = new ConsoleLogger();
+
+
         public static string sampleConfig { get; set; }
         public static bool VERBOSE { get; set; } = true;       // show additional output what is done
 
@@ -96,7 +100,7 @@ namespace Slurper
                                 String regex = m.Groups[2].Value;
                                 filePatternsTolookfor.Add(regex);
                                 drivesRequestedToBeSearched.Add(drive);
-                                ConsoleLogger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", ConsoleLogger.logLevel.VERBOSE);
+                                logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", logLevel.VERBOSE);
 
                                 // add to hash
                                 if (driveFilePatternsTolookfor.ContainsKey(drive))
@@ -117,7 +121,7 @@ namespace Slurper
                             }
                             else
                             {
-                                ConsoleLogger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", ConsoleLogger.logLevel.VERBOSE);
+                                logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", logLevel.VERBOSE);
                             }
                         }
                     }
@@ -125,7 +129,7 @@ namespace Slurper
                 }
                 catch (Exception e)
                 {
-                    ConsoleLogger.Log($"LoadConfigFile: Could not read[{Configuration.cfgFileName}] [{e.Message}]", ConsoleLogger.logLevel.ERROR);
+                    logger.Log($"LoadConfigFile: Could not read[{Configuration.cfgFileName}] [{e.Message}]", logLevel.ERROR);
                 }
 
             }
@@ -170,7 +174,7 @@ namespace Slurper
                         break;
                 }
             }
-            ConsoleLogger.Log($"Arguments: VERBOSE[{VERBOSE}] DRYRUN[{DRYRUN}] TRACE[{TRACE}]", ConsoleLogger.logLevel.VERBOSE);
+            logger.Log($"Arguments: VERBOSE[{VERBOSE}] DRYRUN[{DRYRUN}] TRACE[{TRACE}]", logLevel.VERBOSE);
 
 
 

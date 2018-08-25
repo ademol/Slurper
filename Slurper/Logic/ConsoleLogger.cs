@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Slurper
 {
-   class ConsoleLogger
+   public class ConsoleLogger : ILogger
     {
 
-        public static void Log(string Message, logLevel Level = logLevel.LOG)
+        public void Log(string Message, logLevel Level = logLevel.LOG)
         {
             var previousColor = Console.ForegroundColor;
             ConsoleColor color = previousColor;
@@ -51,13 +51,6 @@ namespace Slurper
 
         }
 
-        public enum logLevel {
-            TRACE,
-            LOG,
-            VERBOSE,
-            WARN,
-            ERROR
-        }
 
     }
 }
