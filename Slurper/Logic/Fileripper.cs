@@ -13,6 +13,7 @@ namespace Slurper.Logic
     {
         static readonly ILogger logger = LogProvider.Logger;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public static void RipFile(String filename)
         {
             String targetFileName = Path.GetFileName(filename);
