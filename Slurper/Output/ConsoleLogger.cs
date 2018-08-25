@@ -29,7 +29,7 @@ namespace Slurper
                 case logLevel.VERBOSE:
                     if ( Configuration.VERBOSE ) {
                         displayLog = true;
-                        color = ConsoleColor.Blue;
+                        color = ConsoleColor.DarkYellow;
                     }
                     break;
                 case logLevel.ERROR:
