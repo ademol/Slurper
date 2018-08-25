@@ -1,18 +1,13 @@
 ﻿using Slurper.Providers;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Alphaleonis.Win32.Filesystem;
 
 namespace Slurper.Logic
 {
     class Searcher
     {
-
         static readonly ILogger logger = new LogProvider().GetLog();
 
         public static void SearchAndCopyFiles()
@@ -26,7 +21,6 @@ namespace Slurper.Logic
 
         public static void DirSearch(string sDir)
         {
-
 
             //driveFilePatternsTolookfor
             // make sure to only use the patterns for the drives requested
@@ -43,23 +37,19 @@ namespace Slurper.Logic
             Configuration.driveFilePatternsTolookfor.TryGetValue(".:", out v);
             if (v != null) { thisDrivePatternsToLookFor.AddRange(v); }
 
-
             // long live the 'null-coalescing' operator ?? to handle cases of 'null'  :)
             foreach (string d in getDirs(sDir) ?? new String[0])
             {
                 foreach (string f in getFiles(d) ?? new String[0])
                 {
                     Spinner.Spin();
-
                     logger.Log($"[{f}]", logLevel.TRACE);
-
 
                     // check if file is wanted by any of the specified patterns
                     foreach (String p in thisDrivePatternsToLookFor)
                     {
-                        if ((new Regex(p).Match(f)).Success) { Fileripper.RipFile(f); continue; }
+                        if ((new Regex(p).Match(f)).Success) { Fileripper.RipFile(f); break; }
                     }
-
                 }
                 try
                 {
@@ -70,15 +60,10 @@ namespace Slurper.Logic
                     logger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", logLevel.ERROR);
                 }
             }
-
         }
-
-
-
 
         static String[] getFiles(string dir)
         {
-
             try
             {
                 String[] files = Directory.GetFiles(dir, "*.*");
@@ -104,8 +89,5 @@ namespace Slurper.Logic
             }
             return null;
         }
-
-
-
     }
 }

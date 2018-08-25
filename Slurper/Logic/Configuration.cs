@@ -13,32 +13,21 @@ namespace Slurper
 {
     public class Configuration
     {
-
         static readonly ILogger logger = new LogProvider().GetLog();
 
+        public static string sampleConfig { get; set; } 
+        public static bool VERBOSE { get; set; } = false;                                       // show additional output what is done
+        public static bool DRYRUN { get; set; } = false;                                        // (only) show what will be done (has implicit VERBOSE)
+        public static bool TRACE { get; set; } = false;                                         // VERBOSE + show also unmatched files 
+        public static String cfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
+        public static string ripDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
 
-        public static string sampleConfig { get; set; }
-        public static bool VERBOSE { get; set; } = true;       // show additional output what is done
+        public static string DefaultRegexPattern { get; set; } = @"(?i).*\.jpg";                // the default pattern that is used to search for jpg files
 
-        public static bool DRYRUN { get; set; } = false;        // (only) show what will be done (has implicit VERBOSE)
-
-        public static bool TRACE { get; set; } = false;         // VERBOSE + show also unmatched files 
-
-
-        public static String cfgFileName { get; set; } = "slurper.cfg";      // regex pattern(s) configuration file
-
-
-
-        public static string ripDir { get; set; } = "rip";                   // relative root directory for files to be copied to
-
-
-        public static string DefaultRegexPattern { get; set; } = @"(?i).*\.jpg";             // the default pattern that is used to search for jpg files
-
-        public static ArrayList filePatternsTolookfor { get; set; } = new ArrayList();       // patterns to search  
-        public static ArrayList drivesRequestedToBeSearched { get; set; } = new ArrayList(); // drives requested to searched base on configuration  ('c:'  'd:'  etc..  '.:'  means all)
-        public static ArrayList drivesToSearch { get; set; } = new ArrayList();              // actual drives to search (always excludes the drive that the program is run from..)
+        public static ArrayList filePatternsTolookfor { get; set; } = new ArrayList();          // patterns to search  
+        public static ArrayList drivesRequestedToBeSearched { get; set; } = new ArrayList();    // drives requested to searched base on configuration  ('c:'  'd:'  etc..  '.:'  means all)
+        public static ArrayList drivesToSearch { get; set; } = new ArrayList();                 // actual drives to search (always excludes the drive that the program is run from..)
         public static Dictionary<string, ArrayList> driveFilePatternsTolookfor { get; set; } = new Dictionary<string, ArrayList>();   // hash of drive keys with their pattern values 
-
 
         public static void Configure()
         {
@@ -47,9 +36,6 @@ namespace Slurper
                 // default config            
                 logger.Log($"Configure: config file [{Configuration.cfgFileName}] not found, " +
                     $"or no valid patterns in file found => using default pattern [{Configuration.DefaultRegexPattern}]", logLevel.WARN);
-
-                //// add a regex set as a default.
-                //filePatternsTolookfor.Add(DefaultRegexPattern);
 
                 //todo: check => add to driveFilePatternsTolookfor
                 ArrayList defPattern = new ArrayList();
@@ -71,7 +57,6 @@ namespace Slurper
             }
         }
 
-
             public static void InitSampleConfig()
         {
             // sample config
@@ -83,10 +68,7 @@ namespace Slurper
             {
                 sampleConfig = reader.ReadToEnd();
             }
-
         }
-
-
 
         private static void generateConfig()
         {
@@ -97,7 +79,7 @@ namespace Slurper
             }
             catch (Exception e)
             {
-                Console.WriteLine("generateConfig: failed to generate [{0}][{1}]", cfgFileName, e.Message);
+                logger.Log($"generateConfig: failed to generate [{cfgFileName}][{e.Message}]", logLevel.ERROR);  
             }
         }
 
@@ -112,7 +94,7 @@ namespace Slurper
                 try
                 {
                     //todo: also move to alphafs ?
-                    using (System.IO.StreamReader sr = new System.IO.StreamReader(Configuration.cfgFileName))
+                    using (StreamReader sr = new StreamReader(Configuration.cfgFileName))
                     {
                         while (!sr.EndOfStream)
                         {
@@ -141,7 +123,6 @@ namespace Slurper
                                     t.Add(regex);
                                     driveFilePatternsTolookfor.Add(drive, t);
                                 }
-
                             }
                             else
                             {
@@ -160,11 +141,8 @@ namespace Slurper
             return cfgLoaded;
         }
 
-
-
         public static void ProcessArguments(string[] args)
         {
-
             // concat the arguments, handle each char as switch selection  (ignore any '/' or '-')
             string concat = String.Join("", args);
             foreach (char c in concat)
@@ -199,11 +177,6 @@ namespace Slurper
                 }
             }
             logger.Log($"Arguments: VERBOSE[{VERBOSE}] DRYRUN[{DRYRUN}] TRACE[{TRACE}]", logLevel.VERBOSE);
-
-
-
-
         }
-
     }
 }

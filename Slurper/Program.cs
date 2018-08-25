@@ -35,7 +35,7 @@ namespace Slurper
             // get drives to search
             FileSystemLayer.GetDriveInfo();
 
-            // find files matching pattern(s) from all applicable drives, and copy them to ripdir
+            // find files matching pattern(s) from all applicable drives, and copy them to the targetLocation
             Searcher.SearchAndCopyFiles();
         }
     }

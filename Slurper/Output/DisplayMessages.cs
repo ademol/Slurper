@@ -9,7 +9,6 @@ namespace Slurper
     class DisplayMessages
     {
   
-
         public static void help()
         {
             //todo: nicer help

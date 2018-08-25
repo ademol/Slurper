@@ -18,8 +18,5 @@ namespace Slurper.Providers
         {
             return _logger;
         }
-
-        
-
     }
 }

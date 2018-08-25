@@ -120,10 +120,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Logic\DisplayMessages.cs" />
-    <Compile Include="Logic\FilePath.cs" />
+    <Compile Include="Output\DisplayMessages.cs" />
     <Compile Include="Logic\Fileripper.cs" />
-    <Compile Include="Logic\ConsoleLogger.cs" />
+    <Compile Include="Output\ConsoleLogger.cs" />
     <Compile Include="Contracts\ILogger.cs" />
     <Compile Include="Logic\Searcher.cs" />
     <Compile Include="Program.cs" />
@@ -131,7 +130,7 @@
     <Compile Include="Logic\Configuration.cs" />
     <Compile Include="Providers\FileSystemLayer.cs" />
     <Compile Include="Providers\LogProvider.cs" />
-    <Compile Include="Spinner.cs" />
+    <Compile Include="Output\Spinner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
