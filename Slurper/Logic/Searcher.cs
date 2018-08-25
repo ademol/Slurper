@@ -6,9 +6,9 @@ using Alphaleonis.Win32.Filesystem;
 
 namespace Slurper.Logic
 {
-    class Searcher
+    static class Searcher
     {
-        static readonly ILogger logger = new LogProvider().GetLog();
+        static readonly ILogger logger = LogProvider.Logger;
 
         public static void SearchAndCopyFiles()
         {
@@ -58,7 +58,7 @@ namespace Slurper.Logic
                 catch (Exception e)
                 {
                     logger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", logLevel.ERROR);
-                }
+                  }
             }
         }
 
@@ -68,6 +68,10 @@ namespace Slurper.Logic
             {
                 String[] files = Directory.GetFiles(dir, "*.*");
                 return files;
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                logger.Log($"getFiles: Unauthorized to retrieve fileList from [{dir}][{e.Message}]", logLevel.ERROR);
             }
             catch (Exception e)
             {
@@ -82,6 +86,10 @@ namespace Slurper.Logic
             {
                 string[] dirs = Directory.GetDirectories(sDir);
                 return dirs;
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                logger.Log($"getFiles: Unauthorized to retrieve dirList from [{sDir}][{e.Message}]", logLevel.ERROR);
             }
             catch (Exception e)
             {

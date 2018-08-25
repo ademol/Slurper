@@ -2,7 +2,8 @@
 {
     public interface ILogger
     {
-        void Log(string Message, logLevel Level = logLevel.LOG);
+        void Log(string Message, logLevel Level);
+        void Log(string Message);
     }
     public enum logLevel
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Slurper
 {
-    class DisplayMessages
+    static class DisplayMessages
     {
   
         public static void help()

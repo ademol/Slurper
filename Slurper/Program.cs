@@ -1,7 +1,9 @@
 ﻿
 using Slurper.Logic;
 using Slurper.Providers;
+using System;
 
+[assembly: CLSCompliant(true)]
 namespace Slurper
 {
     class Program
@@ -15,8 +17,6 @@ namespace Slurper
          *           => suggested use is to run this program from an portable location (USB/HD) 
          *           
          */
-    
-        static readonly ILogger logger = new LogProvider().GetLog();
 
         static void Main(string[] args)
         {

@@ -9,7 +9,7 @@ namespace Slurper
    public class ConsoleLogger : ILogger
     {
 
-        public void Log(string Message, logLevel Level = logLevel.LOG)
+        public void Log(string Message, logLevel Level)
         {
             var previousColor = Console.ForegroundColor;
             ConsoleColor color = previousColor;
@@ -49,6 +49,11 @@ namespace Slurper
                 Console.ForegroundColor = previousColor;
             }
 
+        }
+
+        public void Log(string Message)
+        {
+            Log(Message, logLevel.LOG);
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Slurper
 {
-    class Spinner
+    static class Spinner
     {
         private static char[] spinChars = new char[] { '|', '/', '-', '\\' };
         private static int spinCharIdx = 0;

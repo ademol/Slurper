@@ -6,17 +6,8 @@ using System.Threading.Tasks;
 
 namespace Slurper.Providers
 {
-   public class LogProvider
+   public static class LogProvider
     {
-        ILogger _logger = new ConsoleLogger();
-
-        public LogProvider()
-        {
-        }
-
-        public ILogger GetLog()
-        {
-            return _logger;
-        }
+        public static ILogger Logger { get; } = new ConsoleLogger();
     }
 }

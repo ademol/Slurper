@@ -8,13 +8,13 @@ using Slurper.Logic;
 
 namespace Slurper.Providers
 {
-    public class FileSystemLayer
+    public static class FileSystemLayer
     {
-        static readonly ILogger logger = new LogProvider().GetLog();
+        static readonly ILogger logger = LogProvider.Logger;
 
         public static String targetDirBasePath { get; set; }                             // relative directory for file to be copied to
 
-        public static char pathSep = Path.DirectorySeparatorChar;
+        public static char pathSep { get; }  = Path.DirectorySeparatorChar;
 
         public static void CreateTargetLocation()
         {
@@ -29,7 +29,7 @@ namespace Slurper.Providers
             {
                 if (!Configuration.DRYRUN) { Directory.CreateDirectory(targetDirBasePath); }
             }
-            catch (Exception e)
+                catch (Exception e)
             {
                 logger.Log($"CreateTargetLocation: failed to create director [{targetDirBasePath}][{e.Message}]", logLevel.ERROR);
             }

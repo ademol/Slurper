@@ -9,9 +9,9 @@ using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    class Fileripper
+    static class Fileripper
     {
-        static readonly ILogger logger = new LogProvider().GetLog();
+        static readonly ILogger logger = LogProvider.Logger;
 
         public static void RipFile(String filename)
         {

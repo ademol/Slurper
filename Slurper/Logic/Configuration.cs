@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace Slurper
 {
-    public class Configuration
+    static public class Configuration
     {
-        static readonly ILogger logger = new LogProvider().GetLog();
+        static readonly ILogger logger = LogProvider.Logger;
 
-        public static string sampleConfig { get; set; } 
+        public static string sampleConfig { get; set; }
         public static bool VERBOSE { get; set; } = false;                                       // show additional output what is done
         public static bool DRYRUN { get; set; } = false;                                        // (only) show what will be done (has implicit VERBOSE)
         public static bool TRACE { get; set; } = false;                                         // VERBOSE + show also unmatched files 
@@ -24,10 +24,10 @@ namespace Slurper
 
         public static string DefaultRegexPattern { get; set; } = @"(?i).*\.jpg";                // the default pattern that is used to search for jpg files
 
-        public static ArrayList filePatternsTolookfor { get; set; } = new ArrayList();          // patterns to search  
-        public static ArrayList drivesRequestedToBeSearched { get; set; } = new ArrayList();    // drives requested to searched base on configuration  ('c:'  'd:'  etc..  '.:'  means all)
-        public static ArrayList drivesToSearch { get; set; } = new ArrayList();                 // actual drives to search (always excludes the drive that the program is run from..)
-        public static Dictionary<string, ArrayList> driveFilePatternsTolookfor { get; set; } = new Dictionary<string, ArrayList>();   // hash of drive keys with their pattern values 
+        public static ArrayList filePatternsTolookfor { get; } = new ArrayList();               // patterns to search  
+        public static ArrayList drivesRequestedToBeSearched { get; } = new ArrayList();         // drives requested to searched base on configuration  ('c:'  'd:'  etc..  '.:'  means all)
+        public static ArrayList drivesToSearch { get; } = new ArrayList();                      // actual drives to search (always excludes the drive that the program is run from..)
+        public static Dictionary<string, ArrayList> driveFilePatternsTolookfor { get; } = new Dictionary<string, ArrayList>();   // hash of drive keys with their pattern values 
 
         public static void Configure()
         {
@@ -57,15 +57,15 @@ namespace Slurper
             }
         }
 
-            public static void InitSampleConfig()
+        public static void InitSampleConfig()
         {
             // sample config
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "Slurper.slurper.cfg.txt";
 
             using (System.IO.Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
             {
+                System.IO.StreamReader reader = new System.IO.StreamReader(stream);
                 sampleConfig = reader.ReadToEnd();
             }
         }
@@ -79,7 +79,7 @@ namespace Slurper
             }
             catch (Exception e)
             {
-                logger.Log($"generateConfig: failed to generate [{cfgFileName}][{e.Message}]", logLevel.ERROR);  
+                logger.Log($"generateConfig: failed to generate [{cfgFileName}][{e.Message}]", logLevel.ERROR);
             }
         }
 
