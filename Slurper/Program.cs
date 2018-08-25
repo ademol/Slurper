@@ -4,7 +4,7 @@ using System.Collections;
 using Alphaleonis.Win32.Filesystem;
 using System.Collections.Generic;
 using System.Reflection;
-
+using Slurper.Logic;
 
 namespace Slurper
 {
@@ -20,14 +20,10 @@ namespace Slurper
          *           
          */
 
-        private static Boolean VERBOSE = false;                                 // show additional output what is done
-        private static Boolean DRYRUN = false;                                  // (only) show what will be done (has implicit VERBOSE)
-        private static Boolean TRACE = false;                                   // VERBOSE + show also unmatched files 
-        private static string ripDir = "rip";                                   // relative root directory for files to be copied to
-        private static String cfgFileName = "slurper.cfg";                      // regex pattern(s) configuration file
-        private static String targetDirBasePath;                                // relative directory for file to be copied to
 
-        private static char pathSep = Path.DirectorySeparatorChar;
+
+
+    
         private static string DefaultRegexPattern = @"(?i).*\.jpg";             // the default pattern that is used to search for jpg files
 
         private static ArrayList filePatternsTolookfor = new ArrayList();       // patterns to search  
@@ -35,20 +31,14 @@ namespace Slurper
         private static ArrayList drivesToSearch = new ArrayList();              // actual drives to search (always excludes the drive that the program is run from..)
         private static Dictionary<string, ArrayList> driveFilePatternsTolookfor = new Dictionary<string, ArrayList>();   // hash of drive keys with their pattern values 
 
-        private static ArrayList filesRipped = new ArrayList();                 // files grabbed, to prevent multiple copies (in case of multiple matching patterns)
-
-
-
-        
-
 
         static void Main(string[] args)
         {
             // init
-            SampleConfig.Init();
+            Configuration.InitSampleConfig();
 
             // handle arguments
-            Arguments(args);
+            Configuration.ProcessArguments(args);
 
             // determine & create target directory
             CreateTargetLocation();
@@ -66,56 +56,6 @@ namespace Slurper
 
 
 
-        static void Arguments(string[] args)
-        {
-            // concat the arguments, handle each char as switch selection  (ignore any '/' or '-')
-            string concat = String.Join("",args);
-            foreach ( char c in concat )
-            {
-                switch ( c )
-                {
-                    case 'h':
-                        DisplayMessages.help();
-                        break;
-                    case 'v':
-                        VERBOSE = true;
-                        break;
-                    case 'd':
-                        DRYRUN = true;
-                        break;
-                    case 't':
-                        TRACE = true;
-                        VERBOSE = true;
-                        break;
-                    case '/':
-                        break;
-                    case '-':
-                        break;
-                    case 'g':
-                        generateConfig();
-                        Environment.Exit(0);
-                        break;
-                    default:
-                        Console.WriteLine("option [{0}] not supported", c);
-                        DisplayMessages.help();
-                        break;
-                }
-            }
-            if (VERBOSE) { Console.WriteLine("Arguments: VERBOSE[{0}] DRYRUN[{1}] TRACE[{2}]", VERBOSE, DRYRUN, TRACE); }
-
-
-        }
-
-        private static void generateConfig()
-        {
-            Console.WriteLine("generating sample config file [{0}]",cfgFileName); 
-            try
-            {
-                System.IO.File.WriteAllText(cfgFileName, SampleConfig.sampleConfig);
-            } catch (Exception e) {
-                Console.WriteLine("generateConfig: failed to generate [{0}][{1}]", cfgFileName, e.Message);
-            }
-        }
 
 
 
@@ -154,15 +94,15 @@ namespace Slurper
             {
                 foreach (string f in getFiles(d) ?? new String[0])
                 {
-                    //if (Debug) { Console.WriteLine(f); }
                     Spinner.Spin();
 
-                    if (TRACE) {Console.WriteLine("TRACE:-[{0}]-",f); }
+                    ConsoleLogger.Log($"[{f}]", ConsoleLogger.logLevel.TRACE);
+
 
                     // check if file is wanted by any of the specified patterns
                     foreach (String p in thisDrivePatternsToLookFor)
                     {
-                        if ((new Regex(p).Match(f)).Success) { RipFile(f); continue; }
+                        if ((new Regex(p).Match(f)).Success) { Fileripper.RipFile(f); continue; }
                     }
 
                 }
@@ -207,41 +147,6 @@ namespace Slurper
             return null;
         }
 
-        static void RipFile(String filename)
-        {
-            // process if not already downloaded  (in case of multiple regex matches)
-            if (!filesRipped.Contains(filename))
-            {
-                filesRipped.Add(filename);
-
-                // determine target filename
-                String targetFileName = Path.GetFileName(filename);
-                String targetRelativePath = Path.GetDirectoryName(filename);
-
-
-                targetRelativePath = targetRelativePath.Replace(':', '_');
-                String targetPath = targetDirBasePath + pathSep + targetRelativePath + pathSep;
-
-
-                String targetFileNameFullPath = targetPath + targetFileName;
-
-                if (VERBOSE) { Console.WriteLine("RipFile: ripping [{0}] => [{1}]", filename, targetFileNameFullPath); }
-                try
-                {
-                    // do the filecopy unless this is a dryrun
-                    if (!DRYRUN)
-                    {
-                        Directory.CreateDirectory(targetPath);
-                        File.Copy(filename, targetFileNameFullPath);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("RipFile: copy of [{0}] failed with [{1}]", filename, e.Message);
-                }
-            }
-        }
-
         static void GetDriveInfo()
         {
             // look for possible drives to search 
@@ -251,7 +156,7 @@ namespace Slurper
 
             // mydrive
             String mydrive = Path.GetPathRoot(Directory.GetCurrentDirectory());
-            if (VERBOSE) { Console.WriteLine("GetDriveInfo: mydrive = [{0}]", mydrive); }
+            if (Configuration.VERBOSE) { Console.WriteLine("GetDriveInfo: mydrive = [{0}]", mydrive); }
 
             foreach (DriveInfo d in allDrives)
             {
@@ -289,7 +194,7 @@ namespace Slurper
                     drivesToSearch.Add(d.Name);
                 }
 
-                if (VERBOSE) { Console.WriteLine("GetDriveInfo: found drive [{0}]\t included? [{1}]\t reason[{2}]", driveID, driveToBeIncluded, reason); }
+                if (Configuration.VERBOSE) { Console.WriteLine("GetDriveInfo: found drive [{0}]\t included? [{1}]\t reason[{2}]", driveID, driveToBeIncluded, reason); }
 
             }
 
@@ -300,19 +205,19 @@ namespace Slurper
             String curDir = Directory.GetCurrentDirectory();
             String hostname = (System.Environment.MachineName).ToLower();
             String dateTime = String.Format("{0:yyyyMMdd_HH-mm-ss}", DateTime.Now);
-            if (VERBOSE) { Console.WriteLine("CreateTargetLocation: [{0}][{1}][{2}]", hostname, curDir, dateTime); }
+            if (Configuration.VERBOSE) { Console.WriteLine("CreateTargetLocation: [{0}][{1}][{2}]", hostname, curDir, dateTime); }
 
-            targetDirBasePath = string.Concat(curDir, pathSep, ripDir, pathSep, hostname, "_", dateTime);
-            if (VERBOSE) { Console.WriteLine("CreateTargetLocation: [{0}]", targetDirBasePath); }
+            FilePath.targetDirBasePath = string.Concat(curDir, FilePath.pathSep, Configuration.ripDir, FilePath.pathSep, hostname, "_", dateTime);
+            if (Configuration.VERBOSE) { Console.WriteLine("CreateTargetLocation: [{0}]", FilePath.targetDirBasePath); }
 
             try
             {
-                if (!DRYRUN) { Directory.CreateDirectory(targetDirBasePath); }
+                if (!Configuration.DRYRUN) { Directory.CreateDirectory(FilePath.targetDirBasePath); }
 
             }
             catch (Exception e)
             {
-                Console.WriteLine("CreateTargetLocation: failed to create director [{0}][{1}]", targetDirBasePath, e.Message);
+                Console.WriteLine("CreateTargetLocation: failed to create director [{0}][{1}]", FilePath.targetDirBasePath, e.Message);
 
             }
         }
@@ -322,7 +227,7 @@ namespace Slurper
             if (!LoadConfigFile() || driveFilePatternsTolookfor.Count == 0)
             {
                 // default config
-                if (VERBOSE) { Console.WriteLine("Configure: config file [{0}] not found, or no valid patterns in file found => using default pattern [{1}]", cfgFileName, DefaultRegexPattern); }
+                if (Configuration.VERBOSE) { Console.WriteLine("Configure: config file [{0}] not found, or no valid patterns in file found => using default pattern [{1}]", Configuration.cfgFileName, DefaultRegexPattern); }
 
                 //// add a regex set as a default.
                 //filePatternsTolookfor.Add(DefaultRegexPattern);
@@ -333,7 +238,7 @@ namespace Slurper
                 driveFilePatternsTolookfor.Add(".:", defPattern);
             }
             // show patterns used
-            if (VERBOSE)
+            if (Configuration.VERBOSE)
             {
                 foreach (String drive in driveFilePatternsTolookfor.Keys)
                 {
@@ -350,7 +255,7 @@ namespace Slurper
         static Boolean LoadConfigFile()
         {
             Boolean cfgLoaded = false;
-            if (File.Exists(cfgFileName))
+            if (File.Exists(Configuration.cfgFileName))
             {
                 String line;
                 String REGEXpattern = @"^([^#]:)(.*)";               // pattern to match valid lines from config file   <driveLetter:><regex>
@@ -358,13 +263,11 @@ namespace Slurper
                 try
                 {
                     //todo: also move to alphafs ?
-                    using (System.IO.StreamReader sr = new System.IO.StreamReader(cfgFileName))
+                    using (System.IO.StreamReader sr = new System.IO.StreamReader(Configuration.cfgFileName))
                     {
                         while (!sr.EndOfStream)
                         {
                             line = sr.ReadLine();
-                            //if (Debug) { Console.WriteLine(line); }
-
                             Match m = r.Match(line);
                             if (m.Success)
                             {
@@ -372,7 +275,7 @@ namespace Slurper
                                 String regex = m.Groups[2].Value;
                                 filePatternsTolookfor.Add(regex);
                                 drivesRequestedToBeSearched.Add(drive);
-                                if (VERBOSE) { Console.WriteLine("LoadConfigFile: [{0}] => for drive:[{1}] regex:[{2}]", line, drive, regex); }
+                                if (Configuration.VERBOSE) { Console.WriteLine("LoadConfigFile: [{0}] => for drive:[{1}] regex:[{2}]", line, drive, regex); }
 
                                 // add to hash
                                 if (driveFilePatternsTolookfor.ContainsKey(drive))
@@ -395,7 +298,7 @@ namespace Slurper
                             }
                             else
                             {
-                                if (VERBOSE) { Console.WriteLine("LoadConfigFile: [{0}] => regex:[{1}]", line, "---skipped---"); }
+                                if (Configuration.VERBOSE) { Console.WriteLine("LoadConfigFile: [{0}] => regex:[{1}]", line, "---skipped---"); }
                             }
                         }
                     }
@@ -403,7 +306,7 @@ namespace Slurper
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("LoadConfigFile: Could not read [{0}] [{1}]", cfgFileName, e.Message);
+                    Console.WriteLine("LoadConfigFile: Could not read [{0}] [{1}]", Configuration.cfgFileName, e.Message);
                 }
 
             }
