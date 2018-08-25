@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Slurper.Providers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +14,7 @@ namespace Slurper
     public class Configuration
     {
 
-        static ILogger logger = new ConsoleLogger();
+        static readonly ILogger logger = new LogProvider().GetLog();
 
 
         public static string sampleConfig { get; set; }
@@ -31,12 +32,6 @@ namespace Slurper
         public static string ripDir { get; set; } = "rip";                   // relative root directory for files to be copied to
 
 
-
-
-
-
-
-
         public static string DefaultRegexPattern { get; set; } = @"(?i).*\.jpg";             // the default pattern that is used to search for jpg files
 
         public static ArrayList filePatternsTolookfor { get; set; } = new ArrayList();       // patterns to search  
@@ -45,10 +40,39 @@ namespace Slurper
         public static Dictionary<string, ArrayList> driveFilePatternsTolookfor { get; set; } = new Dictionary<string, ArrayList>();   // hash of drive keys with their pattern values 
 
 
+        public static void Configure()
+        {
+            if (!Configuration.LoadConfigFile() || Configuration.driveFilePatternsTolookfor.Count == 0)
+            {
+                // default config            
+                logger.Log($"Configure: config file [{Configuration.cfgFileName}] not found, " +
+                    $"or no valid patterns in file found => using default pattern [{Configuration.DefaultRegexPattern}]", logLevel.WARN);
+
+                //// add a regex set as a default.
+                //filePatternsTolookfor.Add(DefaultRegexPattern);
+
+                //todo: check => add to driveFilePatternsTolookfor
+                ArrayList defPattern = new ArrayList();
+                defPattern.Add(Configuration.DefaultRegexPattern);
+                Configuration.driveFilePatternsTolookfor.Add(".:", defPattern);
+            }
+            // show patterns used
+            if (Configuration.VERBOSE)
+            {
+                foreach (String drive in Configuration.driveFilePatternsTolookfor.Keys)
+                {
+                    ArrayList patterns;
+                    Configuration.driveFilePatternsTolookfor.TryGetValue(drive, out patterns);
+                    foreach (String pattern in patterns)
+                    {
+                        logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ", logLevel.VERBOSE);
+                    }
+                }
+            }
+        }
 
 
-
-        public static void InitSampleConfig()
+            public static void InitSampleConfig()
         {
             // sample config
             var assembly = Assembly.GetExecutingAssembly();
