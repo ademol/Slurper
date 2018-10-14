@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2041
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slurper", "Slurper\Slurper.csproj", "{7B395CB8-BE52-4C04-B77C-293E1849D473}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlurperDotNetCore", "SlurperDotNetCore\SlurperDotNetCore.csproj", "{BEE572DC-3F0A-48F1-8A7F-6FFE37F4A6AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +23,19 @@ Global
 		{7B395CB8-BE52-4C04-B77C-293E1849D473}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7B395CB8-BE52-4C04-B77C-293E1849D473}.Release|x64.ActiveCfg = Release|x64
 		{7B395CB8-BE52-4C04-B77C-293E1849D473}.Release|x64.Build.0 = Release|x64
+		{BEE572DC-3F0A-48F1-8A7F-6FFE37F4A6AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEE572DC-3F0A-48F1-8A7F-6FFE37F4A6AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEE572DC-3F0A-48F1-8A7F-6FFE37F4A6AE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BEE572DC-3F0A-48F1-8A7F-6FFE37F4A6AE}.Debug|x64.Build.0 = Debug|Any CPU
+		{BEE572DC-3F0A-48F1-8A7F-6FFE37F4A6AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEE572DC-3F0A-48F1-8A7F-6FFE37F4A6AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEE572DC-3F0A-48F1-8A7F-6FFE37F4A6AE}.Release|x64.ActiveCfg = Release|Any CPU
+		{BEE572DC-3F0A-48F1-8A7F-6FFE37F4A6AE}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9612019B-8DF1-4229-9553-C539EDAECAE2}
 	EndGlobalSection
 EndGlobal
