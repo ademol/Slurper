@@ -39,7 +39,7 @@ namespace SlurperDotNetCore
             Configuration.Configure();
 
             // get drives to search
-            fileSystemLayer.GetDriveInfo();
+            fileSystemLayer.GetMountedPartitionInfo();
 
             // find files matching pattern(s) from all applicable drives, and copy them to the targetLocation
             Searcher.SearchAndCopyFiles();

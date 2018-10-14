@@ -33,7 +33,7 @@ namespace SlurperDotNetCore.Providers
             }
         }
 
-        public void GetDriveInfo()
+        public void GetMountedPartitionInfo()
         {
             DriveInfo[] allDrives = DriveInfo.GetDrives();
 

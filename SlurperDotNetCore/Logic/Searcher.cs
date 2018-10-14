@@ -28,11 +28,17 @@ namespace SlurperDotNetCore.Logic
             // make sure to only use the patterns for the drives requested
             ArrayList thisDrivePatternsToLookFor = new ArrayList();
             // drive to search
-            String curDrive = sDir.Substring(0, 2);    // aka c:  
+            // String curDrive = sDir.Substring(0, 2);    // aka c: 
+
+            Regex rx = new Regex(@"^([^:]+)");
+            string curDrive = rx.Matches(sDir)[0].Value.ToString();
+
+
+            if (curDrive.Length == 1) { curDrive = curDrive.ToUpper(); }
 
             // add patterns for specific drive
             ArrayList v;
-            Configuration.driveFilePatternsTolookfor.TryGetValue(curDrive.ToUpper(), out v);
+            Configuration.driveFilePatternsTolookfor.TryGetValue(curDrive, out v);
             if (v != null) { thisDrivePatternsToLookFor.AddRange(v); }
 
             // add patterns for all drives
@@ -60,7 +66,7 @@ namespace SlurperDotNetCore.Logic
                 catch (Exception e)
                 {
                     logger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", logLevel.ERROR);
-                  }
+                }
             }
         }
 

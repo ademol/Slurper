@@ -10,14 +10,14 @@ namespace SlurperDotNetCore.Logic
     
         public static void RipFile(String filename)
         {
-            String targetFileName = Path.GetFileName(filename);
+            String targetFileName = Path.GetFileName(filename); 
             String targetRelativePath = Path.GetDirectoryName(filename);
 
             targetRelativePath = targetRelativePath.Replace(':', '_');
             String targetPath = SlurperDotNetCore.Program.fileSystemLayer.targetDirBasePath 
             + SlurperDotNetCore.Program.fileSystemLayer.pathSep 
             + targetRelativePath + SlurperDotNetCore.Program.fileSystemLayer.pathSep;
-            
+
             String targetFileNameFullPath = targetPath + targetFileName;
 
             logger.Log($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]", logLevel.VERBOSE);

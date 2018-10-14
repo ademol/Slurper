@@ -11,6 +11,6 @@ namespace SlurperDotNetCore.Contracts
 
         void CreateTargetLocation();
 
-        void GetDriveInfo();
+        void GetMountedPartitionInfo();
     }
 }

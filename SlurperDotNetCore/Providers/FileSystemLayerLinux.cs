@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-
+using System.Text.RegularExpressions;
 using SlurperDotNetCore.Contracts;
 
 namespace SlurperDotNetCore.Providers
@@ -33,18 +33,20 @@ namespace SlurperDotNetCore.Providers
             }
         }
 
-        public void GetDriveInfo()
+        public void GetMountedPartitionInfo()
         {
-            DriveInfo[] allDrives = DriveInfo.GetDrives();
+            DriveInfo[] allMountpoints = DriveInfo.GetDrives();
 
             // mydrive
             String mydrive = Path.GetPathRoot(Directory.GetCurrentDirectory());
             logger.Log($"GetDriveInfo: mydrive = [{mydrive}]", logLevel.VERBOSE);
 
-            foreach (DriveInfo d in allDrives)
+            foreach (DriveInfo d in allMountpoints)
             {
                 // D:\  -> D:
-                String driveID = d.Name.Substring(0, 2).ToUpper();
+                //String driveID = d.Name.Substring(0, 2).ToUpper();
+
+string mountPoint = d.Name.ToString();
 
                 // check if drive will be included
                 Boolean driveToBeIncluded = false;
@@ -54,13 +56,13 @@ namespace SlurperDotNetCore.Providers
                 if (Configuration.driveFilePatternsTolookfor.ContainsKey(".:"))
                 {
                     driveToBeIncluded = true;
-                    reason = "configuration for drive .:";
+                    reason = "configuration for drivemapping .:";
                 }
                 // check for specific drive
-                if (Configuration.driveFilePatternsTolookfor.ContainsKey(driveID))
+                if (Configuration.driveFilePatternsTolookfor.ContainsKey(mountPoint))
                 {
                     driveToBeIncluded = true;
-                    reason = "configuration for drive " + driveID;
+                    reason = "configuration for drive " + mountPoint;
                 }
                 // skip the drive i'm running from
                 if ((mydrive.ToUpper()).Equals(d.Name.ToUpper()))
@@ -74,7 +76,7 @@ namespace SlurperDotNetCore.Providers
                 {
                     Configuration.drivesToSearch.Add(d.Name);
                 }
-                logger.Log($"GetDriveInfo: found drive [{driveID}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", logLevel.VERBOSE);
+                logger.Log($"GetDriveInfo: found drive [{mountPoint}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", logLevel.VERBOSE);
             }
         }
     }
