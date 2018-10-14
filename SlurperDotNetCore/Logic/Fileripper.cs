@@ -7,14 +7,17 @@ namespace SlurperDotNetCore.Logic
     static class Fileripper
     {
         static readonly ILogger logger = LogProvider.Logger;
-
+    
         public static void RipFile(String filename)
         {
             String targetFileName = Path.GetFileName(filename);
             String targetRelativePath = Path.GetDirectoryName(filename);
 
             targetRelativePath = targetRelativePath.Replace(':', '_');
-            String targetPath = FileSystemLayer.targetDirBasePath + FileSystemLayer.pathSep + targetRelativePath + FileSystemLayer.pathSep;
+            String targetPath = SlurperDotNetCore.Program.fileSystemLayer.targetDirBasePath 
+            + SlurperDotNetCore.Program.fileSystemLayer.pathSep 
+            + targetRelativePath + SlurperDotNetCore.Program.fileSystemLayer.pathSep;
+            
             String targetFileNameFullPath = targetPath + targetFileName;
 
             logger.Log($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]", logLevel.VERBOSE);

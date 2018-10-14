@@ -1,18 +1,20 @@
 ﻿using System;
 using System.IO;
 
+using SlurperDotNetCore.Contracts;
+
 namespace SlurperDotNetCore.Providers
 {
-    public static class FileSystemLayer
+    public class FileSystemLayerLinux : IFileSystemLayer 
     {
-        static readonly ILogger logger = LogProvider.Logger;
+        public ILogger logger { get; } = LogProvider.Logger;
 
-        public static String targetDirBasePath { get; set; }                             // relative directory for file to be copied to
+        public String targetDirBasePath { get; set; }                             // relative directory for file to be copied to
 
-        public static char pathSep { get; }  = Path.DirectorySeparatorChar;
+        public  char pathSep { get; }  = Path.DirectorySeparatorChar;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public static void CreateTargetLocation()
+        public void CreateTargetLocation()
         {
             String curDir = Directory.GetCurrentDirectory();
             String hostname = (System.Environment.MachineName).ToLower();
@@ -31,7 +33,7 @@ namespace SlurperDotNetCore.Providers
             }
         }
 
-        public static void GetDriveInfo()
+        public void GetDriveInfo()
         {
             DriveInfo[] allDrives = DriveInfo.GetDrives();
 

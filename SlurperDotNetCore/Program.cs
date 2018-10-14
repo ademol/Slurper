@@ -1,4 +1,6 @@
-﻿using SlurperDotNetCore;
+﻿using System;
+using SlurperDotNetCore;
+using SlurperDotNetCore.Contracts;
 using SlurperDotNetCore.Logic;
 using SlurperDotNetCore.Providers;
 
@@ -16,6 +18,9 @@ namespace SlurperDotNetCore
         *           
         */
 
+
+        public static  IFileSystemLayer fileSystemLayer { get; private set; }
+
         static void Main(string[] args)
         {
             // init
@@ -24,17 +29,41 @@ namespace SlurperDotNetCore
             // handle arguments
             Configuration.ProcessArguments(args);
 
+            fileSystemLayer = ChoseFileSystemLayer();
+
+
             // determine & create target directory
-            FileSystemLayer.CreateTargetLocation();
+            fileSystemLayer.CreateTargetLocation();
 
             // configuration 
             Configuration.Configure();
 
             // get drives to search
-            FileSystemLayer.GetDriveInfo();
+            fileSystemLayer.GetDriveInfo();
 
             // find files matching pattern(s) from all applicable drives, and copy them to the targetLocation
             Searcher.SearchAndCopyFiles();
+        }
+
+        static IFileSystemLayer ChoseFileSystemLayer()
+        {
+            IFileSystemLayer fileSystemLayer;
+            switch (System.Environment.OSVersion.Platform)
+            {
+                case PlatformID.Win32NT:
+                    fileSystemLayer = new FileSystemLayerWindows();
+                    break;
+                case PlatformID.Unix:
+                    fileSystemLayer = new FileSystemLayerLinux();
+                    break;
+                case PlatformID.MacOSX:
+                    fileSystemLayer = new FileSystemLayerLinux();
+                    break;
+                default:
+                    Console.WriteLine("This OS and/or its filesystem is not supported");
+                    throw new NotSupportedException();
+            }
+            return fileSystemLayer;
         }
     }
 }
