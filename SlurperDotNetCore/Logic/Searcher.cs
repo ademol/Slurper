@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 using SlurperDotNetCore.Providers;
@@ -48,8 +49,16 @@ namespace SlurperDotNetCore.Logic
             // long live the 'null-coalescing' operator ?? to handle cases of 'null'  :)
             foreach (string d in getDirs(sDir) ?? new String[0])
             {
+                if (IsSymbolic(d))
+                {
+                    continue;
+                }
                 foreach (string f in getFiles(d) ?? new String[0])
                 {
+                    if (IsSymbolic(f))
+                    {
+                        continue;
+                    }
                     Spinner.Spin();
                     logger.Log($"[{f}]", logLevel.TRACE);
 
@@ -69,6 +78,15 @@ namespace SlurperDotNetCore.Logic
                 }
             }
         }
+
+
+
+        private static bool IsSymbolic(string pathName)
+        {
+            return System.IO.File.GetAttributes(pathName).HasFlag(FileAttributes.ReparsePoint);
+        }
+
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         static String[] getFiles(string dir)
