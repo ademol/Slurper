@@ -21,7 +21,6 @@ namespace SlurperDotNetCore.Logic
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public static void DirSearch(string sDir)
         {
 
@@ -88,7 +87,6 @@ namespace SlurperDotNetCore.Logic
 
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         static String[] getFiles(string dir)
         {
             try
@@ -107,7 +105,6 @@ namespace SlurperDotNetCore.Logic
             return null;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         static String[] getDirs(string sDir)
         {
             try

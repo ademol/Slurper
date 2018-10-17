@@ -11,48 +11,47 @@ using System.Threading.Tasks;
 
 namespace Slurper
 {
-    static public class Configuration
+    public class Configuration
     {
+
+        static Boolean configurationLoaded = false;
+
         static readonly ILogger logger = LogProvider.Logger;
 
         public static string sampleConfig { get; set; }
-        public static bool VERBOSE { get; set; } = false;                                       // show additional output what is done
+        public static bool VERBOSE { get; set; } = false;
         public static bool DRYRUN { get; set; } = false;                                        // (only) show what will be done (has implicit VERBOSE)
         public static bool TRACE { get; set; } = false;                                         // VERBOSE + show also unmatched files 
         public static String cfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
         public static string ripDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
 
-        public static string DefaultRegexPattern { get; set; } = @"(?i).*\.jpg";                // the default pattern that is used to search for jpg files
+        public static string DefaultFallbackRegexPattern { get; set; } = @"(?i).*\.jpg";
 
-        public static ArrayList filePatternsTolookfor { get; } = new ArrayList();               // patterns to search  
-        public static ArrayList drivesRequestedToBeSearched { get; } = new ArrayList();         // drives requested to searched base on configuration  ('c:'  'd:'  etc..  '.:'  means all)
-        public static ArrayList drivesToSearch { get; } = new ArrayList();                      // actual drives to search (always excludes the drive that the program is run from..)
-        public static Dictionary<string, ArrayList> driveFilePatternsTolookfor { get; } = new Dictionary<string, ArrayList>();   // hash of drive keys with their pattern values 
+        public static List<string> drivesToSearch { get; } = new List<string>();                      // actual drives to search (always excludes the drive that the program is run from..)
+        public static Dictionary<string, List<string>> driveFilePatternsTolookfor { get; } = new Dictionary<string, List<string>>();   // hash of drive keys with their pattern values 
 
         public static void Configure()
         {
-            if (!Configuration.LoadConfigFile() || Configuration.driveFilePatternsTolookfor.Count == 0)
-            {
-                // default config            
-                logger.Log($"Configure: config file [{Configuration.cfgFileName}] not found, " +
-                    $"or no valid patterns in file found => using default pattern [{Configuration.DefaultRegexPattern}]", logLevel.WARN);
+            Configuration.LoadConfigFile();
 
-                //todo: check => add to driveFilePatternsTolookfor
-                ArrayList defPattern = new ArrayList();
-                defPattern.Add(Configuration.DefaultRegexPattern);
-                Configuration.driveFilePatternsTolookfor.Add(".:", defPattern);
-            }
-            // show patterns used
-            if (Configuration.VERBOSE)
+            //  if (Configuration.VERBOSE)
+            ShowPatternsUsedByDrive();
+        }
+
+        private static void LoadDefaultConfiguration()
+        {
+            logger.Log($"Configure:  using default pattern [{Configuration.DefaultFallbackRegexPattern}]", logLevel.WARN);
+            Configuration.driveFilePatternsTolookfor.Add(".:", new List<string> { DefaultFallbackRegexPattern });
+        }
+
+        private static void ShowPatternsUsedByDrive()
+        {
+            foreach (String drive in Configuration.driveFilePatternsTolookfor.Keys)
             {
-                foreach (String drive in Configuration.driveFilePatternsTolookfor.Keys)
+                Configuration.driveFilePatternsTolookfor.TryGetValue(drive, out List<string> patterns);
+                foreach (String pattern in patterns)
                 {
-                    ArrayList patterns;
-                    Configuration.driveFilePatternsTolookfor.TryGetValue(drive, out patterns);
-                    foreach (String pattern in patterns)
-                    {
-                        logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ", logLevel.VERBOSE);
-                    }
+                    logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ", logLevel.VERBOSE);
                 }
             }
         }
@@ -70,8 +69,7 @@ namespace Slurper
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private static void generateConfig()
+        private static void generateSampleConfigFile()
         {
             Console.WriteLine("generating sample config file [{0}]", cfgFileName);
             try
@@ -84,68 +82,69 @@ namespace Slurper
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public static Boolean LoadConfigFile()
+
+        public static void LoadConfigFile()
         {
-            Boolean cfgLoaded = false;
-            if (File.Exists(Configuration.cfgFileName))
+            if (!File.Exists(Configuration.cfgFileName))
             {
-                String line;
-                String REGEXpattern = @"^([^#]:)(.*)";               // pattern to match valid lines from config file   <driveLetter:><regex>
-                Regex r = new Regex(REGEXpattern);
-                try
-                {
-                    //todo: also move to alphafs ?
-                    using (StreamReader sr = new StreamReader(Configuration.cfgFileName))
-                    {
-                        while (!sr.EndOfStream)
-                        {
-                            line = sr.ReadLine();
-                            Match m = r.Match(line);
-                            if (m.Success)
-                            {
-                                String drive = m.Groups[1].Value.ToUpper();
-                                String regex = m.Groups[2].Value;
-                                filePatternsTolookfor.Add(regex);
-                                drivesRequestedToBeSearched.Add(drive);
-                                logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", logLevel.VERBOSE);
-
-                                // add to hash
-                                if (driveFilePatternsTolookfor.ContainsKey(drive))
-                                {
-                                    // add to existing key
-                                    ArrayList t;
-                                    driveFilePatternsTolookfor.TryGetValue(drive, out t);
-                                    t.Add(regex);
-
-                                }
-                                else
-                                {
-                                    ArrayList t = new ArrayList();
-                                    t.Add(regex);
-                                    driveFilePatternsTolookfor.Add(drive, t);
-                                }
-                            }
-                            else
-                            {
-                                logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", logLevel.VERBOSE);
-                            }
-                        }
-                    }
-                    cfgLoaded = true;
-                }
-                catch (Exception e)
-                {
-                    logger.Log($"LoadConfigFile: Could not read[{Configuration.cfgFileName}] [{e.Message}]", logLevel.ERROR);
-                }
-
+                LoadDefaultConfiguration();
+                return;
             }
-            return cfgLoaded;
+
+            try
+            {
+                //todo: also move to alphafs ?
+                using (StreamReader streamReader = new StreamReader(Configuration.cfgFileName))
+                {
+                    while (!streamReader.EndOfStream)
+                    {
+                        ParseConfigLines(streamReader.ReadLine());
+                    }
+                }
+                configurationLoaded = true;
+                return;
+            }
+            catch (Exception e)
+            {
+                logger.Log($"LoadConfigFile: Could not read[{Configuration.cfgFileName}] [{e.Message}]", logLevel.ERROR);
+                configurationLoaded = false;
+            }
+        }
+
+        private static void ParseConfigLines(string line)
+        {
+            // pattern to match valid lines from config file   <driveLetter:><regex>
+            String ValidConfigLine = @"^([^#]:)(.*)";               
+            
+      
+            Regex PatternToMatchValidConfigLine = new Regex(ValidConfigLine);
+            Match matchedConfigurationLine = PatternToMatchValidConfigLine.Match(line);
+
+            if (!matchedConfigurationLine.Success) {
+                logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", logLevel.VERBOSE);
+                return;
+            }
+
+            String drive = matchedConfigurationLine.Groups[1].Value.ToUpper();
+            String regex = matchedConfigurationLine.Groups[2].Value;
+                   
+            StoreRegexToSearchByDrive(drive, regex);
+            logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", logLevel.VERBOSE);
+
+        }
+
+        private static void StoreRegexToSearchByDrive(string drive, string regex)
+        {
+            List<string> driveFilePatterns = new List<string>();
+            if (driveFilePatternsTolookfor.ContainsKey(drive))
+                driveFilePatternsTolookfor.TryGetValue(drive, out driveFilePatterns);
+
+            driveFilePatterns.Add(regex);
+            driveFilePatternsTolookfor[drive] = driveFilePatterns;
         }
 
         public static void ProcessArguments(string[] args)
         {
-            // concat the arguments, handle each char as switch selection  (ignore any '/' or '-')
             string concat = String.Join("", args);
             foreach (char c in concat)
             {
@@ -169,7 +168,7 @@ namespace Slurper
                     case '-':
                         break;
                     case 'g':
-                        generateConfig();
+                        generateSampleConfigFile();
                         Environment.Exit(0);
                         break;
                     default:

@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Text.RegularExpressions;
 using Alphaleonis.Win32.Filesystem;
+using System.Collections.Generic;
 
 namespace Slurper.Logic
 {
@@ -19,18 +20,17 @@ namespace Slurper.Logic
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public static void DirSearch(string sDir)
         {
 
             //driveFilePatternsTolookfor
             // make sure to only use the patterns for the drives requested
-            ArrayList thisDrivePatternsToLookFor = new ArrayList();
+            List<string> thisDrivePatternsToLookFor = new List<string>();
             // drive to search
             String curDrive = sDir.Substring(0, 2);    // aka c:  
 
             // add patterns for specific drive
-            ArrayList v;
+            List<string> v;
             Configuration.driveFilePatternsTolookfor.TryGetValue(curDrive.ToUpper(), out v);
             if (v != null) { thisDrivePatternsToLookFor.AddRange(v); }
 
@@ -49,6 +49,7 @@ namespace Slurper.Logic
                     // check if file is wanted by any of the specified patterns
                     foreach (String p in thisDrivePatternsToLookFor)
                     {
+                        if ((new Regex(p).Match(f)).Success) { Console.WriteLine("success"); }
                         if ((new Regex(p).Match(f)).Success) { Fileripper.RipFile(f); break; }
                     }
                 }
@@ -63,7 +64,6 @@ namespace Slurper.Logic
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         static String[] getFiles(string dir)
         {
             try
@@ -82,7 +82,6 @@ namespace Slurper.Logic
             return null;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         static String[] getDirs(string sDir)
         {
             try

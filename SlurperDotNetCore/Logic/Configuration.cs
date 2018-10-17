@@ -75,7 +75,6 @@ namespace SlurperDotNetCore
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private static void generateConfig()
         {
             Console.WriteLine("generating sample config file [{0}]", cfgFileName);
@@ -89,7 +88,6 @@ namespace SlurperDotNetCore
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public static Boolean LoadConfigFile()
         {
             Boolean cfgLoaded = false;

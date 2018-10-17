@@ -13,7 +13,6 @@ namespace SlurperDotNetCore.Providers
 
         public  char pathSep { get; }  = Path.DirectorySeparatorChar;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void CreateTargetLocation()
         {
             String curDir = Directory.GetCurrentDirectory();

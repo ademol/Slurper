@@ -13,8 +13,7 @@ namespace Slurper.Logic
     {
         static readonly ILogger logger = LogProvider.Logger;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public static void RipFile(String filename)
+          public static void RipFile(String filename)
         {
             String targetFileName = Path.GetFileName(filename);
             String targetRelativePath = Path.GetDirectoryName(filename);
@@ -27,7 +26,6 @@ namespace Slurper.Logic
 
             try
             {
-                // do the filecopy unless this is a dryrun
                 if (!Configuration.DRYRUN)
                 {
                     Directory.CreateDirectory(targetPath);
