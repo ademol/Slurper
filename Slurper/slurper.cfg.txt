@@ -1,7 +1,7 @@
 ﻿#################################
 # sample config file            #
 #################################
-# drive:regex
+# drive:filenameregex
 #################################
 c:(?i).*\.jpg
 f:(?i).*\.doc
@@ -14,3 +14,4 @@ c:(?i).*\.txt
 #    doc files on the f: drive
 #    mp3 files on all (.:) drives
 #
+# note: (?i) makes the matches case-insensitive 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -13,6 +14,7 @@ namespace Slurper
 
         static readonly ILogger logger = LogProvider.Logger;
 
+        public static List<char> argumentFlags { get; set; }
         public static string sampleConfig { get; set; }
         public static bool VERBOSE { get; set; } = false;
         public static bool PARALLEL { get; set; } = false;
@@ -106,20 +108,21 @@ namespace Slurper
         private static void ParseConfigLines(string line)
         {
             // pattern to match valid lines from config file   <driveLetter:><regex>
-            String ValidConfigLine = @"^([^#]:)(.*)";               
-            
-      
+            String ValidConfigLine = @"^([^#]:)(.*)";
+
+
             Regex PatternToMatchValidConfigLine = new Regex(ValidConfigLine);
             Match matchedConfigurationLine = PatternToMatchValidConfigLine.Match(line);
 
-            if (!matchedConfigurationLine.Success) {
+            if (!matchedConfigurationLine.Success)
+            {
                 logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", logLevel.VERBOSE);
                 return;
             }
 
             String drive = matchedConfigurationLine.Groups[1].Value.ToUpper();
             String regex = matchedConfigurationLine.Groups[2].Value;
-                   
+
             StoreRegexToSearchByDrive(drive, regex);
             logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", logLevel.VERBOSE);
 
@@ -135,10 +138,15 @@ namespace Slurper
             driveFilePatternsTolookfor[drive] = driveFilePatterns;
         }
 
-        public static void ProcessArguments(string[] args)
+        public static void ExtractArgumentFlags(string argument)
         {
-            string concat = String.Join("", args);
-            foreach (char c in concat)
+            foreach (char c in argument)
+                argumentFlags.Add(c);
+        }
+
+        public static void ProcessArgumentFlags()
+        {
+            foreach (char c in argumentFlags)
             {
                 switch (c)
                 {
@@ -172,7 +180,28 @@ namespace Slurper
                         break;
                 }
             }
-            logger.Log($"Arguments: VERBOSE[{VERBOSE}] DRYRUN[{DRYRUN}] TRACE[{TRACE}]", logLevel.VERBOSE);
+            logger.Log($"Arguments: VERBOSE[{VERBOSE}] DRYRUN[{DRYRUN}] TRACE[{TRACE}] PARALLEL[{PARALLEL}]", logLevel.VERBOSE);
+        }
+
+        public static void ProcessArguments(string[] args)
+        {
+            List<string> patternKeywords = new List<string>();
+
+            argumentFlags = new List<char>();
+            foreach (var argument in args)
+            {
+                if (argument.StartsWith("/") || argument.StartsWith("-"))
+                {
+                    ExtractArgumentFlags(argument);
+                }
+                else
+                {
+                    patternKeywords.Add(argument);
+                }
+            }
+            if (patternKeywords.Count > 0)
+                DefaultFallbackRegexPattern = @"(?i).*" + patternKeywords.Aggregate((current, next) => current + @".*" + next) + @".*";
+            ProcessArgumentFlags();
         }
     }
 }

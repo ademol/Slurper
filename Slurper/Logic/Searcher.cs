@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
@@ -14,38 +15,53 @@ namespace Slurper.Logic
         static readonly ILogger logger = LogProvider.Logger;
         static double countFiles = 0;
         static double countMatches = 0;
-
+        static BlockingCollection<string> blockingCollection = new BlockingCollection<string>();
+        static Stopwatch sw;
 
         public static void SearchAndCopyFiles()
         {
-            Stopwatch sw = new Stopwatch();
+
+            sw = new Stopwatch();
             sw.Start();
-            int maxParallel = Configuration.PARALLEL ?  -1  : 1;
-            Parallel.ForEach(Configuration.drivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = maxParallel }),(currentDrive) =>
-            {
-                new Searcher().DirSearch(currentDrive);
-            } );
+            System.Threading.Thread myThread;
+            myThread = new System.Threading.Thread(
+                new System.Threading.ThreadStart(blockingCollectionFileRipper));
+            myThread.Start();
 
+            int maxParallel = Configuration.PARALLEL ? -1 : 1;
+            Parallel.ForEach(Configuration.drivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = maxParallel }), (currentDrive) =>
+             {
+                 new Searcher().DirSearch(currentDrive);
+             });
+            blockingCollection.CompleteAdding();
+            logger.Log($"search done:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", logLevel.VERBOSE);
+            while (!blockingCollection.IsCompleted)
+            { }
             sw.Stop();
-            Console.WriteLine($"checked {countFiles} with {countMatches} matches in {sw.Elapsed}");
+            logger.Log($"copy done:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", logLevel.VERBOSE);
 
+        }
+
+
+        public static void blockingCollectionFileRipper()
+        {
+            foreach (var item in blockingCollection.GetConsumingEnumerable())
+            {
+                Fileripper.RipFile(item);
+            }
         }
 
         public void DirSearch(string sDir)
         {
 
-            //driveFilePatternsTolookfor
-            // make sure to only use the patterns for the drives requested
             List<string> thisDrivePatternsToLookFor = new List<string>();
-            // drive to search
             String curDrive = sDir.Substring(0, 2);    // aka c:  
 
-            // add patterns for specific drive
             List<string> v;
             Configuration.driveFilePatternsTolookfor.TryGetValue(curDrive.ToUpper(), out v);
             if (v != null) { thisDrivePatternsToLookFor.AddRange(v); }
 
-            // add patterns for all drives
+            // add patterns for all (.:) drives
             Configuration.driveFilePatternsTolookfor.TryGetValue(".:", out v);
             if (v != null) { thisDrivePatternsToLookFor.AddRange(v); }
 
@@ -57,20 +73,16 @@ namespace Slurper.Logic
                     Spinner.Spin();
                     countFiles++;
 
-                    if ( countMatches > 10 )
-                    {
-
-                        break;
-                    }
+                    if ((countMatches + 1) % 100 == 0)
+                        logger.Log($"search busy:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", logLevel.VERBOSE);
 
                     logger.Log($"[{f}]", logLevel.TRACE);
 
                     // check if file is wanted by any of the specified patterns
                     foreach (String p in thisDrivePatternsToLookFor)
                     {
-                        if ((new Regex(p).Match(f)).Success) { Fileripper.RipFile(f); countMatches++; break; }
+                        if ((new Regex(p).Match(Path.GetFileName(f))).Success) { blockingCollection.Add(f); countMatches++; break; }
                     }
-
                 }
                 try
                 {
@@ -79,7 +91,7 @@ namespace Slurper.Logic
                 catch (Exception e)
                 {
                     logger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", logLevel.ERROR);
-                  }
+                }
             }
         }
 
