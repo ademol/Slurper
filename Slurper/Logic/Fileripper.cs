@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Alphaleonis.Win32.Filesystem;
+
 using Slurper.Providers;
 
 namespace Slurper.Logic

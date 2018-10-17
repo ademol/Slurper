@@ -1,20 +1,15 @@
-﻿using Slurper.Providers;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+
+using Slurper.Providers;
 
 namespace Slurper
 {
     public class Configuration
     {
-
-        static Boolean configurationLoaded = false;
 
         static readonly ILogger logger = LogProvider.Logger;
 
@@ -33,9 +28,8 @@ namespace Slurper
         public static void Configure()
         {
             Configuration.LoadConfigFile();
-
-            //  if (Configuration.VERBOSE)
             ShowPatternsUsedByDrive();
+
         }
 
         private static void LoadDefaultConfiguration()
@@ -93,7 +87,6 @@ namespace Slurper
 
             try
             {
-                //todo: also move to alphafs ?
                 using (StreamReader streamReader = new StreamReader(Configuration.cfgFileName))
                 {
                     while (!streamReader.EndOfStream)
@@ -101,13 +94,11 @@ namespace Slurper
                         ParseConfigLines(streamReader.ReadLine());
                     }
                 }
-                configurationLoaded = true;
                 return;
             }
             catch (Exception e)
             {
                 logger.Log($"LoadConfigFile: Could not read[{Configuration.cfgFileName}] [{e.Message}]", logLevel.ERROR);
-                configurationLoaded = false;
             }
         }
 

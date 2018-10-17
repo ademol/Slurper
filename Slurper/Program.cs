@@ -1,7 +1,8 @@
-﻿
+﻿using System;
+
 using Slurper.Logic;
 using Slurper.Providers;
-using System;
+
 
 [assembly: CLSCompliant(true)]
 namespace Slurper
