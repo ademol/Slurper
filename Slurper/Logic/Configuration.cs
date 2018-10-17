@@ -8,13 +8,14 @@ using Slurper.Providers;
 
 namespace Slurper
 {
-    public class Configuration
+    public static class Configuration
     {
 
         static readonly ILogger logger = LogProvider.Logger;
 
         public static string sampleConfig { get; set; }
         public static bool VERBOSE { get; set; } = false;
+        public static bool PARALLEL { get; set; } = false;
         public static bool DRYRUN { get; set; } = false;                                        // (only) show what will be done (has implicit VERBOSE)
         public static bool TRACE { get; set; } = false;                                         // VERBOSE + show also unmatched files 
         public static String cfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
@@ -22,7 +23,7 @@ namespace Slurper
 
         public static string DefaultFallbackRegexPattern { get; set; } = @"(?i).*\.jpg";
 
-        public static List<string> drivesToSearch { get; } = new List<string>();                      // actual drives to search (always excludes the drive that the program is run from..)
+        public static List<string> drivesToSearch { get; } = new List<string>();                // actual drives to search (always excludes the drive that the program is run from..)
         public static Dictionary<string, List<string>> driveFilePatternsTolookfor { get; } = new Dictionary<string, List<string>>();   // hash of drive keys with their pattern values 
 
         public static void Configure()
@@ -153,6 +154,9 @@ namespace Slurper
                     case 't':
                         TRACE = true;
                         VERBOSE = true;
+                        break;
+                    case 'p':
+                        PARALLEL = true;
                         break;
                     case '/':
                         break;

@@ -1,27 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
+using System.Threading.Tasks;
 using Alphaleonis.Win32.Filesystem;
 
 using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    static class Searcher
+    public class Searcher
     {
         static readonly ILogger logger = LogProvider.Logger;
 
         public static void SearchAndCopyFiles()
         {
-            // process each drive
-            foreach (String drive in Configuration.drivesToSearch)
+            int maxParallel = Configuration.PARALLEL ?  -1  : 1;
+            Parallel.ForEach(Configuration.drivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = maxParallel }),(currentDrive) =>
             {
-                DirSearch(drive);
-            }
+                new Searcher().DirSearch(currentDrive);
+            } );
         }
 
-        public static void DirSearch(string sDir)
+        public void DirSearch(string sDir)
         {
 
             //driveFilePatternsTolookfor
