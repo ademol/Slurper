@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Alphaleonis.Win32.Filesystem;
@@ -11,14 +12,23 @@ namespace Slurper.Logic
     public class Searcher
     {
         static readonly ILogger logger = LogProvider.Logger;
+        static double countFiles = 0;
+        static double countMatches = 0;
+
 
         public static void SearchAndCopyFiles()
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             int maxParallel = Configuration.PARALLEL ?  -1  : 1;
             Parallel.ForEach(Configuration.drivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = maxParallel }),(currentDrive) =>
             {
                 new Searcher().DirSearch(currentDrive);
             } );
+
+            sw.Stop();
+            Console.WriteLine($"checked {countFiles} with {countMatches} matches in {sw.Elapsed}");
+
         }
 
         public void DirSearch(string sDir)
@@ -45,13 +55,22 @@ namespace Slurper.Logic
                 foreach (string f in getFiles(d) ?? new String[0])
                 {
                     Spinner.Spin();
+                    countFiles++;
+
+                    if ( countMatches > 10 )
+                    {
+
+                        break;
+                    }
+
                     logger.Log($"[{f}]", logLevel.TRACE);
 
                     // check if file is wanted by any of the specified patterns
                     foreach (String p in thisDrivePatternsToLookFor)
                     {
-                        if ((new Regex(p).Match(f)).Success) { Fileripper.RipFile(f); break; }
+                        if ((new Regex(p).Match(f)).Success) { Fileripper.RipFile(f); countMatches++; break; }
                     }
+
                 }
                 try
                 {

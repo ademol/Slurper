@@ -4,29 +4,17 @@ namespace Slurper
 {
     static class Spinner
     {
-        private static char[] spinChars = new char[] { '|', '/', '-', '\\' };
-        private static int spinCharIdx = 0;
-        private static readonly object spinLock = new object();
+        private static char char1 = '/';
+        private static char char2 = '\\';
+        private static char newChar = char2;
 
         public static void Spin()
         {
-
-            lock (spinLock)
-            {
-                // fold back to begin char when needed
-                if (spinCharIdx + 1 == spinChars.Length)
-                { spinCharIdx = 0; }
-                else
-                { spinCharIdx++; }
-
-                char spinChar = spinChars[spinCharIdx];
-
+                newChar = (newChar == char1) ? char2 : char1;
                 //set the spinner position
                 Console.CursorLeft = 0;
-
                 //write the new character to the console
-                Console.Write(spinChar);
-           }
+                Console.Write( newChar );
         }
 
     }
