@@ -1,9 +1,10 @@
-﻿using Slurper.Providers;
-using System;
-using System.Collections;
-using System.Text.RegularExpressions;
-using Alphaleonis.Win32.Filesystem;
+﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+using Alphaleonis.Win32.Filesystem;
+
+using Slurper.Providers;
 
 namespace Slurper.Logic
 {
@@ -49,7 +50,6 @@ namespace Slurper.Logic
                     // check if file is wanted by any of the specified patterns
                     foreach (String p in thisDrivePatternsToLookFor)
                     {
-                        if ((new Regex(p).Match(f)).Success) { Console.WriteLine("success"); }
                         if ((new Regex(p).Match(f)).Success) { Fileripper.RipFile(f); break; }
                     }
                 }
