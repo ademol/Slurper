@@ -25,7 +25,7 @@ namespace Slurper.Logic
                 if (!Configuration.DRYRUN)
                 {
                     Directory.CreateDirectory(targetPath);
-                    File.Copy(filename, targetFileNameFullPath);
+                    File.Copy("\\\\?\\" + filename, targetFileNameFullPath);
                 }
             }
             catch (Exception e)
