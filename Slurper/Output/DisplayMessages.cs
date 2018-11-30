@@ -14,6 +14,7 @@ namespace Slurper
             txt += "use the /v flag for verbose output => slurper.exe /v \n";
             txt += "use the /d flag for dryrun (no filecopy mode) => slurper.exe /d \n";
             txt += "use the /t flag for trace => slurper.exe /t    (note: setting trace sets verbose) \n";
+            txt += "use the /s flag for silent mode\n";
             txt += "use the /g flag to generate a sample cfg file\n";
             txt += "\n";
             txt += "(optional) when a configfile exits (./slurper.cfg) it is used to specify custom regexes to match \n";

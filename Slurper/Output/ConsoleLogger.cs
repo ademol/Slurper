@@ -11,6 +11,8 @@ namespace Slurper
 
         public void Log(string Message, logLevel Level)
         {
+            if (Configuration.SILENT) return;
+
             var previousColor = Console.ForegroundColor;
             ConsoleColor color = previousColor;
 

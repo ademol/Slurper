@@ -1,6 +1,5 @@
 ﻿using System;
-
-using Alphaleonis.Win32.Filesystem;
+using System.IO;
 
 using Slurper.Providers;
 
@@ -17,7 +16,7 @@ namespace Slurper.Logic
 
             targetRelativePath = targetRelativePath.Replace(':', '_');
             String targetPath = FileSystemLayer.targetDirBasePath + FileSystemLayer.pathSep + targetRelativePath + FileSystemLayer.pathSep;
-            String targetFileNameFullPath = targetPath + targetFileName;
+            String targetFileNameFullPath = "\\\\?\\" + targetPath + targetFileName;
 
             logger.Log($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]", logLevel.VERBOSE);
 
