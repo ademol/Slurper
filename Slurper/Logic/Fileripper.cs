@@ -15,7 +15,7 @@ namespace Slurper.Logic
             String targetPath = BuildTargetPath(soureFilePath);
             String targetFilePath = targetPath + Path.GetFileName(soureFilePath);
 
-            logger.Log($"RipFile: ripping [{soureFilePath}] => [{targetFilePath}]", logLevel.VERBOSE);
+            logger.Log($"RipFile: ripping [{soureFilePath}] => [{targetFilePath}]", LogLevel.VERBOSE);
 
             if (Configuration.DRYRUN) { return; }
             try
@@ -25,7 +25,7 @@ namespace Slurper.Logic
             }
             catch (Exception e)
             {
-                logger.Log($"RipFile: copy of [{soureFilePath}] failed with [{e.Message}]", logLevel.ERROR);
+                logger.Log($"RipFile: copy of [{soureFilePath}] failed with [{e.Message}]", LogLevel.ERROR);
             }
         }
 

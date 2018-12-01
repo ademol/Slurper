@@ -7,14 +7,14 @@ namespace Slurper.Providers
     {
         static readonly ILogger logger = LogProvider.Logger;
 
-        public static String TargetDirBasePath { get; set; }                             // relative directory for file to be copied to
+        public static String TargetDirBasePath { get; set; }          
 
         public static char PathSep { get; }  = Path.DirectorySeparatorChar;
 
         public static void CreateTargetLocation()
         {
             TargetDirBasePath = BuildTargetBasePath();
-            logger.Log($"CreateTargetLocation: [{TargetDirBasePath}]", logLevel.VERBOSE);
+            logger.Log($"CreateTargetLocation: [{TargetDirBasePath}]", LogLevel.VERBOSE);
 
             if (Configuration.DRYRUN) { return; }
             try
@@ -23,7 +23,7 @@ namespace Slurper.Providers
             }
                 catch (Exception e)
             {
-                logger.Log($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]", logLevel.ERROR);
+                logger.Log($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]", LogLevel.ERROR);
             }
         }
 
@@ -42,7 +42,7 @@ namespace Slurper.Providers
 
             // mydrive
             String mydrive = Path.GetPathRoot(Directory.GetCurrentDirectory());
-            logger.Log($"GetDriveInfo: mydrive = [{mydrive}]", logLevel.VERBOSE);
+            logger.Log($"GetDriveInfo: mydrive = [{mydrive}]", LogLevel.VERBOSE);
 
             foreach (DriveInfo d in allDrives)
             {
@@ -77,7 +77,7 @@ namespace Slurper.Providers
                 {
                     Configuration.drivesToSearch.Add(d.Name);
                 }
-                logger.Log($"GetDriveInfo: found drive [{driveID}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", logLevel.VERBOSE);
+                logger.Log($"GetDriveInfo: found drive [{driveID}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", LogLevel.VERBOSE);
             }
         }
     }

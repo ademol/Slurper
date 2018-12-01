@@ -39,8 +39,19 @@ namespace Slurper
 
         private static void LoadDefaultConfiguration()
         {
-            logger.Log($"Configure:  using default pattern [{Configuration.DefaultFallbackRegexPattern}]", logLevel.WARN);
-            Configuration.driveFilePatternsTolookfor.Add(".:", new List<string> { DefaultFallbackRegexPattern });
+            logger.Log($"Configure:  using default pattern [{Configuration.DefaultFallbackRegexPattern}]", LogLevel.WARN);
+
+            string driverIdentifier = ".:";
+
+            Regex MatchDrive = new Regex(@"(^[^:]+)([A-Z]:)(.*)", RegexOptions.IgnoreCase);
+            Match match = MatchDrive.Match(Configuration.DefaultFallbackRegexPattern);
+            if ( match.Success )
+            {
+                driverIdentifier = match.Groups[2].Value.ToUpperInvariant();
+                DefaultFallbackRegexPattern = match.Groups[1].Value + match.Groups[3].Value;
+            }
+
+            Configuration.driveFilePatternsTolookfor.Add(driverIdentifier, new List<string> { DefaultFallbackRegexPattern });
         }
 
         public static void ShowPatternsUsedByDrive()
@@ -50,7 +61,7 @@ namespace Slurper
                 Configuration.driveFilePatternsTolookfor.TryGetValue(drive, out List<string> patterns);
                 foreach (String pattern in patterns)
                 {
-                    logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ", logLevel.VERBOSE);
+                    logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ", LogLevel.VERBOSE);
                 }
             }
         }
@@ -77,7 +88,7 @@ namespace Slurper
             }
             catch (Exception e)
             {
-                logger.Log($"generateConfig: failed to generate [{cfgFileName}][{e.Message}]", logLevel.ERROR);
+                logger.Log($"generateConfig: failed to generate [{cfgFileName}][{e.Message}]", LogLevel.ERROR);
             }
         }
 
@@ -103,7 +114,7 @@ namespace Slurper
             }
             catch (Exception e)
             {
-                logger.Log($"LoadConfigFile: Could not read[{Configuration.cfgFileName}] [{e.Message}]", logLevel.ERROR);
+                logger.Log($"LoadConfigFile: Could not read[{Configuration.cfgFileName}] [{e.Message}]", LogLevel.ERROR);
             }
         }
 
@@ -118,7 +129,7 @@ namespace Slurper
 
             if (!matchedConfigurationLine.Success)
             {
-                logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", logLevel.VERBOSE);
+                logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", LogLevel.VERBOSE);
                 return;
             }
 
@@ -126,7 +137,7 @@ namespace Slurper
             String regex = matchedConfigurationLine.Groups[2].Value;
 
             StoreRegexToSearchByDrive(drive, regex);
-            logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", logLevel.VERBOSE);
+            logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", LogLevel.VERBOSE);
 
         }
 
@@ -182,10 +193,11 @@ namespace Slurper
                     default:
                         Console.WriteLine("option [{0}] not supported", c);
                         DisplayMessages.Help();
+                        Environment.Exit(0);
                         break;
                 }
             }
-            logger.Log($"Arguments: VERBOSE[{VERBOSE}] DRYRUN[{DRYRUN}] TRACE[{TRACE}] PARALLEL[{PARALLEL}]", logLevel.VERBOSE);
+            logger.Log($"Arguments: VERBOSE[{VERBOSE}] DRYRUN[{DRYRUN}] TRACE[{TRACE}] PARALLEL[{PARALLEL}]", LogLevel.VERBOSE);
         }
 
         public static void ProcessArguments(string[] args)

@@ -6,29 +6,29 @@ namespace Slurper
 {
    public class ConsoleLogger : ILogger
     {
-        private static readonly Dictionary<logLevel, ConsoleColor> consoleLevelColor = new Dictionary<logLevel, ConsoleColor>()
+        private static readonly Dictionary<LogLevel, ConsoleColor> consoleLevelColor = new Dictionary<LogLevel, ConsoleColor>()
         {
-            { logLevel.TRACE, ConsoleColor.DarkRed },
-            { logLevel.LOG, ConsoleColor.White },
-            { logLevel.VERBOSE, ConsoleColor.Yellow },
-            { logLevel.ERROR, ConsoleColor.Red },
-            { logLevel.WARN, ConsoleColor.DarkYellow }
+            { LogLevel.TRACE, ConsoleColor.DarkRed },
+            { LogLevel.LOG, ConsoleColor.White },
+            { LogLevel.VERBOSE, ConsoleColor.Yellow },
+            { LogLevel.ERROR, ConsoleColor.Red },
+            { LogLevel.WARN, ConsoleColor.DarkYellow }
         };
 
         private static readonly ConsoleColor foreGroundColor = Console.ForegroundColor;
 
-        public void Log(string Message, logLevel messageLogLevel)
+        public void Log(string Message, LogLevel messageLogLevel)
         {
             if (Configuration.SILENT) return;
-            if (messageLogLevel == logLevel.TRACE && !Configuration.TRACE) return;
-            if (messageLogLevel == logLevel.VERBOSE && !Configuration.VERBOSE) return;
+            if (messageLogLevel == LogLevel.TRACE && !Configuration.TRACE) return;
+            if (messageLogLevel == LogLevel.VERBOSE && !Configuration.VERBOSE) return;
 
             SetForeGroundColorForLogLevel(messageLogLevel);
             WriteToConsole(GetCallingMember(), messageLogLevel, Message);
             RestoreForeGroundcolor();
         }
 
-        private void WriteToConsole(string callingMethod, logLevel level, string logMessage)
+        private void WriteToConsole(string callingMethod, LogLevel level, string logMessage)
         {
             Console.WriteLine($"[{callingMethod}][{level.ToString()}][{logMessage}]");
         }
@@ -44,7 +44,7 @@ namespace Slurper
             Console.ForegroundColor = foreGroundColor;
         }
 
-        private void SetForeGroundColorForLogLevel(logLevel Level)
+        private void SetForeGroundColorForLogLevel(LogLevel Level)
         {
             if (consoleLevelColor.TryGetValue(Level, out ConsoleColor foregroundColor))
             {
@@ -54,7 +54,7 @@ namespace Slurper
 
         public void Log(string Message)
         {
-            Log(Message, logLevel.LOG);
+            Log(Message, LogLevel.LOG);
         }
     }
 }

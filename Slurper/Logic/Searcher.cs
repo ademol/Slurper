@@ -29,18 +29,18 @@ namespace Slurper.Logic
             myThread.Start();
 
             int maxParallel = Configuration.PARALLEL ? -1 : 1;
-            logger.Log($"maxParallel = [{maxParallel}]", logLevel.VERBOSE);
+            logger.Log($"maxParallel = [{maxParallel}]", LogLevel.VERBOSE);
 
             Parallel.ForEach(Configuration.drivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = maxParallel }), (currentDrive) =>
              {
                  new Searcher().DirSearch(currentDrive);
              });
             blockingCollection.CompleteAdding();
-            logger.Log($"search done:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", logLevel.VERBOSE);
+            logger.Log($"search done:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", LogLevel.VERBOSE);
             while (!blockingCollection.IsCompleted)
             { }
             sw.Stop();
-            logger.Log($"copy done:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", logLevel.VERBOSE);
+            logger.Log($"copy done:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", LogLevel.VERBOSE);
 
         }
 
@@ -55,9 +55,10 @@ namespace Slurper.Logic
 
         public void DirSearch(string sDir)
         {
-
             List<string> thisDrivePatternsToLookFor = new List<string>();
             String curDrive = sDir.Substring(0, 2);    // aka c:  
+
+        //   if (curDrive != "G:" ) { return; }
 
             List<string> v;
             Configuration.driveFilePatternsTolookfor.TryGetValue(curDrive.ToUpper(), out v);
@@ -76,14 +77,14 @@ namespace Slurper.Logic
                     countFiles++;
 
                     if ((countMatches + 1) % 100 == 0)
-                        logger.Log($"search busy:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", logLevel.VERBOSE);
+                        logger.Log($"search busy:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", LogLevel.VERBOSE);
 
-                    logger.Log($"[{f}]", logLevel.TRACE);
+                    logger.Log($"[{f}]", LogLevel.TRACE);
 
                     // check if file is wanted by any of the specified patterns
                     foreach (String p in thisDrivePatternsToLookFor)
                     {
-                        if ((new Regex(p).Match(Path.GetFileName(f))).Success) { blockingCollection.Add(f); countMatches++; break; }
+                        if ((new Regex(p).Match(Path.GetFullPath(f))).Success) { blockingCollection.Add(f); countMatches++; break; }
                     }
                 }
                 try
@@ -92,7 +93,7 @@ namespace Slurper.Logic
                 }
                 catch (Exception e)
                 {
-                    logger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", logLevel.ERROR);
+                    logger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", LogLevel.ERROR);
                 }
             }
         }
@@ -106,11 +107,11 @@ namespace Slurper.Logic
             }
             catch (UnauthorizedAccessException e)
             {
-                logger.Log($"getFiles: Unauthorized to retrieve fileList from [{dir}][{e.Message}]", logLevel.ERROR);
+                logger.Log($"getFiles: Unauthorized to retrieve fileList from [{dir}][{e.Message}]", LogLevel.ERROR);
             }
             catch (Exception e)
             {
-                logger.Log($"getFiles: Failed to retrieve fileList from [{dir}][{e.Message}]", logLevel.ERROR);
+                logger.Log($"getFiles: Failed to retrieve fileList from [{dir}][{e.Message}]", LogLevel.ERROR);
             }
             return null;
         }
@@ -124,11 +125,11 @@ namespace Slurper.Logic
             }
             catch (UnauthorizedAccessException e)
             {
-                logger.Log($"getFiles: Unauthorized to retrieve dirList from [{sDir}][{e.Message}]", logLevel.ERROR);
+                logger.Log($"getFiles: Unauthorized to retrieve dirList from [{sDir}][{e.Message}]", LogLevel.ERROR);
             }
             catch (Exception e)
             {
-                logger.Log($"getDirs: Failed to retrieve dirList from [{sDir}][{e.Message}]", logLevel.ERROR);
+                logger.Log($"getDirs: Failed to retrieve dirList from [{sDir}][{e.Message}]", LogLevel.ERROR);
             }
             return null;
         }

@@ -20,7 +20,6 @@ namespace Slurper
             txt += "\n";
             txt += Configuration.sampleConfig;
             Console.WriteLine(txt);
-            Environment.Exit(0);
         }
     }
 }

@@ -1,13 +1,12 @@
-﻿using System.Runtime.CompilerServices;
-
+﻿
 namespace Slurper
 {
     public interface ILogger
     {
-        void Log(string Message, logLevel Level);
+        void Log(string Message, LogLevel Level);
         void Log(string Message);
     }
-    public enum logLevel
+    public enum LogLevel
     {
         TRACE,
         LOG,
@@ -15,5 +14,4 @@ namespace Slurper
         WARN,
         ERROR
     }
-
 }
