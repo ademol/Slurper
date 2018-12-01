@@ -32,6 +32,7 @@ namespace Slurper
             
             // configuration 
             Configuration.Configure();
+            Configuration.ShowPatternsUsedByDrive();
 
             // get drives to search
             FileSystemLayer.GetDriveInfo();

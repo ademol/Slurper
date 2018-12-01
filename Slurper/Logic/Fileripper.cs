@@ -5,33 +5,36 @@ using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    static class Fileripper
+    class Fileripper
     {
         static readonly ILogger logger = LogProvider.Logger;
+        const string longPathPrefix = "\\\\?\\";
 
-          public static void RipFile(String filename)
+        public void RipFile(String soureFilePath)
         {
-            String targetFileName = Path.GetFileName(filename);
-            String targetRelativePath = Path.GetDirectoryName(filename);
+            String targetPath = BuildTargetPath(soureFilePath);
+            String targetFilePath = targetPath + Path.GetFileName(soureFilePath);
 
-            targetRelativePath = targetRelativePath.Replace(':', '_');
-            String targetPath = FileSystemLayer.targetDirBasePath + FileSystemLayer.pathSep + targetRelativePath + FileSystemLayer.pathSep;
-            String targetFileNameFullPath = "\\\\?\\" + targetPath + targetFileName;
+            logger.Log($"RipFile: ripping [{soureFilePath}] => [{targetFilePath}]", logLevel.VERBOSE);
 
-            logger.Log($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]", logLevel.VERBOSE);
-
+            if (Configuration.DRYRUN) { return; }
             try
             {
-                if (!Configuration.DRYRUN)
-                {
-                    Directory.CreateDirectory(targetPath);
-                    File.Copy("\\\\?\\" + filename, targetFileNameFullPath);
-                }
+                Directory.CreateDirectory(longPathPrefix + targetPath);
+                File.Copy(longPathPrefix + soureFilePath, longPathPrefix + targetFilePath);
             }
             catch (Exception e)
             {
-                logger.Log($"RipFile: copy of [{filename}] failed with [{e.Message}]", logLevel.ERROR);
+                logger.Log($"RipFile: copy of [{soureFilePath}] failed with [{e.Message}]", logLevel.ERROR);
             }
         }
+
+        private string BuildTargetPath(string filename)
+        {
+            String targetRelativePath = Path.GetDirectoryName(filename);
+            targetRelativePath = targetRelativePath.Replace(':', '_');
+            return FileSystemLayer.targetDirBasePath + FileSystemLayer.pathSep + targetRelativePath + FileSystemLayer.pathSep;
+        }
+
     }
 }

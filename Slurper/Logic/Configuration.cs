@@ -43,7 +43,7 @@ namespace Slurper
             Configuration.driveFilePatternsTolookfor.Add(".:", new List<string> { DefaultFallbackRegexPattern });
         }
 
-        private static void ShowPatternsUsedByDrive()
+        public static void ShowPatternsUsedByDrive()
         {
             foreach (String drive in Configuration.driveFilePatternsTolookfor.Keys)
             {

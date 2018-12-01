@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
     <PublishUrl>Q:\publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -29,7 +30,6 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -157,10 +157,11 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>powershell Remove-Item Q:\publish\slurper\rip -recurse -force
-copy /Y "$(TargetDir)/*.dll" Q:\publish\slurper
-copy /Y "$(TargetDir)/$(ProjectName).exe" Q:\publish\slurper
-</PostBuildEvent>
+    <PostBuildEvent>set DESTPATH="$(PublishUrl)\slurper"
+powershell new-item -Path "%25DESTPATH%25\rip" -Force
+powershell Remove-Item "%25DESTPATH%25\rip" -recurse -force
+copy /Y "$(TargetDir)/*.dll" "%25DESTPATH%25"
+copy /Y "$(TargetDir)/$(ProjectName).exe" "%25DESTPATH%25"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

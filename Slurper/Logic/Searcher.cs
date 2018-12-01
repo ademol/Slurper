@@ -25,7 +25,7 @@ namespace Slurper.Logic
             sw.Start();
             System.Threading.Thread myThread;
             myThread = new System.Threading.Thread(
-                new System.Threading.ThreadStart(blockingCollectionFileRipper));
+                new System.Threading.ThreadStart(BlockingCollectionFileRipper));
             myThread.Start();
 
             int maxParallel = Configuration.PARALLEL ? -1 : 1;
@@ -43,11 +43,11 @@ namespace Slurper.Logic
         }
 
 
-        public static void blockingCollectionFileRipper()
+        public static void BlockingCollectionFileRipper()
         {
             foreach (var item in blockingCollection.GetConsumingEnumerable())
             {
-                Fileripper.RipFile(item);
+                new Fileripper().RipFile(item);
             }
         }
 
@@ -66,9 +66,9 @@ namespace Slurper.Logic
             if (v != null) { thisDrivePatternsToLookFor.AddRange(v); }
 
             // long live the 'null-coalescing' operator ?? to handle cases of 'null'  :)
-            foreach (string d in getDirs(sDir) ?? new String[0])
+            foreach (string d in GetDirs(sDir) ?? new String[0])
             {
-                foreach (string f in getFiles(d) ?? new String[0])
+                foreach (string f in GetFiles(d) ?? new String[0])
                 {
                     Spinner.Spin();
                     countFiles++;
@@ -95,7 +95,7 @@ namespace Slurper.Logic
             }
         }
 
-        static String[] getFiles(string dir)
+        static String[] GetFiles(string dir)
         {
             try
             {
@@ -113,7 +113,7 @@ namespace Slurper.Logic
             return null;
         }
 
-        static String[] getDirs(string sDir)
+        static String[] GetDirs(string sDir)
         {
             try
             {
