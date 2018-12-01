@@ -156,7 +156,7 @@ namespace Slurper
                         SILENT = true;
                         break;
                     case 'h':
-                        DisplayMessages.help();
+                        DisplayMessages.Help();
                         break;
                     case 'v':
                         VERBOSE = true;
@@ -181,7 +181,7 @@ namespace Slurper
                         break;
                     default:
                         Console.WriteLine("option [{0}] not supported", c);
-                        DisplayMessages.help();
+                        DisplayMessages.Help();
                         break;
                 }
             }

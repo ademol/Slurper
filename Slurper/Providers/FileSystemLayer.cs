@@ -7,27 +7,33 @@ namespace Slurper.Providers
     {
         static readonly ILogger logger = LogProvider.Logger;
 
-        public static String targetDirBasePath { get; set; }                             // relative directory for file to be copied to
+        public static String TargetDirBasePath { get; set; }                             // relative directory for file to be copied to
 
-        public static char pathSep { get; }  = Path.DirectorySeparatorChar;
+        public static char PathSep { get; }  = Path.DirectorySeparatorChar;
 
         public static void CreateTargetLocation()
+        {
+            TargetDirBasePath = BuildTargetBasePath();
+            logger.Log($"CreateTargetLocation: [{TargetDirBasePath}]", logLevel.VERBOSE);
+
+            if (Configuration.DRYRUN) { return; }
+            try
+            {
+                Directory.CreateDirectory(TargetDirBasePath);
+            }
+                catch (Exception e)
+            {
+                logger.Log($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]", logLevel.ERROR);
+            }
+        }
+
+        private static string BuildTargetBasePath()
         {
             String curDir = Directory.GetCurrentDirectory();
             String hostname = (System.Environment.MachineName).ToLower();
             String dateTime = String.Format("{0:yyyyMMdd_HH-mm-ss}", DateTime.Now);
 
-            targetDirBasePath = string.Concat(curDir, pathSep, Configuration.ripDir, pathSep, hostname, "_", dateTime);
-            logger.Log($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{targetDirBasePath}]", logLevel.VERBOSE);
-
-            try
-            {
-                if (!Configuration.DRYRUN) { Directory.CreateDirectory(targetDirBasePath); }
-            }
-                catch (Exception e)
-            {
-                logger.Log($"CreateTargetLocation: failed to create director [{targetDirBasePath}][{e.Message}]", logLevel.ERROR);
-            }
+            return string.Concat(curDir, PathSep, Configuration.ripDir, PathSep, hostname, "_", dateTime);
         }
 
         public static void GetDriveInfo()

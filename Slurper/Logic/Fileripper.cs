@@ -33,7 +33,7 @@ namespace Slurper.Logic
         {
             String targetRelativePath = Path.GetDirectoryName(filename);
             targetRelativePath = targetRelativePath.Replace(':', '_');
-            return FileSystemLayer.targetDirBasePath + FileSystemLayer.pathSep + targetRelativePath + FileSystemLayer.pathSep;
+            return FileSystemLayer.TargetDirBasePath + FileSystemLayer.PathSep + targetRelativePath + FileSystemLayer.PathSep;
         }
 
     }

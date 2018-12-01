@@ -4,8 +4,7 @@ namespace Slurper
 {
     static class DisplayMessages
     {
-  
-        public static void help()
+        public static void Help()
         {
             //todo: nicer help
             String txt = "";
@@ -20,10 +19,8 @@ namespace Slurper
             txt += "(optional) when a configfile exits (./slurper.cfg) it is used to specify custom regexes to match \n";
             txt += "\n";
             txt += Configuration.sampleConfig;
-
             Console.WriteLine(txt);
             Environment.Exit(0);
         }
-
     }
 }
