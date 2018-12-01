@@ -18,14 +18,13 @@ namespace Slurper.Logic
         static BlockingCollection<string> blockingCollection = new BlockingCollection<string>();
         static Stopwatch sw;
 
-        public static void SearchAndCopyFiles()
+        public static void SearchDrives()
         {
-
             sw = new Stopwatch();
             sw.Start();
             System.Threading.Thread myThread;
             myThread = new System.Threading.Thread(
-                new System.Threading.ThreadStart(BlockingCollectionFileRipper));
+            new System.Threading.ThreadStart(BlockingCollectionFileRipper));
             myThread.Start();
 
             int maxParallel = Configuration.PARALLEL ? -1 : 1;
@@ -44,7 +43,6 @@ namespace Slurper.Logic
 
         }
 
-
         public static void BlockingCollectionFileRipper()
         {
             foreach (var item in blockingCollection.GetConsumingEnumerable())
@@ -58,22 +56,19 @@ namespace Slurper.Logic
             List<string> thisDrivePatternsToLookFor = new List<string>();
             String curDrive = sDir.Substring(0, 2);    // aka c:  
 
-        //   if (curDrive != "G:" ) { return; }
-
-            List<string> v;
-            Configuration.driveFilePatternsTolookfor.TryGetValue(curDrive.ToUpper(), out v);
-            if (v != null) { thisDrivePatternsToLookFor.AddRange(v); }
+            Configuration.driveFilePatternsTolookfor.TryGetValue(curDrive.ToUpper(), out List<string> patternsForSpecificDrive);
+            if (patternsForSpecificDrive != null) { thisDrivePatternsToLookFor.AddRange(patternsForSpecificDrive); }
 
             // add patterns for all (.:) drives
-            Configuration.driveFilePatternsTolookfor.TryGetValue(".:", out v);
-            if (v != null) { thisDrivePatternsToLookFor.AddRange(v); }
+            Configuration.driveFilePatternsTolookfor.TryGetValue(".:", out List<string> patternsForAllDrives);
+            if (patternsForAllDrives != null) { thisDrivePatternsToLookFor.AddRange(patternsForAllDrives); }
 
             // long live the 'null-coalescing' operator ?? to handle cases of 'null'  :)
             foreach (string d in GetDirs(sDir) ?? new String[0])
             {
                 foreach (string f in GetFiles(d) ?? new String[0])
                 {
-                    Spinner.Spin();
+                    Spinner.SearchSpin();
                     countFiles++;
 
                     if ((countMatches + 1) % 100 == 0)
@@ -102,8 +97,7 @@ namespace Slurper.Logic
         {
             try
             {
-                String[] files = Directory.GetFiles(dir, "*.*");
-                return files;
+                return Directory.GetFiles(dir, "*.*"); 
             }
             catch (UnauthorizedAccessException e)
             {
@@ -120,8 +114,7 @@ namespace Slurper.Logic
         {
             try
             {
-                string[] dirs = Directory.GetDirectories(sDir);
-                return dirs;
+                return Directory.GetDirectories(sDir);
             }
             catch (UnauthorizedAccessException e)
             {

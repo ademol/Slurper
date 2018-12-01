@@ -15,6 +15,7 @@ namespace Slurper.Logic
             String targetPath = BuildTargetPath(soureFilePath);
             String targetFilePath = targetPath + Path.GetFileName(soureFilePath);
 
+            Spinner.RipSpin();
             logger.Log($"RipFile: ripping [{soureFilePath}] => [{targetFilePath}]", LogLevel.VERBOSE);
 
             if (Configuration.DRYRUN) { return; }
@@ -32,9 +33,13 @@ namespace Slurper.Logic
         private string BuildTargetPath(string filename)
         {
             String targetRelativePath = Path.GetDirectoryName(filename);
-            targetRelativePath = targetRelativePath.Replace(':', '_');
+            targetRelativePath = SanitizePath(targetRelativePath);
             return FileSystemLayer.TargetDirBasePath + FileSystemLayer.PathSep + targetRelativePath + FileSystemLayer.PathSep;
         }
 
+        private string SanitizePath(string path)
+        {
+            return path.Replace(':', '_');
+        }
     }
 }
