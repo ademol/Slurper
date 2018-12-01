@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -46,8 +48,11 @@ namespace Slurper
 
             if (displayLog)
             {
+                StackFrame frame = new StackFrame(1, true);
+                var sourceMethod = frame.GetMethod();
+
                 Console.ForegroundColor = color;
-                Console.WriteLine("[{0}][{1}]", Level, Message);
+                Console.WriteLine($"[{sourceMethod}][{Level}][{Message}]");
                 Console.ForegroundColor = previousColor;
             }
 

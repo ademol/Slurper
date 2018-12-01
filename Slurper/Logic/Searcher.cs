@@ -29,6 +29,8 @@ namespace Slurper.Logic
             myThread.Start();
 
             int maxParallel = Configuration.PARALLEL ? -1 : 1;
+            logger.Log($"maxParallel = [{maxParallel}]", logLevel.VERBOSE);
+
             Parallel.ForEach(Configuration.drivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = maxParallel }), (currentDrive) =>
              {
                  new Searcher().DirSearch(currentDrive);

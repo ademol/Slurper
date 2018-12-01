@@ -1,4 +1,6 @@
-﻿namespace Slurper
+﻿using System.Runtime.CompilerServices;
+
+namespace Slurper
 {
     public interface ILogger
     {
