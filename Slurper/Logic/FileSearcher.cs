@@ -10,7 +10,7 @@ using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    public class Searcher
+    public class FileSearcher
     {
         static readonly ILogger logger = LogProvider.Logger;
         static double countFiles = 0;
@@ -32,7 +32,7 @@ namespace Slurper.Logic
 
             Parallel.ForEach(Configuration.drivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = maxParallel }), (currentDrive) =>
              {
-                 new Searcher().DirSearch(currentDrive);
+                 new FileSearcher().DirSearch(currentDrive);
              });
             blockingCollection.CompleteAdding();
             logger.Log($"search done:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", LogLevel.VERBOSE);
