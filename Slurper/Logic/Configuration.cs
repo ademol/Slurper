@@ -18,6 +18,7 @@ namespace Slurper
         public static string sampleConfig { get; set; }
         public static bool SILENT { get; set; } = false;
 
+        public static bool INCLUDEMYDRIVE { get; set; } = false;
         public static bool VERBOSE { get; set; } = false;
         public static bool PARALLEL { get; set; } = false;
         public static bool DRYRUN { get; set; } = false;                                        // (only) show what will be done (has implicit VERBOSE)
@@ -175,6 +176,9 @@ namespace Slurper
             {
                 switch (c)
                 {
+                    case 'i':
+                        INCLUDEMYDRIVE = true;
+                        break;
                     case 's':
                         SILENT = true;
                         break;

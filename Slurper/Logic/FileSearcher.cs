@@ -58,7 +58,6 @@ namespace Slurper.Logic
             }
         }
 
-
         public void DriveSearch(string currentDrive)
         {
             SetFilePatternsForDrive(currentDrive);

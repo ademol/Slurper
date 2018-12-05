@@ -46,6 +46,7 @@ namespace Slurper.Providers
 
             foreach (DriveInfo d in allDrives)
             {
+            
                 // D:\  -> D:
                 String driveIdentifier = d.Name.Substring(0, 2).ToUpper();
 
@@ -66,12 +67,17 @@ namespace Slurper.Providers
                     reason = "configuration for drive " + driveIdentifier;
                 }
                 // skip the drive i'm running from
-                if ((mydrive.ToUpper()).Equals(d.Name.ToUpper()))
+                if ((mydrive.ToUpper()).Equals(d.Name.ToUpper()) && ! Configuration.INCLUDEMYDRIVE)
                 {
                     driveToBeIncluded = false;
                     reason = "this the drive i'm running from";
                 }
-
+                // skip cdrom
+                if (d.DriveType == DriveType.CDRom)
+                {
+                    driveToBeIncluded = false;
+                    reason = "this is a CD/DVDrom drive";
+                }
                 // include this drive
                 if (driveToBeIncluded)
                 {
