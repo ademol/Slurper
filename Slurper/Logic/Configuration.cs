@@ -24,34 +24,50 @@ namespace Slurper
         public static bool TRACE { get; set; } = false;                                         // VERBOSE + show also unmatched files 
         public static String cfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
         public static string ripDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
+        public static string defaultDriveRegexPattern { get; set; } = @".*\.jpg";         
+        public static string ManualDriveRegexPattern { get; set; }
 
-        public static string DefaultFallbackRegexPattern { get; set; } = @"(?i).*\.jpg";
 
         public static List<string> drivesToSearch { get; } = new List<string>();                // actual drives to search (always excludes the drive that the program is run from..)
         public static Dictionary<string, List<string>> driveFilePatternsTolookfor { get; } = new Dictionary<string, List<string>>();   // hash of drive keys with their pattern values 
 
         public static void Configure()
         {
-            Configuration.LoadConfigFile();
+            if (ManualDriveRegexPattern != null)
+            {
+                LoadSingleConfiguration(ManualDriveRegexPattern);
+            }
+            else
+            {
+                if (!File.Exists(Configuration.cfgFileName))
+                {
+                    LoadSingleConfiguration(defaultDriveRegexPattern);
+                    return;
+                }
+            }
             ShowPatternsUsedByDrive();
 
         }
 
-        private static void LoadDefaultConfiguration()
+        private static void LoadSingleConfiguration(string regexPattern)
         {
-            logger.Log($"Configure:  using default pattern [{Configuration.DefaultFallbackRegexPattern}]", LogLevel.WARN);
+            logger.Log($"Configure:  using pattern [{regexPattern}]", LogLevel.WARN);
 
-            string driverIdentifier = ".:";
+            string defaultDriverIdentifier = ".:";
+            string driverIdentifier;
 
-            Regex MatchDrive = new Regex(@"(^[^:]+)([A-Z]:)(.*)", RegexOptions.IgnoreCase);
-            Match match = MatchDrive.Match(Configuration.DefaultFallbackRegexPattern);
-            if ( match.Success )
+
+            Regex MatchDrive = new Regex(@"(^.:).*", RegexOptions.IgnoreCase);
+            Match driveMatch = MatchDrive.Match(regexPattern);
+            if (driveMatch.Success )
             {
-                driverIdentifier = match.Groups[2].Value.ToUpperInvariant();
-                DefaultFallbackRegexPattern = match.Groups[1].Value + match.Groups[3].Value;
+                driverIdentifier = driveMatch.Groups[1].Value.ToUpperInvariant();
+            } else
+            {
+                driverIdentifier = defaultDriverIdentifier;
             }
 
-            Configuration.driveFilePatternsTolookfor.Add(driverIdentifier, new List<string> { DefaultFallbackRegexPattern });
+            Configuration.driveFilePatternsTolookfor.Add(driverIdentifier, new List<string> { regexPattern });
         }
 
         public static void ShowPatternsUsedByDrive()
@@ -95,11 +111,7 @@ namespace Slurper
 
         public static void LoadConfigFile()
         {
-            if (!File.Exists(Configuration.cfgFileName))
-            {
-                LoadDefaultConfiguration();
-                return;
-            }
+
 
             try
             {
@@ -120,8 +132,8 @@ namespace Slurper
 
         private static void ParseConfigLines(string line)
         {
-            // pattern to match valid lines from config file   <driveLetter:><regex>
-            String ValidConfigLine = @"^([^#]:)(.*)";
+            // pattern to match valid lines from config file   <driveLetter:><remaining-regex>
+            String ValidConfigLine = @"^([^#]:)\s*(.*)";
 
 
             Regex PatternToMatchValidConfigLine = new Regex(ValidConfigLine);
@@ -217,7 +229,9 @@ namespace Slurper
                 }
             }
             if (patternKeywords.Count > 0)
-                DefaultFallbackRegexPattern = @"(?i).*" + patternKeywords.Aggregate((current, next) => current + @".*" + next) + @".*";
+            {
+                ManualDriveRegexPattern = patternKeywords.Aggregate((current, next) => current + @".*" + next) + @".*";
+            }
             ProcessArgumentFlags();
         }
     }

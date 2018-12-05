@@ -47,7 +47,7 @@ namespace Slurper.Providers
             foreach (DriveInfo d in allDrives)
             {
                 // D:\  -> D:
-                String driveID = d.Name.Substring(0, 2).ToUpper();
+                String driveIdentifier = d.Name.Substring(0, 2).ToUpper();
 
                 // check if drive will be included
                 Boolean driveToBeIncluded = false;
@@ -60,10 +60,10 @@ namespace Slurper.Providers
                     reason = "configuration for drive .:";
                 }
                 // check for specific drive
-                if (Configuration.driveFilePatternsTolookfor.ContainsKey(driveID))
+                if (Configuration.driveFilePatternsTolookfor.ContainsKey(driveIdentifier))
                 {
                     driveToBeIncluded = true;
-                    reason = "configuration for drive " + driveID;
+                    reason = "configuration for drive " + driveIdentifier;
                 }
                 // skip the drive i'm running from
                 if ((mydrive.ToUpper()).Equals(d.Name.ToUpper()))
@@ -77,7 +77,7 @@ namespace Slurper.Providers
                 {
                     Configuration.drivesToSearch.Add(d.Name);
                 }
-                logger.Log($"GetDriveInfo: found drive [{driveID}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", LogLevel.VERBOSE);
+                logger.Log($"GetDriveInfo: found drive [{driveIdentifier}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", LogLevel.VERBOSE);
             }
         }
     }

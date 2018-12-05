@@ -18,6 +18,13 @@ namespace Slurper.Logic
         static BlockingCollection<string> blockingCollection = new BlockingCollection<string>();
         static Stopwatch sw;
 
+        List<string> thisDrivePatternsToLookFor;
+
+        public FileSearcher()
+        {
+            thisDrivePatternsToLookFor = new List<string>();
+        }
+
         public static void SearchDrives()
         {
             sw = new Stopwatch();
@@ -32,7 +39,7 @@ namespace Slurper.Logic
 
             Parallel.ForEach(Configuration.drivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = maxParallel }), (currentDrive) =>
              {
-                 new FileSearcher().DirSearch(currentDrive);
+                 new FileSearcher().DriveSearch(currentDrive);
              });
             blockingCollection.CompleteAdding();
             logger.Log($"search done:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", LogLevel.VERBOSE);
@@ -51,22 +58,32 @@ namespace Slurper.Logic
             }
         }
 
-        public void DirSearch(string sDir)
-        {
-            List<string> thisDrivePatternsToLookFor = new List<string>();
-            String curDrive = sDir.Substring(0, 2);    // aka c:  
 
-            Configuration.driveFilePatternsTolookfor.TryGetValue(curDrive.ToUpper(), out List<string> patternsForSpecificDrive);
+        public void DriveSearch(string currentDrive)
+        {
+            SetFilePatternsForDrive(currentDrive);
+            DirSearch(currentDrive);
+        }
+
+        public void SetFilePatternsForDrive(string driveInfoName)
+        {
+            String driveIdentifier = driveInfoName.Substring(0, 2); 
+
+            Configuration.driveFilePatternsTolookfor.TryGetValue(driveIdentifier.ToUpper(), out List<string> patternsForSpecificDrive);
             if (patternsForSpecificDrive != null) { thisDrivePatternsToLookFor.AddRange(patternsForSpecificDrive); }
 
             // add patterns for all (.:) drives
             Configuration.driveFilePatternsTolookfor.TryGetValue(".:", out List<string> patternsForAllDrives);
             if (patternsForAllDrives != null) { thisDrivePatternsToLookFor.AddRange(patternsForAllDrives); }
+        }
 
+
+        public void DirSearch(string sDir)
+        {
             // long live the 'null-coalescing' operator ?? to handle cases of 'null'  :)
-            foreach (string d in GetDirs(sDir) ?? new String[0])
+            foreach (string directoryName in GetDirs(sDir) ?? new String[0])
             {
-                foreach (string f in GetFiles(d) ?? new String[0])
+                foreach (string fileName in GetFiles(directoryName) ?? new String[0])
                 {
                     Spinner.SearchSpin();
                     countFiles++;
@@ -74,21 +91,21 @@ namespace Slurper.Logic
                     if ((countMatches + 1) % 100 == 0)
                         logger.Log($"search busy:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", LogLevel.VERBOSE);
 
-                    logger.Log($"[{f}]", LogLevel.TRACE);
+                    logger.Log($"[{fileName}]", LogLevel.TRACE);
 
                     // check if file is wanted by any of the specified patterns
-                    foreach (String p in thisDrivePatternsToLookFor)
+                    foreach (String pattern in thisDrivePatternsToLookFor)
                     {
-                        if ((new Regex(p).Match(Path.GetFullPath(f))).Success) { blockingCollection.Add(f); countMatches++; break; }
+                        if ((new Regex(pattern, RegexOptions.IgnoreCase).Match(Path.GetFullPath(fileName))).Success) { blockingCollection.Add(fileName); countMatches++; break; }
                     }
                 }
                 try
                 {
-                    DirSearch(d);
+                    DirSearch(directoryName);
                 }
                 catch (Exception e)
                 {
-                    logger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", LogLevel.ERROR);
+                    logger.Log($"DirSearch: Could not read dir [{directoryName}][{e.Message}]", LogLevel.ERROR);
                 }
             }
         }
