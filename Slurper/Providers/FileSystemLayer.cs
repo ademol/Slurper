@@ -55,13 +55,13 @@ namespace Slurper.Providers
                 String reason = "configuration";
 
                 // check for wildcard
-                if (Configuration.driveFilePatternsTolookfor.ContainsKey(".:"))
+                if (Configuration.driveFileSearchPatterns.ContainsKey(".:"))
                 {
                     driveToBeIncluded = true;
                     reason = "configuration for drive .:";
                 }
                 // check for specific drive
-                if (Configuration.driveFilePatternsTolookfor.ContainsKey(driveIdentifier))
+                if (Configuration.driveFileSearchPatterns.ContainsKey(driveIdentifier))
                 {
                     driveToBeIncluded = true;
                     reason = "configuration for drive " + driveIdentifier;

@@ -14,18 +14,18 @@ namespace Slurper.Logic
     {
         static readonly ILogger logger = LogProvider.Logger;
         static double countFiles = 0;
-        static double countMatches = 0;
+        static double countAddedFileNames = 0;
         static BlockingCollection<string> blockingCollection = new BlockingCollection<string>();
         static Stopwatch sw;
 
-        List<string> thisDrivePatternsToLookFor;
+        List<string> currentDriveSearchPatterns;
 
         public FileSearcher()
         {
-            thisDrivePatternsToLookFor = new List<string>();
+            currentDriveSearchPatterns = new List<string>();
         }
 
-        public static void SearchDrives()
+        public static void DispatchDriveSearchers()
         {
             sw = new Stopwatch();
             sw.Start();
@@ -42,40 +42,40 @@ namespace Slurper.Logic
                  new FileSearcher().DriveSearch(currentDrive);
              });
             blockingCollection.CompleteAdding();
-            logger.Log($"search done:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", LogLevel.VERBOSE);
+            logger.Log($"searching done:checked {countFiles} with {countAddedFileNames} matches in {sw.Elapsed}", LogLevel.VERBOSE);
+
             while (!blockingCollection.IsCompleted)
             { }
             sw.Stop();
-            logger.Log($"copy done:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", LogLevel.VERBOSE);
+            logger.Log($"copying done:checked {countFiles} with {countAddedFileNames} matches in {sw.Elapsed}", LogLevel.VERBOSE);
 
         }
 
         public static void BlockingCollectionFileRipper()
         {
-            foreach (var item in blockingCollection.GetConsumingEnumerable())
+            foreach (var fileName in blockingCollection.GetConsumingEnumerable())
             {
-                new Fileripper().RipFile(item);
+                new Fileripper().RipFile(fileName);
             }
         }
 
         public void DriveSearch(string currentDrive)
         {
-            SetFilePatternsForDrive(currentDrive);
+            SetSearchPatternsForDrive(currentDrive);
             DirSearch(currentDrive);
         }
 
-        public void SetFilePatternsForDrive(string driveInfoName)
+        public void SetSearchPatternsForDrive(string driveInfoName)
         {
-            String driveIdentifier = driveInfoName.Substring(0, 2); 
+            String currentDriveIdentifier = driveInfoName.Substring(0, 2); 
 
-            Configuration.driveFilePatternsTolookfor.TryGetValue(driveIdentifier.ToUpper(), out List<string> patternsForSpecificDrive);
-            if (patternsForSpecificDrive != null) { thisDrivePatternsToLookFor.AddRange(patternsForSpecificDrive); }
+            Configuration.driveFileSearchPatterns.TryGetValue(currentDriveIdentifier.ToUpper(), out List<string> patternsForSpecificDrive);
+            if (patternsForSpecificDrive?.Count > 0) { currentDriveSearchPatterns.AddRange(patternsForSpecificDrive); }
 
-            // add patterns for all (.:) drives
-            Configuration.driveFilePatternsTolookfor.TryGetValue(".:", out List<string> patternsForAllDrives);
-            if (patternsForAllDrives != null) { thisDrivePatternsToLookFor.AddRange(patternsForAllDrives); }
+            // include patterns for "all" drives
+            Configuration.driveFileSearchPatterns.TryGetValue(".:", out List<string> patternsForAllDrives);
+            if (patternsForAllDrives?.Count > 0) { currentDriveSearchPatterns.AddRange(patternsForAllDrives); }
         }
-
 
         public void DirSearch(string sDir)
         {
@@ -87,15 +87,20 @@ namespace Slurper.Logic
                     Spinner.SearchSpin();
                     countFiles++;
 
-                    if ((countMatches + 1) % 100 == 0)
-                        logger.Log($"search busy:checked {countFiles} with {countMatches} matches in {sw.Elapsed}", LogLevel.VERBOSE);
+                    if ((countAddedFileNames + 1) % 100 == 0)
+                        logger.Log($"search busy:checked {countFiles} with {countAddedFileNames} matches in {sw.Elapsed}", LogLevel.VERBOSE);
 
                     logger.Log($"[{fileName}]", LogLevel.TRACE);
 
-                    // check if file is wanted by any of the specified patterns
-                    foreach (String pattern in thisDrivePatternsToLookFor)
+                    if ( MatchFileAgainstSearchPatterns(fileName) )
                     {
-                        if ((new Regex(pattern, RegexOptions.IgnoreCase).Match(Path.GetFullPath(fileName))).Success) { blockingCollection.Add(fileName); countMatches++; break; }
+                        blockingCollection.Add(fileName);
+                        countAddedFileNames++;
+                    }
+
+                    foreach (String pattern in currentDriveSearchPatterns)
+                    {
+                        if ((new Regex(pattern, RegexOptions.IgnoreCase).Match(Path.GetFullPath(fileName))).Success) { blockingCollection.Add(fileName); countAddedFileNames++; break; }
                     }
                 }
                 try
@@ -109,7 +114,17 @@ namespace Slurper.Logic
             }
         }
 
-        static String[] GetFiles(string dir)
+        public bool MatchFileAgainstSearchPatterns(string fileName)
+        {
+            // check if file is wanted by any of the specified patterns
+            foreach (String pattern in currentDriveSearchPatterns)
+            {
+                if ((new Regex(pattern, RegexOptions.IgnoreCase).Match(Path.GetFullPath(fileName))).Success) { return true; }
+            }
+            return false;
+        }
+
+        public String[] GetFiles(string dir)
         {
             try
             {
@@ -126,7 +141,7 @@ namespace Slurper.Logic
             return null;
         }
 
-        static String[] GetDirs(string sDir)
+        public String[] GetDirs(string sDir)
         {
             try
             {

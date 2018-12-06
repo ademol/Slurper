@@ -38,7 +38,7 @@ namespace Slurper
             FileSystemLayer.GetDriveInfo();
 
             // find files matching pattern(s) from all applicable drives, and copy them to the targetLocation
-            FileSearcher.SearchDrives();
+            FileSearcher.DispatchDriveSearchers();
         }
     }
 }

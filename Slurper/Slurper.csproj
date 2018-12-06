@@ -139,7 +139,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icons\Ahmadhania-Spherical-File-download.ico" />
-    <EmbeddedResource Include="slurper.cfg.txt" />
+    <EmbeddedResource Include="slurper.cfg.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">

@@ -25,57 +25,60 @@ namespace Slurper
         public static bool TRACE { get; set; } = false;                                         // VERBOSE + show also unmatched files 
         public static String cfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
         public static string ripDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
-        public static string defaultDriveRegexPattern { get; set; } = @".*\.jpg";         
+        public static string defaultDriveRegexPattern { get; set; } = @".*\.jpg";
         public static string ManualDriveRegexPattern { get; set; }
 
 
         public static List<string> drivesToSearch { get; } = new List<string>();                // actual drives to search (always excludes the drive that the program is run from..)
-        public static Dictionary<string, List<string>> driveFilePatternsTolookfor { get; } = new Dictionary<string, List<string>>();   // hash of drive keys with their pattern values 
+        public static Dictionary<string, List<string>> driveFileSearchPatterns { get; } = new Dictionary<string, List<string>>();   // hash of drive keys with their pattern values 
 
         public static void Configure()
         {
+
             if (ManualDriveRegexPattern != null)
             {
-                LoadSingleConfiguration(ManualDriveRegexPattern);
+                LoadSingleRegexConfiguration(ManualDriveRegexPattern);
+                return;
+            }
+
+            if (!File.Exists(Configuration.cfgFileName))
+            {
+                LoadSingleRegexConfiguration(defaultDriveRegexPattern);
+                return;
+            }
+
+            LoadConfigFile();
+        }
+
+
+        private static void LoadSingleRegexConfiguration(string regexPattern)
+        {
+            string driveIdentifier = ParseDriveIdentifierFromRegexPatternPattern(regexPattern);
+
+            logger.Log($"Configure: using pattern [{regexPattern}] for drive [{driveIdentifier}]", LogLevel.WARN);
+            Configuration.driveFileSearchPatterns.Add(driveIdentifier, new List<string> { regexPattern });
+        }
+
+        private static string ParseDriveIdentifierFromRegexPatternPattern(string regexPattern)
+        {
+            string fallbackDriveIdentifier = ".:";
+            Regex MatchDrive = new Regex(@"(^.:).*", RegexOptions.IgnoreCase);
+            Match driveMatch = MatchDrive.Match(regexPattern);
+            if (driveMatch.Success)
+            {
+                return driveMatch.Groups[1].Value.ToUpperInvariant();
             }
             else
             {
-                if (!File.Exists(Configuration.cfgFileName))
-                {
-                    LoadSingleConfiguration(defaultDriveRegexPattern);
-                    return;
-                }
+               return fallbackDriveIdentifier;
             }
-            ShowPatternsUsedByDrive();
-
-        }
-
-        private static void LoadSingleConfiguration(string regexPattern)
-        {
-            logger.Log($"Configure:  using pattern [{regexPattern}]", LogLevel.WARN);
-
-            string defaultDriverIdentifier = ".:";
-            string driverIdentifier;
-
-
-            Regex MatchDrive = new Regex(@"(^.:).*", RegexOptions.IgnoreCase);
-            Match driveMatch = MatchDrive.Match(regexPattern);
-            if (driveMatch.Success )
-            {
-                driverIdentifier = driveMatch.Groups[1].Value.ToUpperInvariant();
-            } else
-            {
-                driverIdentifier = defaultDriverIdentifier;
-            }
-
-            Configuration.driveFilePatternsTolookfor.Add(driverIdentifier, new List<string> { regexPattern });
         }
 
         public static void ShowPatternsUsedByDrive()
         {
-            foreach (String drive in Configuration.driveFilePatternsTolookfor.Keys)
+            foreach (String drive in Configuration.driveFileSearchPatterns.Keys)
             {
-                Configuration.driveFilePatternsTolookfor.TryGetValue(drive, out List<string> patterns);
+                Configuration.driveFileSearchPatterns.TryGetValue(drive, out List<string> patterns);
                 foreach (String pattern in patterns)
                 {
                     logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ", LogLevel.VERBOSE);
@@ -112,8 +115,6 @@ namespace Slurper
 
         public static void LoadConfigFile()
         {
-
-
             try
             {
                 using (StreamReader streamReader = new StreamReader(Configuration.cfgFileName))
@@ -136,7 +137,6 @@ namespace Slurper
             // pattern to match valid lines from config file   <driveLetter:><remaining-regex>
             String ValidConfigLine = @"^([^#]:)\s*(.*)";
 
-
             Regex PatternToMatchValidConfigLine = new Regex(ValidConfigLine);
             Match matchedConfigurationLine = PatternToMatchValidConfigLine.Match(line);
 
@@ -157,11 +157,11 @@ namespace Slurper
         private static void StoreRegexToSearchByDrive(string drive, string regex)
         {
             List<string> driveFilePatterns = new List<string>();
-            if (driveFilePatternsTolookfor.ContainsKey(drive))
-                driveFilePatternsTolookfor.TryGetValue(drive, out driveFilePatterns);
+            if (driveFileSearchPatterns.ContainsKey(drive))
+                driveFileSearchPatterns.TryGetValue(drive, out driveFilePatterns);
 
             driveFilePatterns.Add(regex);
-            driveFilePatternsTolookfor[drive] = driveFilePatterns;
+            driveFileSearchPatterns[drive] = driveFilePatterns;
         }
 
         public static void ExtractArgumentFlags(string argument)
