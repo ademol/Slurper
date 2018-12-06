@@ -5,55 +5,50 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-
 using Slurper.Providers;
 
 namespace Slurper
 {
     public static class Configuration
     {
-
         static readonly ILogger logger = LogProvider.Logger;
-
         public static List<char> ArgumentFlags { get; set; }
         public static string SampleConfig { get; set; }
         public static bool SILENT { get; set; } = false;
-
         public static bool INCLUDEMYDRIVE { get; set; } = false;
         public static bool VERBOSE { get; set; } = false;
         public static bool DRYRUN { get; set; } = false;                                        // (only) show what will be done (has implicit VERBOSE)
         public static bool TRACE { get; set; } = false;                                         // VERBOSE + show also unmatched files 
-        public static String CfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
+        public static String CfgFileName { get; set; } = "slurper.cfg";                        
         public static string RipDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
         public static string DefaultDriveRegexPattern { get; set; } = @".*\.jpg";
-
         public static string ManualDriveRegexPattern { get; set; }
-
-        public static List<string> DrivesToSearch { get; } = new List<string>();                // actual drives to search (always excludes the drive that the program is run from..)
+        public static List<string> DrivesToSearch { get; } = new List<string>();                // actual drives to search (excludes the drive that the program is run from..)
         public static Dictionary<string, List<string>> DriveFileSearchPatterns { get; } = new Dictionary<string, List<string>>();   // hash of drive keys with their pattern values 
 
         public static void Configure()
         {
-
             if (ManualDriveRegexPattern != null)
             {
                 LoadSingleRegexConfiguration(ManualDriveRegexPattern);
                 return;
             }
 
-            if (!File.Exists(Configuration.CfgFileName))
+            if (File.Exists(Configuration.CfgFileName))
+            {
+                LoadConfigFile();
+                return;
+            }
+            else
             {
                 LoadSingleRegexConfiguration(DefaultDriveRegexPattern);
                 return;
             }
-
-            LoadConfigFile();
         }
 
         private static void LoadSingleRegexConfiguration(string regexPattern)
         {
             string driveIdentifier = ParseDriveIdentifierFromRegexPatternPattern(regexPattern);
-
             logger.Log($"Configure: using pattern [{regexPattern}] for drive [{driveIdentifier}]", LogLevel.WARN);
             Configuration.DriveFileSearchPatterns.Add(driveIdentifier, new List<string> { regexPattern });
         }
@@ -98,7 +93,7 @@ namespace Slurper
             }
         }
 
-        private static void generateSampleConfigFile()
+        private static void GenerateSampleConfigFile()
         {
             Console.WriteLine("generating sample config file [{0}]", CfgFileName);
             try
@@ -198,7 +193,7 @@ namespace Slurper
                     case '-':
                         break;
                     case 'g':
-                        generateSampleConfigFile();
+                        GenerateSampleConfigFile();
                         Environment.Exit(0);
                         break;
                     default:

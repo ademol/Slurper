@@ -39,13 +39,16 @@ namespace Slurper.Logic
                  new FileSearcher().DriveSearch(currentDrive);
              });
             blockingCollection.CompleteAdding();
-            logger.Log($"searching done:checked {countFiles} with {countAddedFileNames} matches in {sw.Elapsed}", LogLevel.VERBOSE);
+
+            var searchingDoneTime = sw.Elapsed;
+            logger.Log($"searching done:checked {countFiles} with {countAddedFileNames} matches in {searchingDoneTime}", LogLevel.VERBOSE);
 
             while (!blockingCollection.IsCompleted)
             { }
             sw.Stop();
-            logger.Log($"copying done:checked {countFiles} with {countAddedFileNames} matches in {sw.Elapsed}", LogLevel.VERBOSE);
-
+            var CopyDoneTime = sw.Elapsed;
+            logger.Log($"done:checked {countFiles} with {countAddedFileNames} matches.  " +
+                $"SearchingTime [{searchingDoneTime}]   Searching+CopyTime [{CopyDoneTime}]", LogLevel.VERBOSE);
         }
 
         public static void BlockingCollectionFileRipper()
@@ -148,6 +151,5 @@ namespace Slurper.Logic
             }
             return filesystemEntries;
         }
-
     }
 }

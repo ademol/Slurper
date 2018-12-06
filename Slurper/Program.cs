@@ -28,14 +28,14 @@ namespace Slurper
             Configuration.ProcessArguments(args);
 
             // determine & create target directory
-            FileSystemLayer.CreateTargetLocation();
+            SystemLayer.CreateTargetLocation();
             
             // configuration 
             Configuration.Configure();
             Configuration.ShowPatternsUsedByDrive();
 
             // get drives to search
-            FileSystemLayer.GetDriveInfo();
+            SystemLayer.GetDriveInfo();
 
             // find files matching pattern(s) from all applicable drives, and copy them to the targetLocation
             FileSearcher.DispatchDriveSearchers();

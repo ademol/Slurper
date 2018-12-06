@@ -34,7 +34,7 @@ namespace Slurper.Logic
         {
             String targetRelativePath = Path.GetDirectoryName(filename);
             targetRelativePath = SanitizePath(targetRelativePath);
-            return FileSystemLayer.TargetDirBasePath + FileSystemLayer.PathSep + targetRelativePath + FileSystemLayer.PathSep;
+            return SystemLayer.TargetDirBasePath + SystemLayer.PathSep + targetRelativePath + SystemLayer.PathSep;
         }
 
         private string SanitizePath(string path)

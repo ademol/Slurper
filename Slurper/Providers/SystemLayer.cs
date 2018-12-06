@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Slurper.Providers
 {
-    public static class FileSystemLayer
+    public static class SystemLayer
     {
         static readonly ILogger logger = LogProvider.Logger;
 
