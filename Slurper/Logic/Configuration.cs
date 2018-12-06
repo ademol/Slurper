@@ -20,7 +20,6 @@ namespace Slurper
 
         public static bool INCLUDEMYDRIVE { get; set; } = false;
         public static bool VERBOSE { get; set; } = false;
-        public static bool PARALLEL { get; set; } = false;
         public static bool DRYRUN { get; set; } = false;                                        // (only) show what will be done (has implicit VERBOSE)
         public static bool TRACE { get; set; } = false;                                         // VERBOSE + show also unmatched files 
         public static String cfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
@@ -195,9 +194,6 @@ namespace Slurper
                         TRACE = true;
                         VERBOSE = true;
                         break;
-                    case 'p':
-                        PARALLEL = true;
-                        break;
                     case '/':
                         break;
                     case '-':
@@ -213,7 +209,7 @@ namespace Slurper
                         break;
                 }
             }
-            logger.Log($"Arguments: VERBOSE[{VERBOSE}] DRYRUN[{DRYRUN}] TRACE[{TRACE}] PARALLEL[{PARALLEL}]", LogLevel.VERBOSE);
+            logger.Log($"Arguments: VERBOSE[{VERBOSE}] DRYRUN[{DRYRUN}] TRACE[{TRACE}]", LogLevel.VERBOSE);
         }
 
         public static void ProcessArguments(string[] args)

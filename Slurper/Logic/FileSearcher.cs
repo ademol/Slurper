@@ -34,10 +34,7 @@ namespace Slurper.Logic
             new System.Threading.ThreadStart(BlockingCollectionFileRipper));
             myThread.Start();
 
-            int maxParallel = Configuration.PARALLEL ? -1 : 1;
-            logger.Log($"maxParallel = [{maxParallel}]", LogLevel.VERBOSE);
-
-            Parallel.ForEach(Configuration.drivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = maxParallel }), (currentDrive) =>
+            Parallel.ForEach(Configuration.drivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = -1 }), (currentDrive) =>
              {
                  new FileSearcher().DriveSearch(currentDrive);
              });
