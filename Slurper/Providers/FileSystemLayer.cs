@@ -33,7 +33,7 @@ namespace Slurper.Providers
             String hostname = (System.Environment.MachineName).ToLower();
             String dateTime = String.Format("{0:yyyyMMdd_HH-mm-ss}", DateTime.Now);
 
-            return string.Concat(curDir, PathSep, Configuration.ripDir, PathSep, hostname, "_", dateTime);
+            return string.Concat(curDir, PathSep, Configuration.RipDir, PathSep, hostname, "_", dateTime);
         }
 
         public static void GetDriveInfo()
@@ -55,13 +55,13 @@ namespace Slurper.Providers
                 String reason = "configuration";
 
                 // check for wildcard
-                if (Configuration.driveFileSearchPatterns.ContainsKey(".:"))
+                if (Configuration.DriveFileSearchPatterns.ContainsKey(".:"))
                 {
                     driveToBeIncluded = true;
                     reason = "configuration for drive .:";
                 }
                 // check for specific drive
-                if (Configuration.driveFileSearchPatterns.ContainsKey(driveIdentifier))
+                if (Configuration.DriveFileSearchPatterns.ContainsKey(driveIdentifier))
                 {
                     driveToBeIncluded = true;
                     reason = "configuration for drive " + driveIdentifier;
@@ -81,7 +81,7 @@ namespace Slurper.Providers
                 // include this drive
                 if (driveToBeIncluded)
                 {
-                    Configuration.drivesToSearch.Add(d.Name);
+                    Configuration.DrivesToSearch.Add(d.Name);
                 }
                 logger.Log($"GetDriveInfo: found drive [{driveIdentifier}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", LogLevel.VERBOSE);
             }

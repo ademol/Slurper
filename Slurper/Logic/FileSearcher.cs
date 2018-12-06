@@ -34,7 +34,7 @@ namespace Slurper.Logic
             new System.Threading.ThreadStart(BlockingCollectionFileRipper));
             myThread.Start();
 
-            Parallel.ForEach(Configuration.drivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = -1 }), (currentDrive) =>
+            Parallel.ForEach(Configuration.DrivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = -1 }), (currentDrive) =>
              {
                  new FileSearcher().DriveSearch(currentDrive);
              });
@@ -66,48 +66,36 @@ namespace Slurper.Logic
         {
             String currentDriveIdentifier = driveInfoName.Substring(0, 2); 
 
-            Configuration.driveFileSearchPatterns.TryGetValue(currentDriveIdentifier.ToUpper(), out List<string> patternsForSpecificDrive);
+            Configuration.DriveFileSearchPatterns.TryGetValue(currentDriveIdentifier.ToUpper(), out List<string> patternsForSpecificDrive);
             if (patternsForSpecificDrive?.Count > 0) { currentDriveSearchPatterns.AddRange(patternsForSpecificDrive); }
 
             // include patterns for "all" drives
-            Configuration.driveFileSearchPatterns.TryGetValue(".:", out List<string> patternsForAllDrives);
+            Configuration.DriveFileSearchPatterns.TryGetValue(".:", out List<string> patternsForAllDrives);
             if (patternsForAllDrives?.Count > 0) { currentDriveSearchPatterns.AddRange(patternsForAllDrives); }
         }
 
         public void DirSearch(string sDir)
         {
             // long live the 'null-coalescing' operator ?? to handle cases of 'null'  :)
-            foreach (string directoryName in GetDirs(sDir) ?? new String[0])
+            foreach (string fileName in GetFiles(sDir) ?? new String[0])
             {
-                foreach (string fileName in GetFiles(directoryName) ?? new String[0])
+                Spinner.SearchSpin();
+                countFiles++;
+
+                if ((countAddedFileNames + 1) % 100 == 0)
+                    logger.Log($"search busy:checked {countFiles} with {countAddedFileNames} matches in {sw.Elapsed}", LogLevel.VERBOSE);
+
+                logger.Log($"[{fileName}]", LogLevel.TRACE);
+
+                if (MatchFileAgainstSearchPatterns(fileName))
                 {
-                    Spinner.SearchSpin();
-                    countFiles++;
-
-                    if ((countAddedFileNames + 1) % 100 == 0)
-                        logger.Log($"search busy:checked {countFiles} with {countAddedFileNames} matches in {sw.Elapsed}", LogLevel.VERBOSE);
-
-                    logger.Log($"[{fileName}]", LogLevel.TRACE);
-
-                    if ( MatchFileAgainstSearchPatterns(fileName) )
-                    {
-                        blockingCollection.Add(fileName);
-                        countAddedFileNames++;
-                    }
-
-                    foreach (String pattern in currentDriveSearchPatterns)
-                    {
-                        if ((new Regex(pattern, RegexOptions.IgnoreCase).Match(Path.GetFullPath(fileName))).Success) { blockingCollection.Add(fileName); countAddedFileNames++; break; }
-                    }
+                    blockingCollection.Add(fileName);
+                    countAddedFileNames++;
                 }
-                try
-                {
-                    DirSearch(directoryName);
-                }
-                catch (Exception e)
-                {
-                    logger.Log($"DirSearch: Could not read dir [{directoryName}][{e.Message}]", LogLevel.ERROR);
-                }
+            }
+            foreach (string dirEntry in GetDirs(sDir) ?? new String[0])
+            {
+                DirSearch(dirEntry);
             }
         }
 
@@ -121,38 +109,45 @@ namespace Slurper.Logic
             return false;
         }
 
-        public String[] GetFiles(string dir)
+        public String[] GetFiles(string currentDirectory)
         {
+            string[] filesystemEntries;
             try
             {
-                return Directory.GetFiles(dir, "*.*"); 
+                filesystemEntries = Directory.GetFiles(currentDirectory);
             }
             catch (UnauthorizedAccessException e)
             {
-                logger.Log($"getFiles: Unauthorized to retrieve fileList from [{dir}][{e.Message}]", LogLevel.ERROR);
+                logger.Log($"getFiles: Unauthorized to retrieve file entries from [{currentDirectory}][{e.Message}]", LogLevel.ERROR);
+                filesystemEntries = null;
             }
             catch (Exception e)
             {
-                logger.Log($"getFiles: Failed to retrieve fileList from [{dir}][{e.Message}]", LogLevel.ERROR);
+                logger.Log($"getFiles: Failed to retrieve file entries from [{currentDirectory}][{e.Message}]", LogLevel.ERROR);
+                filesystemEntries = null;
             }
-            return null;
+            return filesystemEntries;
         }
 
-        public String[] GetDirs(string sDir)
+        public String[] GetDirs(string currentDirectory)
         {
+            string[] filesystemEntries;
             try
             {
-                return Directory.GetDirectories(sDir);
+                filesystemEntries = Directory.GetDirectories(currentDirectory);
             }
             catch (UnauthorizedAccessException e)
             {
-                logger.Log($"getFiles: Unauthorized to retrieve dirList from [{sDir}][{e.Message}]", LogLevel.ERROR);
+                logger.Log($"getDirs: Unauthorized to retrieve (sub)directories from [{currentDirectory}][{e.Message}]", LogLevel.ERROR);
+                filesystemEntries = null;
             }
             catch (Exception e)
             {
-                logger.Log($"getDirs: Failed to retrieve dirList from [{sDir}][{e.Message}]", LogLevel.ERROR);
+                logger.Log($"getDirs: Failed to retrieve (sub)directories from [{currentDirectory}][{e.Message}]", LogLevel.ERROR);
+                filesystemEntries = null;
             }
-            return null;
+            return filesystemEntries;
         }
+
     }
 }

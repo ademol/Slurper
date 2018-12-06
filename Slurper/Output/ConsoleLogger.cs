@@ -30,7 +30,11 @@ namespace Slurper
 
         private void WriteToConsole(string callingMethod, LogLevel level, string logMessage)
         {
-            Console.WriteLine($"[{callingMethod}][{level.ToString()}][{logMessage}]");
+
+            lock (this)
+            {
+                Console.WriteLine($"[{callingMethod}][{level.ToString()}][{logMessage}]");
+            }
         }
 
         private string GetCallingMember()

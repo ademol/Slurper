@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
+
 using Slurper.Providers;
 
 namespace Slurper
@@ -14,22 +15,22 @@ namespace Slurper
 
         static readonly ILogger logger = LogProvider.Logger;
 
-        public static List<char> argumentFlags { get; set; }
-        public static string sampleConfig { get; set; }
+        public static List<char> ArgumentFlags { get; set; }
+        public static string SampleConfig { get; set; }
         public static bool SILENT { get; set; } = false;
 
         public static bool INCLUDEMYDRIVE { get; set; } = false;
         public static bool VERBOSE { get; set; } = false;
         public static bool DRYRUN { get; set; } = false;                                        // (only) show what will be done (has implicit VERBOSE)
         public static bool TRACE { get; set; } = false;                                         // VERBOSE + show also unmatched files 
-        public static String cfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
-        public static string ripDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
-        public static string defaultDriveRegexPattern { get; set; } = @".*\.jpg";
+        public static String CfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
+        public static string RipDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
+        public static string DefaultDriveRegexPattern { get; set; } = @".*\.jpg";
+
         public static string ManualDriveRegexPattern { get; set; }
 
-
-        public static List<string> drivesToSearch { get; } = new List<string>();                // actual drives to search (always excludes the drive that the program is run from..)
-        public static Dictionary<string, List<string>> driveFileSearchPatterns { get; } = new Dictionary<string, List<string>>();   // hash of drive keys with their pattern values 
+        public static List<string> DrivesToSearch { get; } = new List<string>();                // actual drives to search (always excludes the drive that the program is run from..)
+        public static Dictionary<string, List<string>> DriveFileSearchPatterns { get; } = new Dictionary<string, List<string>>();   // hash of drive keys with their pattern values 
 
         public static void Configure()
         {
@@ -40,22 +41,21 @@ namespace Slurper
                 return;
             }
 
-            if (!File.Exists(Configuration.cfgFileName))
+            if (!File.Exists(Configuration.CfgFileName))
             {
-                LoadSingleRegexConfiguration(defaultDriveRegexPattern);
+                LoadSingleRegexConfiguration(DefaultDriveRegexPattern);
                 return;
             }
 
             LoadConfigFile();
         }
 
-
         private static void LoadSingleRegexConfiguration(string regexPattern)
         {
             string driveIdentifier = ParseDriveIdentifierFromRegexPatternPattern(regexPattern);
 
             logger.Log($"Configure: using pattern [{regexPattern}] for drive [{driveIdentifier}]", LogLevel.WARN);
-            Configuration.driveFileSearchPatterns.Add(driveIdentifier, new List<string> { regexPattern });
+            Configuration.DriveFileSearchPatterns.Add(driveIdentifier, new List<string> { regexPattern });
         }
 
         private static string ParseDriveIdentifierFromRegexPatternPattern(string regexPattern)
@@ -75,9 +75,9 @@ namespace Slurper
 
         public static void ShowPatternsUsedByDrive()
         {
-            foreach (String drive in Configuration.driveFileSearchPatterns.Keys)
+            foreach (String drive in Configuration.DriveFileSearchPatterns.Keys)
             {
-                Configuration.driveFileSearchPatterns.TryGetValue(drive, out List<string> patterns);
+                Configuration.DriveFileSearchPatterns.TryGetValue(drive, out List<string> patterns);
                 foreach (String pattern in patterns)
                 {
                     logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ", LogLevel.VERBOSE);
@@ -94,29 +94,28 @@ namespace Slurper
             using (System.IO.Stream stream = assembly.GetManifestResourceStream(resourceName))
             {
                 System.IO.StreamReader reader = new System.IO.StreamReader(stream);
-                sampleConfig = reader.ReadToEnd();
+                SampleConfig = reader.ReadToEnd();
             }
         }
 
         private static void generateSampleConfigFile()
         {
-            Console.WriteLine("generating sample config file [{0}]", cfgFileName);
+            Console.WriteLine("generating sample config file [{0}]", CfgFileName);
             try
             {
-                System.IO.File.WriteAllText(cfgFileName, Configuration.sampleConfig);
+                System.IO.File.WriteAllText(CfgFileName, Configuration.SampleConfig);
             }
             catch (Exception e)
             {
-                logger.Log($"generateConfig: failed to generate [{cfgFileName}][{e.Message}]", LogLevel.ERROR);
+                logger.Log($"generateConfig: failed to generate [{CfgFileName}][{e.Message}]", LogLevel.ERROR);
             }
         }
-
 
         public static void LoadConfigFile()
         {
             try
             {
-                using (StreamReader streamReader = new StreamReader(Configuration.cfgFileName))
+                using (StreamReader streamReader = new StreamReader(Configuration.CfgFileName))
                 {
                     while (!streamReader.EndOfStream)
                     {
@@ -127,7 +126,7 @@ namespace Slurper
             }
             catch (Exception e)
             {
-                logger.Log($"LoadConfigFile: Could not read[{Configuration.cfgFileName}] [{e.Message}]", LogLevel.ERROR);
+                logger.Log($"LoadConfigFile: Could not read[{Configuration.CfgFileName}] [{e.Message}]", LogLevel.ERROR);
             }
         }
 
@@ -156,22 +155,22 @@ namespace Slurper
         private static void StoreRegexToSearchByDrive(string drive, string regex)
         {
             List<string> driveFilePatterns = new List<string>();
-            if (driveFileSearchPatterns.ContainsKey(drive))
-                driveFileSearchPatterns.TryGetValue(drive, out driveFilePatterns);
+            if (DriveFileSearchPatterns.ContainsKey(drive))
+                DriveFileSearchPatterns.TryGetValue(drive, out driveFilePatterns);
 
             driveFilePatterns.Add(regex);
-            driveFileSearchPatterns[drive] = driveFilePatterns;
+            DriveFileSearchPatterns[drive] = driveFilePatterns;
         }
 
         public static void ExtractArgumentFlags(string argument)
         {
             foreach (char c in argument)
-                argumentFlags.Add(c);
+                ArgumentFlags.Add(c);
         }
 
         public static void ProcessArgumentFlags()
         {
-            foreach (char c in argumentFlags)
+            foreach (char c in ArgumentFlags)
             {
                 switch (c)
                 {
@@ -212,11 +211,24 @@ namespace Slurper
             logger.Log($"Arguments: VERBOSE[{VERBOSE}] DRYRUN[{DRYRUN}] TRACE[{TRACE}]", LogLevel.VERBOSE);
         }
 
+        public static bool IsValidRegex(string pattern)
+        {
+            if (string.IsNullOrEmpty(pattern)) return false;
+            try
+            {
+                new Regex(pattern);
+            } catch (ArgumentException)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public static void ProcessArguments(string[] args)
         {
             List<string> patternKeywords = new List<string>();
 
-            argumentFlags = new List<char>();
+            ArgumentFlags = new List<char>();
             foreach (var argument in args)
             {
                 if (argument.StartsWith("/") || argument.StartsWith("-"))
@@ -230,7 +242,17 @@ namespace Slurper
             }
             if (patternKeywords.Count > 0)
             {
-                ManualDriveRegexPattern = patternKeywords.Aggregate((current, next) => current + @".*" + next) + @".*";
+                string buildRegex = patternKeywords.Aggregate((current, next) => current + @".*" + next) + @".*";
+                if ( IsValidRegex(buildRegex))
+                {
+                    ManualDriveRegexPattern = buildRegex;
+                } else
+                {
+                    string providedArguments = patternKeywords.Aggregate((current, next) => current + ", " + next);
+
+                    Console.WriteLine($"Provided argument(s) [{providedArguments}] does not result in valid regex [{buildRegex}].");
+                    Environment.Exit(1);
+                }
             }
             ProcessArgumentFlags();
         }

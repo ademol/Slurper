@@ -18,7 +18,7 @@ namespace Slurper
             txt += "\n";
             txt += "(optional) when a configfile exits (./slurper.cfg) it is used to specify custom regexes to match \n";
             txt += "\n";
-            txt += Configuration.sampleConfig;
+            txt += Configuration.SampleConfig;
             Console.WriteLine(txt);
         }
     }
