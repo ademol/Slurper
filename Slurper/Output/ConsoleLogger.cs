@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Slurper.Logic;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -19,9 +20,9 @@ namespace Slurper
 
         public void Log(string Message, LogLevel messageLogLevel)
         {
-            if (Configuration.SILENT) return;
-            if (messageLogLevel == LogLevel.TRACE && !Configuration.TRACE) return;
-            if (messageLogLevel == LogLevel.VERBOSE && !Configuration.VERBOSE) return;
+            if (Configuration.cmdLineFlagSet.Contains(CmdLineFlag.SILENT)) return;
+            if (messageLogLevel == LogLevel.TRACE && !Configuration.cmdLineFlagSet.Contains(CmdLineFlag.TRACE)) return;
+            if (messageLogLevel == LogLevel.VERBOSE && !Configuration.cmdLineFlagSet.Contains(CmdLineFlag.VERBOSE)) return;
 
             SetForeGroundColorForLogLevel(messageLogLevel);
             WriteToConsole(GetCallingMember(), messageLogLevel, Message);

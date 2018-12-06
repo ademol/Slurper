@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 using Slurper.Providers;
 
@@ -18,7 +19,7 @@ namespace Slurper.Logic
             Spinner.RipSpin();
             logger.Log($"RipFile: ripping [{soureFilePath}] => [{targetFilePath}]", LogLevel.VERBOSE);
 
-            if (Configuration.DRYRUN) { return; }
+            if (Configuration.cmdLineFlagSet.Contains(CmdLineFlag.DRYRUN)) { return; }
             try
             {
                 Directory.CreateDirectory(longPathPrefix + targetPath);

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 
+using Slurper.Logic;
+
 namespace Slurper.Providers
 {
     public static class SystemLayer
@@ -16,7 +18,7 @@ namespace Slurper.Providers
             TargetDirBasePath = BuildTargetBasePath();
             logger.Log($"CreateTargetLocation: [{TargetDirBasePath}]", LogLevel.VERBOSE);
 
-            if (Configuration.DRYRUN) { return; }
+            if (Configuration.cmdLineFlagSet.Contains(CmdLineFlag.DRYRUN)) { return; }
             try
             {
                 Directory.CreateDirectory(TargetDirBasePath);
@@ -67,7 +69,7 @@ namespace Slurper.Providers
                     reason = "configuration for drive " + driveIdentifier;
                 }
                 // skip the drive i'm running from
-                if ((mydrive.ToUpper()).Equals(d.Name.ToUpper()) && ! Configuration.INCLUDEMYDRIVE)
+                if ((mydrive.ToUpper()).Equals(d.Name.ToUpper()) && ! Configuration.cmdLineFlagSet.Contains(CmdLineFlag.INCLUDEMYDRIVE))
                 {
                     driveToBeIncluded = false;
                     reason = "this the drive i'm running from";

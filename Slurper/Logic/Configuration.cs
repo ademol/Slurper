@@ -5,20 +5,19 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
+using Slurper.Logic;
 using Slurper.Providers;
+
 
 namespace Slurper
 {
     public static class Configuration
     {
         static readonly ILogger logger = LogProvider.Logger;
-        public static List<char> ArgumentFlags { get; set; }
+
+        public static List<CmdLineFlag> cmdLineFlagSet = new List<CmdLineFlag>();
+
         public static string SampleConfig { get; set; }
-        public static bool SILENT { get; set; } = false;
-        public static bool INCLUDEMYDRIVE { get; set; } = false;
-        public static bool VERBOSE { get; set; } = false;
-        public static bool DRYRUN { get; set; } = false;                                        // (only) show what will be done (has implicit VERBOSE)
-        public static bool TRACE { get; set; } = false;                                         // VERBOSE + show also unmatched files 
         public static String CfgFileName { get; set; } = "slurper.cfg";                        
         public static string RipDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
         public static string DefaultDriveRegexPattern { get; set; } = @".*\.jpg";
@@ -93,7 +92,7 @@ namespace Slurper
             }
         }
 
-        private static void GenerateSampleConfigFile()
+        public static void GenerateSampleConfigFile()
         {
             Console.WriteLine("generating sample config file [{0}]", CfgFileName);
             try
@@ -144,7 +143,6 @@ namespace Slurper
 
             StoreRegexToSearchByDrive(drive, regex);
             logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", LogLevel.VERBOSE);
-
         }
 
         private static void StoreRegexToSearchByDrive(string drive, string regex)
@@ -155,55 +153,6 @@ namespace Slurper
 
             driveFilePatterns.Add(regex);
             DriveFileSearchPatterns[drive] = driveFilePatterns;
-        }
-
-        public static void ExtractArgumentFlags(string argument)
-        {
-            foreach (char c in argument)
-                ArgumentFlags.Add(c);
-        }
-
-        public static void ProcessArgumentFlags()
-        {
-            foreach (char c in ArgumentFlags)
-            {
-                switch (c)
-                {
-                    case 'i':
-                        INCLUDEMYDRIVE = true;
-                        break;
-                    case 's':
-                        SILENT = true;
-                        break;
-                    case 'h':
-                        DisplayMessages.Help();
-                        break;
-                    case 'v':
-                        VERBOSE = true;
-                        break;
-                    case 'd':
-                        DRYRUN = true;
-                        break;
-                    case 't':
-                        TRACE = true;
-                        VERBOSE = true;
-                        break;
-                    case '/':
-                        break;
-                    case '-':
-                        break;
-                    case 'g':
-                        GenerateSampleConfigFile();
-                        Environment.Exit(0);
-                        break;
-                    default:
-                        Console.WriteLine("option [{0}] not supported", c);
-                        DisplayMessages.Help();
-                        Environment.Exit(0);
-                        break;
-                }
-            }
-            logger.Log($"Arguments: VERBOSE[{VERBOSE}] DRYRUN[{DRYRUN}] TRACE[{TRACE}]", LogLevel.VERBOSE);
         }
 
         public static bool IsValidRegex(string pattern)
@@ -223,12 +172,15 @@ namespace Slurper
         {
             List<string> patternKeywords = new List<string>();
 
-            ArgumentFlags = new List<char>();
             foreach (var argument in args)
             {
                 if (argument.StartsWith("/") || argument.StartsWith("-"))
                 {
-                    ExtractArgumentFlags(argument);
+                    CommandLineFlagProcessor.ProcessArgumentFlags(argument);
+                    if (cmdLineFlagSet.Contains(CmdLineFlag.GENERATE)) {
+                        GenerateSampleConfigFile();
+                        Environment.Exit(0);
+                    }
                 }
                 else
                 {
@@ -249,7 +201,6 @@ namespace Slurper
                     Environment.Exit(1);
                 }
             }
-            ProcessArgumentFlags();
         }
     }
 }

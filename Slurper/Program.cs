@@ -27,6 +27,11 @@ namespace Slurper
             // handle arguments
             Configuration.ProcessArguments(args);
 
+            if (Configuration.cmdLineFlagSet.Contains(CmdLineFlag.GENERATE)) {
+                Configuration.GenerateSampleConfigFile();
+                Environment.Exit(0);
+            }
+
             // determine & create target directory
             SystemLayer.CreateTargetLocation();
             
