@@ -5,14 +5,16 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
+using Slurper.Contracts;
 using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    public class FileSearcher
+    public class FileSearcher : IFileSearcher
     {
         static readonly ILogger logger = LogProvider.Logger;
+        static readonly IFileripper _fileripper = new fileripper();
+
         static double countFiles = 0;
         static double countAddedFileNames = 0;
         static BlockingCollection<string> blockingCollection = new BlockingCollection<string>();
@@ -25,7 +27,7 @@ namespace Slurper.Logic
             currentDriveSearchPatterns = new List<string>();
         }
 
-        public static void DispatchDriveSearchers()
+        public void DispatchDriveSearchers()
         {
             sw = new Stopwatch();
             sw.Start();
@@ -55,7 +57,7 @@ namespace Slurper.Logic
         {
             foreach (var fileName in blockingCollection.GetConsumingEnumerable())
             {
-                new Fileripper().RipFile(fileName);
+                _fileripper.RipFile(fileName);
             }
         }
 

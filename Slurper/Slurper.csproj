@@ -118,6 +118,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contracts\IFileripper.cs" />
+    <Compile Include="Contracts\IFileSearcher.cs" />
     <Compile Include="Logic\CommandLineFlagProcessor.cs" />
     <Compile Include="Output\DisplayMessages.cs" />
     <Compile Include="Logic\Fileripper.cs" />

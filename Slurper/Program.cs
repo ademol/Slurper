@@ -1,5 +1,5 @@
 ﻿using System;
-
+using Slurper.Contracts;
 using Slurper.Logic;
 using Slurper.Providers;
 
@@ -18,6 +18,7 @@ namespace Slurper
          *           => suggested use is to run this program from an portable location (USB/HD) 
          *           
          */
+        private static readonly IFileSearcher _fileSearcher = new FileSearcher();
 
         static void Main(string[] args)
         {
@@ -43,7 +44,7 @@ namespace Slurper
             SystemLayer.GetDriveInfo();
 
             // find files matching pattern(s) from all applicable drives, and copy them to the targetLocation
-            FileSearcher.DispatchDriveSearchers();
+            _fileSearcher.DispatchDriveSearchers();
         }
     }
 }

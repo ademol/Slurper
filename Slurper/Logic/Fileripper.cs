@@ -1,12 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-
+using Slurper.Contracts;
 using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    class Fileripper
+    class fileripper : IFileripper
     {
         static readonly ILogger logger = LogProvider.Logger;
         const string longPathPrefix = "\\\\?\\";
