@@ -1,12 +1,13 @@
 ﻿using System;
 using System.IO;
+using SlurperDotNetCore.Contracts;
 using SlurperDotNetCore.Providers;
 
 namespace SlurperDotNetCore.Logic
 {
     static class Fileripper
     {
-        static readonly ILogger logger = LogProvider.Logger;
+        static readonly ILogger Logger = LogProvider.Logger;
     
         public static void RipFile(String filename)
         {
@@ -14,18 +15,18 @@ namespace SlurperDotNetCore.Logic
             String targetRelativePath = Path.GetDirectoryName(filename);
 
             targetRelativePath = targetRelativePath.Replace(':', '_');
-            String targetPath = SlurperDotNetCore.Program.fileSystemLayer.targetDirBasePath 
-            + SlurperDotNetCore.Program.fileSystemLayer.pathSep 
-            + targetRelativePath + SlurperDotNetCore.Program.fileSystemLayer.pathSep;
+            String targetPath = Program.FileSystemLayer.TargetDirBasePath 
+            + Program.FileSystemLayer.PathSep 
+            + targetRelativePath + Program.FileSystemLayer.PathSep;
 
             String targetFileNameFullPath = targetPath + targetFileName;
 
-            logger.Log($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]", logLevel.VERBOSE);
+            Logger.Log($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]", LogLevel.Verbose);
 
             try
             {
                 // do the filecopy unless this is a dryrun
-                if (!Configuration.DRYRUN)
+                if (!Configuration.Dryrun)
                 {
                     Directory.CreateDirectory(targetPath);
                     File.Copy(filename, targetFileNameFullPath);
@@ -33,7 +34,7 @@ namespace SlurperDotNetCore.Logic
             }
             catch (Exception e)
             {
-                logger.Log($"RipFile: copy of [{filename}] failed with [{e.Message}]", logLevel.ERROR);
+                Logger.Log($"RipFile: copy of [{filename}] failed with [{e.Message}]", LogLevel.Error);
             }
         }
     }

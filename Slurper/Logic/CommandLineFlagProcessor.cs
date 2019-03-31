@@ -1,15 +1,16 @@
 ﻿
 using System;
-
+using Slurper.Contracts;
+using Slurper.Output;
 using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    public enum CmdLineFlag { SILENT, INCLUDEMYDRIVE, VERBOSE, DRYRUN, TRACE, GENERATE };
+    public enum CmdLineFlag { Silent, Includemydrive, Verbose, Dryrun, Trace, Generate }
 
     public class CommandLineFlagProcessor
     {
-        static readonly ILogger logger = LogProvider.Logger;
+        private static readonly ILogger Logger = LogProvider.Logger;
 
         public static void ProcessArgumentFlags(string argument)
         {
@@ -18,30 +19,30 @@ namespace Slurper.Logic
                 switch (c)
                 {
                     case 'i':
-                        Configuration.cmdLineFlagSet.Add(CmdLineFlag.INCLUDEMYDRIVE);
+                        Configuration.CmdLineFlagSet.Add(CmdLineFlag.Includemydrive);
                         break;
                     case 's':
-                        Configuration.cmdLineFlagSet.Add(CmdLineFlag.SILENT);
+                        Configuration.CmdLineFlagSet.Add(CmdLineFlag.Silent);
                         break;
                     case 'h':
                         DisplayMessages.Help();
                         break;
                     case 'v':
-                        Configuration.cmdLineFlagSet.Add(CmdLineFlag.VERBOSE);
+                        Configuration.CmdLineFlagSet.Add(CmdLineFlag.Verbose);
                         break;
                     case 'd':
-                        Configuration.cmdLineFlagSet.Add(CmdLineFlag.DRYRUN);
+                        Configuration.CmdLineFlagSet.Add(CmdLineFlag.Dryrun);
                         break;
                     case 't':
-                        Configuration.cmdLineFlagSet.Add(CmdLineFlag.TRACE);
-                        Configuration.cmdLineFlagSet.Add(CmdLineFlag.VERBOSE);
+                        Configuration.CmdLineFlagSet.Add(CmdLineFlag.Trace);
+                        Configuration.CmdLineFlagSet.Add(CmdLineFlag.Verbose);
                         break;
                     case '/':
                         break;
                     case '-':
                         break;
                     case 'g':
-                        Configuration.cmdLineFlagSet.Add(CmdLineFlag.GENERATE);
+                        Configuration.CmdLineFlagSet.Add(CmdLineFlag.Generate);
                         break;
                     default:
                         Console.WriteLine("option [{0}] not supported", c);
@@ -50,8 +51,8 @@ namespace Slurper.Logic
                         break;
                 }
             }
-            var displayCmdLineOptionsSet = String.Join(",", Configuration.cmdLineFlagSet.ToArray());
-            logger.Log($"Arguments: [{displayCmdLineOptionsSet}] ", LogLevel.VERBOSE);
+            var displayCmdLineOptionsSet = String.Join(",", Configuration.CmdLineFlagSet.ToArray());
+            Logger.Log($"Arguments: [{displayCmdLineOptionsSet}] ", LogLevel.Verbose);
         }       
     }
 }

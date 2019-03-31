@@ -1,31 +1,32 @@
-﻿using Slurper.Logic;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Slurper.Contracts;
+using Slurper.Logic;
 
-namespace Slurper
+namespace Slurper.Output
 {
    public class ConsoleLogger : ILogger
     {
-        private static readonly Dictionary<LogLevel, ConsoleColor> consoleLevelColor = new Dictionary<LogLevel, ConsoleColor>()
+        private static readonly Dictionary<LogLevel, ConsoleColor> ConsoleLevelColor = new Dictionary<LogLevel, ConsoleColor>
         {
-            { LogLevel.TRACE, ConsoleColor.DarkRed },
-            { LogLevel.LOG, ConsoleColor.White },
-            { LogLevel.VERBOSE, ConsoleColor.Yellow },
-            { LogLevel.ERROR, ConsoleColor.Red },
-            { LogLevel.WARN, ConsoleColor.DarkYellow }
+            { LogLevel.Trace, ConsoleColor.DarkRed },
+            { LogLevel.Log, ConsoleColor.White },
+            { LogLevel.Verbose, ConsoleColor.Yellow },
+            { LogLevel.Error, ConsoleColor.Red },
+            { LogLevel.Warn, ConsoleColor.DarkYellow }
         };
 
-        private static readonly ConsoleColor foreGroundColor = Console.ForegroundColor;
+        private static readonly ConsoleColor ForeGroundColor = Console.ForegroundColor;
 
-        public void Log(string Message, LogLevel messageLogLevel)
+        public void Log(string message, LogLevel messageLogLevel)
         {
-            if (Configuration.cmdLineFlagSet.Contains(CmdLineFlag.SILENT)) return;
-            if (messageLogLevel == LogLevel.TRACE && !Configuration.cmdLineFlagSet.Contains(CmdLineFlag.TRACE)) return;
-            if (messageLogLevel == LogLevel.VERBOSE && !Configuration.cmdLineFlagSet.Contains(CmdLineFlag.VERBOSE)) return;
+            if (Configuration.CmdLineFlagSet.Contains(CmdLineFlag.Silent)) return;
+            if (messageLogLevel == LogLevel.Trace && !Configuration.CmdLineFlagSet.Contains(CmdLineFlag.Trace)) return;
+            if (messageLogLevel == LogLevel.Verbose && !Configuration.CmdLineFlagSet.Contains(CmdLineFlag.Verbose)) return;
 
             SetForeGroundColorForLogLevel(messageLogLevel);
-            WriteToConsole(GetCallingMember(), messageLogLevel, Message);
+            WriteToConsole(GetCallingMember(), messageLogLevel, message);
             RestoreForeGroundcolor();
         }
 
@@ -46,20 +47,20 @@ namespace Slurper
 
         private void RestoreForeGroundcolor()
         {
-            Console.ForegroundColor = foreGroundColor;
+            Console.ForegroundColor = ForeGroundColor;
         }
 
-        private void SetForeGroundColorForLogLevel(LogLevel Level)
+        private void SetForeGroundColorForLogLevel(LogLevel level)
         {
-            if (consoleLevelColor.TryGetValue(Level, out ConsoleColor foregroundColor))
+            if (ConsoleLevelColor.TryGetValue(level, out ConsoleColor foregroundColor))
             {
                 Console.ForegroundColor = foregroundColor;
             }
         }
 
-        public void Log(string Message)
+        public void Log(string message)
         {
-            Log(Message, LogLevel.LOG);
+            Log(message, LogLevel.Log);
         }
     }
 }

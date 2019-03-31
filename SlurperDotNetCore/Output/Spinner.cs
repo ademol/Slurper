@@ -1,21 +1,21 @@
 ﻿using System;
 
-namespace SlurperDotNetCore
+namespace SlurperDotNetCore.Output
 {
     static class Spinner
     {
-        private static char[] spinChars = new char[] { '|', '/', '-', '\\' };
-        private static int spinCharIdx = 0;
+        private static readonly char[] SpinChars = { '|', '/', '-', '\\' };
+        private static int _spinCharIdx;
 
         public static void Spin()
         {
             // fold back to begin char when needed
-            if (spinCharIdx + 1 == spinChars.Length)
-            { spinCharIdx = 0; }
+            if (_spinCharIdx + 1 == SpinChars.Length)
+            { _spinCharIdx = 0; }
             else
-            { spinCharIdx++; }
+            { _spinCharIdx++; }
 
-            char spinChar = spinChars[spinCharIdx];
+            char spinChar = SpinChars[_spinCharIdx];
 
             //set the spinner position
             Console.CursorLeft = 0;

@@ -1,14 +1,15 @@
 ﻿using System;
 using System.IO;
 using Slurper.Contracts;
+using Slurper.Output;
 using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    class fileripper : IFileripper
+    class Fileripper : IFileripper
     {
-        static readonly ILogger logger = LogProvider.Logger;
-        const string longPathPrefix = "\\\\?\\";
+        static readonly ILogger Logger = LogProvider.Logger;
+        const string LongPathPrefix = "\\\\?\\";
 
         public void RipFile(String soureFilePath)
         {
@@ -16,17 +17,17 @@ namespace Slurper.Logic
             String targetFilePath = targetPath + Path.GetFileName(soureFilePath);
 
             Spinner.RipSpin();
-            logger.Log($"RipFile: ripping [{soureFilePath}] => [{targetFilePath}]", LogLevel.VERBOSE);
+            Logger.Log($"RipFile: ripping [{soureFilePath}] => [{targetFilePath}]", LogLevel.Verbose);
 
-            if (Configuration.cmdLineFlagSet.Contains(CmdLineFlag.DRYRUN)) { return; }
+            if (Configuration.CmdLineFlagSet.Contains(CmdLineFlag.Dryrun)) { return; }
             try
             {
-                Directory.CreateDirectory(longPathPrefix + targetPath);
-                File.Copy(longPathPrefix + soureFilePath, longPathPrefix + targetFilePath);
+                Directory.CreateDirectory(LongPathPrefix + targetPath);
+                File.Copy(LongPathPrefix + soureFilePath, LongPathPrefix + targetFilePath);
             }
             catch (Exception e)
             {
-                logger.Log($"RipFile: copy of [{soureFilePath}] failed with [{e.Message}]", LogLevel.ERROR);
+                Logger.Log($"RipFile: copy of [{soureFilePath}] failed with [{e.Message}]", LogLevel.Error);
             }
         }
 

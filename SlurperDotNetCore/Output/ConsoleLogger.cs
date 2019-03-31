@@ -1,38 +1,40 @@
 ﻿using System;
+using SlurperDotNetCore.Contracts;
+using SlurperDotNetCore.Logic;
 
-namespace SlurperDotNetCore
+namespace SlurperDotNetCore.Output
 {
    public class ConsoleLogger : ILogger
     {
 
-        public void Log(string Message, logLevel Level)
+        public void Log(string message, LogLevel level)
         {
             var previousColor = Console.ForegroundColor;
             ConsoleColor color = previousColor;
 
             bool displayLog = false;
-            switch (Level)
+            switch (level)
             {
-                case logLevel.TRACE:
-                    if ( Configuration.TRACE ) {
+                case LogLevel.Trace:
+                    if ( Configuration.Trace ) {
                         displayLog = true;
                         color = ConsoleColor.DarkRed;
                     } 
                     break;
-                case logLevel.LOG:
+                case LogLevel.Log:
                     displayLog = true;
                     break;
-                case logLevel.VERBOSE:
-                    if ( Configuration.VERBOSE ) {
+                case LogLevel.Verbose:
+                    if ( Configuration.Verbose ) {
                         displayLog = true;
                         color = ConsoleColor.DarkYellow;
                     }
                     break;
-                case logLevel.ERROR:
+                case LogLevel.Error:
                     displayLog = true;
                     color = ConsoleColor.Red;
                     break;
-                case logLevel.WARN:
+                case LogLevel.Warn:
                     displayLog = true;
                     color = ConsoleColor.Yellow;
                     break;
@@ -41,15 +43,15 @@ namespace SlurperDotNetCore
             if (displayLog)
             {
                 Console.ForegroundColor = color;
-                Console.WriteLine("[{0}][{1}]", Level, Message);
+                Console.WriteLine("[{0}][{1}]", level, message);
                 Console.ForegroundColor = previousColor;
             }
 
         }
 
-        public void Log(string Message)
+        public void Log(string message)
         {
-            Log(Message, logLevel.LOG);
+            Log(message, LogLevel.Log);
         }
     }
 }

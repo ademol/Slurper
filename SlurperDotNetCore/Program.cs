@@ -1,5 +1,4 @@
 ﻿using System;
-using SlurperDotNetCore;
 using SlurperDotNetCore.Contracts;
 using SlurperDotNetCore.Logic;
 using SlurperDotNetCore.Providers;
@@ -19,7 +18,7 @@ namespace SlurperDotNetCore
         */
 
 
-        public static  IFileSystemLayer fileSystemLayer { get; private set; }
+        public static  IFileSystemLayer FileSystemLayer { get; private set; }
 
         static void Main(string[] args)
         {
@@ -29,17 +28,17 @@ namespace SlurperDotNetCore
             // handle arguments
             Configuration.ProcessArguments(args);
 
-            fileSystemLayer = ChoseFileSystemLayer();
+            FileSystemLayer = ChoseFileSystemLayer();
 
 
             // determine & create target directory
-            fileSystemLayer.CreateTargetLocation();
+            FileSystemLayer.CreateTargetLocation();
 
             // configuration 
             Configuration.Configure();
 
             // get drives to search
-            fileSystemLayer.GetMountedPartitionInfo();
+            FileSystemLayer.GetMountedPartitionInfo();
 
             // find files matching pattern(s) from all applicable drives, and copy them to the targetLocation
             Searcher.SearchAndCopyFiles();
@@ -48,7 +47,7 @@ namespace SlurperDotNetCore
         static IFileSystemLayer ChoseFileSystemLayer()
         {
             IFileSystemLayer fileSystemLayer;
-            switch (System.Environment.OSVersion.Platform)
+            switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.Win32NT:
                     fileSystemLayer = new FileSystemLayerWindows();

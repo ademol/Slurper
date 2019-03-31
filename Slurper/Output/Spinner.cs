@@ -1,20 +1,20 @@
 ﻿using System;
 
-namespace Slurper
+namespace Slurper.Output
 {
     static class Spinner
     {
-        private static char lastSearchChar = '/';
-        private static char lastRipChar = '-';
+        private static char _lastSearchChar = '/';
+        private static char _lastRipChar = '-';
 
         public static void SearchSpin()
         {
-            Flip(ref lastSearchChar, '/', '\\');
+            Flip(ref _lastSearchChar, '/', '\\');
         }
 
         public static void RipSpin()
         {
-            Flip(ref lastRipChar, '-', '|');
+            Flip(ref _lastRipChar, '-', '|');
         }
 
         public static void Flip(ref char lastChar,char lhChar, char rhChar)

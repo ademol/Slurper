@@ -4,54 +4,56 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
-
+using SlurperDotNetCore.Contracts;
+using SlurperDotNetCore.Output;
 using SlurperDotNetCore.Providers;
 
-
-namespace SlurperDotNetCore
+namespace SlurperDotNetCore.Logic
 {
     static public class Configuration
     {
-        static readonly ILogger logger = LogProvider.Logger;
+        static readonly ILogger Logger = LogProvider.Logger;
 
-        public static string sampleConfig { get; set; }
-        public static bool VERBOSE { get; set; } = false;                                       // show additional output what is done
-        public static bool DRYRUN { get; set; } = false;                                        // (only) show what will be done (has implicit VERBOSE)
-        public static bool TRACE { get; set; } = false;                                         // VERBOSE + show also unmatched files 
-        public static String cfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
-        public static string ripDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
+        public static string SampleConfig { get; set; }
+        public static bool Verbose { get; set; } // show additional output what is done
+        public static bool Dryrun { get; set; } // (only) show what will be done (has implicit VERBOSE)
+        public static bool Trace { get; set; } // VERBOSE + show also unmatched files 
+        public static String CfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
+        public static string RipDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
 
         public static string DefaultRegexPattern { get; set; } = @"(?i).*\.jpg";                // the default pattern that is used to search for jpg files
 
-        public static ArrayList filePatternsTolookfor { get; } = new ArrayList();               // patterns to search  
-        public static ArrayList drivesRequestedToBeSearched { get; } = new ArrayList();         // drives requested to searched base on configuration  ('c:'  'd:'  etc..  '.:'  means all)
-        public static ArrayList drivesToSearch { get; } = new ArrayList();                      // actual drives to search (always excludes the drive that the program is run from..)
-        public static Dictionary<string, ArrayList> driveFilePatternsTolookfor { get; } = new Dictionary<string, ArrayList>();   // hash of drive keys with their pattern values 
+        public static ArrayList FilePatternsTolookfor { get; } = new ArrayList();               // patterns to search  
+        public static ArrayList DrivesRequestedToBeSearched { get; } = new ArrayList();         // drives requested to searched base on configuration  ('c:'  'd:'  etc..  '.:'  means all)
+        public static ArrayList DrivesToSearch { get; } = new ArrayList();                      // actual drives to search (always excludes the drive that the program is run from..)
+        public static Dictionary<string, ArrayList> DriveFilePatternsTolookfor { get; } = new Dictionary<string, ArrayList>();   // hash of drive keys with their pattern values 
 
         public static void Configure()
         {
-            if (!Configuration.LoadConfigFile() || Configuration.driveFilePatternsTolookfor.Count == 0)
+            if (!LoadConfigFile() || DriveFilePatternsTolookfor.Count == 0)
             {
                 // default config            
-                logger.Log($"Configure: config file [{Configuration.cfgFileName}] not found, " +
-                    $"or no valid patterns in file found => using default pattern [{Configuration.DefaultRegexPattern}]", logLevel.WARN);
+                Logger.Log($"Configure: config file [{CfgFileName}] not found, " +
+                    $"or no valid patterns in file found => using default pattern [{DefaultRegexPattern}]", LogLevel.Warn);
 
                 //todo: check => add to driveFilePatternsTolookfor
                 ArrayList defPattern = new ArrayList();
-                defPattern.Add(Configuration.DefaultRegexPattern);
-                Configuration.driveFilePatternsTolookfor.Add(".:", defPattern);
+                defPattern.Add(DefaultRegexPattern);
+                DriveFilePatternsTolookfor.Add(".:", defPattern);
             }
             // show patterns used
-            if (Configuration.VERBOSE)
+            if (Verbose)
             {
-                foreach (String drive in Configuration.driveFilePatternsTolookfor.Keys)
+                foreach (String drive in DriveFilePatternsTolookfor.Keys)
                 {
                     ArrayList patterns;
-                    Configuration.driveFilePatternsTolookfor.TryGetValue(drive, out patterns);
-                    foreach (String pattern in patterns)
-                    {
-                        logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ", logLevel.VERBOSE);
-                    }
+                    DriveFilePatternsTolookfor.TryGetValue(drive, out patterns);
+                    if (patterns != null)
+                        foreach (String pattern in patterns)
+                        {
+                            Logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ",
+                                LogLevel.Verbose);
+                        }
                 }
             }
         }
@@ -62,12 +64,12 @@ namespace SlurperDotNetCore
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "Slurper.slurper.cfg.txt";
 
-            using (System.IO.Stream stream = assembly.GetManifestResourceStream(resourceName))
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             {
                 try
                 {
-                    System.IO.StreamReader reader = new System.IO.StreamReader(stream);
-                    sampleConfig = reader.ReadToEnd();
+                    StreamReader reader = new StreamReader(stream);
+                    SampleConfig = reader.ReadToEnd();
                 } catch (Exception ex)
                 {
                     Console.WriteLine($"Could not read config file [{resourceName}] due to [{ex.Message}]");
@@ -75,23 +77,23 @@ namespace SlurperDotNetCore
             }
         }
 
-        private static void generateConfig()
+        private static void GenerateConfig()
         {
-            Console.WriteLine("generating sample config file [{0}]", cfgFileName);
+            Console.WriteLine("generating sample config file [{0}]", CfgFileName);
             try
             {
-                System.IO.File.WriteAllText(cfgFileName, Configuration.sampleConfig);
+                File.WriteAllText(CfgFileName, SampleConfig);
             }
             catch (Exception e)
             {
-                logger.Log($"generateConfig: failed to generate [{cfgFileName}][{e.Message}]", logLevel.ERROR);
+                Logger.Log($"generateConfig: failed to generate [{CfgFileName}][{e.Message}]", LogLevel.Error);
             }
         }
 
         public static Boolean LoadConfigFile()
         {
             Boolean cfgLoaded = false;
-            if (File.Exists(Configuration.cfgFileName))
+            if (File.Exists(CfgFileName))
             {
                 String line;
                 String REGEXpattern = @"^([^#]:)(.*)";               // pattern to match valid lines from config file   <driveLetter:><regex>
@@ -99,39 +101,38 @@ namespace SlurperDotNetCore
                 try
                 {
                     //todo: also move to alphafs ?
-                    using (StreamReader sr = new StreamReader(Configuration.cfgFileName))
+                    using (StreamReader sr = new StreamReader(CfgFileName))
                     {
                         while (!sr.EndOfStream)
                         {
                             line = sr.ReadLine();
-                            Match m = r.Match(line);
+                            Match m = r.Match(line ?? throw new InvalidOperationException());
                             if (m.Success)
                             {
                                 String drive = m.Groups[1].Value.ToUpper();
                                 String regex = m.Groups[2].Value;
-                                filePatternsTolookfor.Add(regex);
-                                drivesRequestedToBeSearched.Add(drive);
-                                logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", logLevel.VERBOSE);
+                                FilePatternsTolookfor.Add(regex);
+                                DrivesRequestedToBeSearched.Add(drive);
+                                Logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", LogLevel.Verbose);
 
                                 // add to hash
-                                if (driveFilePatternsTolookfor.ContainsKey(drive))
+                                if (DriveFilePatternsTolookfor.ContainsKey(drive))
                                 {
                                     // add to existing key
                                     ArrayList t;
-                                    driveFilePatternsTolookfor.TryGetValue(drive, out t);
-                                    t.Add(regex);
-
+                                    DriveFilePatternsTolookfor.TryGetValue(drive, out t);
+                                    if (t != null) t.Add(regex);
                                 }
                                 else
                                 {
                                     ArrayList t = new ArrayList();
                                     t.Add(regex);
-                                    driveFilePatternsTolookfor.Add(drive, t);
+                                    DriveFilePatternsTolookfor.Add(drive, t);
                                 }
                             }
                             else
                             {
-                                logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", logLevel.VERBOSE);
+                                Logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", LogLevel.Verbose);
                             }
                         }
                     }
@@ -139,7 +140,7 @@ namespace SlurperDotNetCore
                 }
                 catch (Exception e)
                 {
-                    logger.Log($"LoadConfigFile: Could not read[{Configuration.cfgFileName}] [{e.Message}]", logLevel.ERROR);
+                    Logger.Log($"LoadConfigFile: Could not read[{CfgFileName}] [{e.Message}]", LogLevel.Error);
                 }
 
             }
@@ -155,33 +156,33 @@ namespace SlurperDotNetCore
                 switch (c)
                 {
                     case 'h':
-                        DisplayMessages.help();
+                        DisplayMessages.Help();
                         break;
                     case 'v':
-                        VERBOSE = true;
+                        Verbose = true;
                         break;
                     case 'd':
-                        DRYRUN = true;
+                        Dryrun = true;
                         break;
                     case 't':
-                        TRACE = true;
-                        VERBOSE = true;
+                        Trace = true;
+                        Verbose = true;
                         break;
                     case '/':
                         break;
                     case '-':
                         break;
                     case 'g':
-                        generateConfig();
+                        GenerateConfig();
                         Environment.Exit(0);
                         break;
                     default:
                         Console.WriteLine("option [{0}] not supported", c);
-                        DisplayMessages.help();
+                        DisplayMessages.Help();
                         break;
                 }
             }
-            logger.Log($"Arguments: VERBOSE[{VERBOSE}] DRYRUN[{DRYRUN}] TRACE[{TRACE}]", logLevel.VERBOSE);
+            Logger.Log($"Arguments: VERBOSE[{Verbose}] DRYRUN[{Dryrun}] TRACE[{Trace}]", LogLevel.Verbose);
         }
     }
 }

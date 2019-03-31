@@ -1,13 +1,13 @@
 ﻿using System;
 using System.IO;
-
+using Slurper.Contracts;
 using Slurper.Logic;
 
 namespace Slurper.Providers
 {
     public static class SystemLayer
     {
-        static readonly ILogger logger = LogProvider.Logger;
+        static readonly ILogger Logger = LogProvider.Logger;
 
         public static String TargetDirBasePath { get; set; }          
 
@@ -16,23 +16,23 @@ namespace Slurper.Providers
         public static void CreateTargetLocation()
         {
             TargetDirBasePath = BuildTargetBasePath();
-            logger.Log($"CreateTargetLocation: [{TargetDirBasePath}]", LogLevel.VERBOSE);
+            Logger.Log($"CreateTargetLocation: [{TargetDirBasePath}]", LogLevel.Verbose);
 
-            if (Configuration.cmdLineFlagSet.Contains(CmdLineFlag.DRYRUN)) { return; }
+            if (Configuration.CmdLineFlagSet.Contains(CmdLineFlag.Dryrun)) { return; }
             try
             {
                 Directory.CreateDirectory(TargetDirBasePath);
             }
                 catch (Exception e)
             {
-                logger.Log($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]", LogLevel.ERROR);
+                Logger.Log($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]", LogLevel.Error);
             }
         }
 
         private static string BuildTargetBasePath()
         {
             String curDir = Directory.GetCurrentDirectory();
-            String hostname = (System.Environment.MachineName).ToLower();
+            String hostname = (Environment.MachineName).ToLower();
             String dateTime = String.Format("{0:yyyyMMdd_HH-mm-ss}", DateTime.Now);
 
             return string.Concat(curDir, PathSep, Configuration.RipDir, PathSep, hostname, "_", dateTime);
@@ -44,7 +44,7 @@ namespace Slurper.Providers
 
             // mydrive
             String mydrive = Path.GetPathRoot(Directory.GetCurrentDirectory());
-            logger.Log($"GetDriveInfo: mydrive = [{mydrive}]", LogLevel.VERBOSE);
+            Logger.Log($"GetDriveInfo: mydrive = [{mydrive}]", LogLevel.Verbose);
 
             foreach (DriveInfo d in allDrives)
             {
@@ -69,7 +69,7 @@ namespace Slurper.Providers
                     reason = "configuration for drive " + driveIdentifier;
                 }
                 // skip the drive i'm running from
-                if ((mydrive.ToUpper()).Equals(d.Name.ToUpper()) && ! Configuration.cmdLineFlagSet.Contains(CmdLineFlag.INCLUDEMYDRIVE))
+                if ((mydrive.ToUpper()).Equals(d.Name.ToUpper()) && ! Configuration.CmdLineFlagSet.Contains(CmdLineFlag.Includemydrive))
                 {
                     driveToBeIncluded = false;
                     reason = "this the drive i'm running from";
@@ -85,7 +85,7 @@ namespace Slurper.Providers
                 {
                     Configuration.DrivesToSearch.Add(d.Name);
                 }
-                logger.Log($"GetDriveInfo: found drive [{driveIdentifier}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", LogLevel.VERBOSE);
+                Logger.Log($"GetDriveInfo: found drive [{driveIdentifier}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", LogLevel.Verbose);
             }
         }
     }

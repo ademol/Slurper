@@ -4,60 +4,62 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Slurper.Contracts;
+using Slurper.Output;
 using Slurper.Providers;
 
 namespace Slurper.Logic
 {
     public class FileSearcher : IFileSearcher
     {
-        static readonly ILogger logger = LogProvider.Logger;
-        static readonly IFileripper _fileripper = new fileripper();
+        static readonly ILogger Logger = LogProvider.Logger;
+        static readonly IFileripper Fileripper = new Fileripper();
 
-        static double countFiles = 0;
-        static double countAddedFileNames = 0;
-        static BlockingCollection<string> blockingCollection = new BlockingCollection<string>();
-        static Stopwatch sw;
+        static double _countFiles;
+        static double _countAddedFileNames;
+        static readonly BlockingCollection<string> BlockingCollection = new BlockingCollection<string>();
+        static Stopwatch _sw;
 
-        List<string> currentDriveSearchPatterns;
+        readonly List<string> _currentDriveSearchPatterns;
 
         public FileSearcher()
         {
-            currentDriveSearchPatterns = new List<string>();
+            _currentDriveSearchPatterns = new List<string>();
         }
 
         public void DispatchDriveSearchers()
         {
-            sw = new Stopwatch();
-            sw.Start();
-            System.Threading.Thread myThread;
-            myThread = new System.Threading.Thread(
-            new System.Threading.ThreadStart(BlockingCollectionFileRipper));
+            _sw = new Stopwatch();
+            _sw.Start();
+            Thread myThread;
+            myThread = new Thread(
+            BlockingCollectionFileRipper);
             myThread.Start();
 
-            Parallel.ForEach(Configuration.DrivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = -1 }), (currentDrive) =>
+            Parallel.ForEach(Configuration.DrivesToSearch, (new ParallelOptions { MaxDegreeOfParallelism = -1 }), currentDrive =>
              {
                  new FileSearcher().DriveSearch(currentDrive);
              });
-            blockingCollection.CompleteAdding();
+            BlockingCollection.CompleteAdding();
 
-            var searchingDoneTime = sw.Elapsed;
-            logger.Log($"searching done:checked {countFiles} with {countAddedFileNames} matches in {searchingDoneTime}", LogLevel.VERBOSE);
+            var searchingDoneTime = _sw.Elapsed;
+            Logger.Log($"searching done:checked {_countFiles} with {_countAddedFileNames} matches in {searchingDoneTime}", LogLevel.Verbose);
 
-            while (!blockingCollection.IsCompleted)
+            while (!BlockingCollection.IsCompleted)
             { }
-            sw.Stop();
-            var CopyDoneTime = sw.Elapsed;
-            logger.Log($"done:checked {countFiles} with {countAddedFileNames} matches.  " +
-                $"SearchingTime [{searchingDoneTime}]   Searching+CopyTime [{CopyDoneTime}]", LogLevel.VERBOSE);
+            _sw.Stop();
+            var copyDoneTime = _sw.Elapsed;
+            Logger.Log($"done:checked {_countFiles} with {_countAddedFileNames} matches.  " +
+                $"SearchingTime [{searchingDoneTime}]   Searching+CopyTime [{copyDoneTime}]", LogLevel.Verbose);
         }
 
         public static void BlockingCollectionFileRipper()
         {
-            foreach (var fileName in blockingCollection.GetConsumingEnumerable())
+            foreach (var fileName in BlockingCollection.GetConsumingEnumerable())
             {
-                _fileripper.RipFile(fileName);
+                Fileripper.RipFile(fileName);
             }
         }
 
@@ -72,11 +74,11 @@ namespace Slurper.Logic
             String currentDriveIdentifier = driveInfoName.Substring(0, 2); 
 
             Configuration.DriveFileSearchPatterns.TryGetValue(currentDriveIdentifier.ToUpper(), out List<string> patternsForSpecificDrive);
-            if (patternsForSpecificDrive?.Count > 0) { currentDriveSearchPatterns.AddRange(patternsForSpecificDrive); }
+            if (patternsForSpecificDrive?.Count > 0) { _currentDriveSearchPatterns.AddRange(patternsForSpecificDrive); }
 
             // include patterns for "all" drives
             Configuration.DriveFileSearchPatterns.TryGetValue(".:", out List<string> patternsForAllDrives);
-            if (patternsForAllDrives?.Count > 0) { currentDriveSearchPatterns.AddRange(patternsForAllDrives); }
+            if (patternsForAllDrives?.Count > 0) { _currentDriveSearchPatterns.AddRange(patternsForAllDrives); }
         }
 
         public void DirSearch(string sDir)
@@ -85,17 +87,18 @@ namespace Slurper.Logic
             foreach (string fileName in GetFiles(sDir) ?? new String[0])
             {
                 Spinner.SearchSpin();
-                countFiles++;
+                _countFiles++;
 
-                if ((countAddedFileNames + 1) % 100 == 0)
-                    logger.Log($"search busy:checked {countFiles} with {countAddedFileNames} matches in {sw.Elapsed}", LogLevel.VERBOSE);
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                if ((_countAddedFileNames + 1) % 100 == 0)
+                    Logger.Log($"search busy:checked {_countFiles} with {_countAddedFileNames} matches in {_sw.Elapsed}", LogLevel.Verbose);
 
-                logger.Log($"[{fileName}]", LogLevel.TRACE);
+                Logger.Log($"[{fileName}]", LogLevel.Trace);
 
                 if (MatchFileAgainstSearchPatterns(fileName))
                 {
-                    blockingCollection.Add(fileName);
-                    countAddedFileNames++;
+                    BlockingCollection.Add(fileName);
+                    _countAddedFileNames++;
                 }
             }
             foreach (string dirEntry in GetDirs(sDir) ?? new String[0])
@@ -107,7 +110,7 @@ namespace Slurper.Logic
         public bool MatchFileAgainstSearchPatterns(string fileName)
         {
             // check if file is wanted by any of the specified patterns
-            foreach (String pattern in currentDriveSearchPatterns)
+            foreach (String pattern in _currentDriveSearchPatterns)
             {
                 if ((new Regex(pattern, RegexOptions.IgnoreCase).Match(Path.GetFullPath(fileName))).Success) { return true; }
             }
@@ -123,12 +126,12 @@ namespace Slurper.Logic
             }
             catch (UnauthorizedAccessException e)
             {
-                logger.Log($"getFiles: Unauthorized to retrieve file entries from [{currentDirectory}][{e.Message}]", LogLevel.ERROR);
+                Logger.Log($"getFiles: Unauthorized to retrieve file entries from [{currentDirectory}][{e.Message}]", LogLevel.Error);
                 filesystemEntries = null;
             }
             catch (Exception e)
             {
-                logger.Log($"getFiles: Failed to retrieve file entries from [{currentDirectory}][{e.Message}]", LogLevel.ERROR);
+                Logger.Log($"getFiles: Failed to retrieve file entries from [{currentDirectory}][{e.Message}]", LogLevel.Error);
                 filesystemEntries = null;
             }
             return filesystemEntries;
@@ -143,12 +146,12 @@ namespace Slurper.Logic
             }
             catch (UnauthorizedAccessException e)
             {
-                logger.Log($"getDirs: Unauthorized to retrieve (sub)directories from [{currentDirectory}][{e.Message}]", LogLevel.ERROR);
+                Logger.Log($"getDirs: Unauthorized to retrieve (sub)directories from [{currentDirectory}][{e.Message}]", LogLevel.Error);
                 filesystemEntries = null;
             }
             catch (Exception e)
             {
-                logger.Log($"getDirs: Failed to retrieve (sub)directories from [{currentDirectory}][{e.Message}]", LogLevel.ERROR);
+                Logger.Log($"getDirs: Failed to retrieve (sub)directories from [{currentDirectory}][{e.Message}]", LogLevel.Error);
                 filesystemEntries = null;
             }
             return filesystemEntries;

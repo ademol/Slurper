@@ -4,18 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-
-using Slurper.Logic;
+using Slurper.Contracts;
 using Slurper.Providers;
 
-
-namespace Slurper
+namespace Slurper.Logic
 {
     public static class Configuration
     {
-        static readonly ILogger logger = LogProvider.Logger;
+        private static readonly ILogger Logger = LogProvider.Logger;
 
-        public static List<CmdLineFlag> cmdLineFlagSet = new List<CmdLineFlag>();
+        public static readonly List<CmdLineFlag> CmdLineFlagSet = new List<CmdLineFlag>();
 
         public static string SampleConfig { get; set; }
         public static String CfgFileName { get; set; } = "slurper.cfg";                        
@@ -33,49 +31,47 @@ namespace Slurper
                 return;
             }
 
-            if (File.Exists(Configuration.CfgFileName))
+            if (File.Exists(CfgFileName))
             {
                 LoadConfigFile();
-                return;
             }
             else
             {
                 LoadSingleRegexConfiguration(DefaultDriveRegexPattern);
-                return;
             }
         }
 
         private static void LoadSingleRegexConfiguration(string regexPattern)
         {
             string driveIdentifier = ParseDriveIdentifierFromRegexPatternPattern(regexPattern);
-            logger.Log($"Configure: using pattern [{regexPattern}] for drive [{driveIdentifier}]", LogLevel.WARN);
-            Configuration.DriveFileSearchPatterns.Add(driveIdentifier, new List<string> { regexPattern });
+            Logger.Log($"Configure: using pattern [{regexPattern}] for drive [{driveIdentifier}]", LogLevel.Warn);
+            DriveFileSearchPatterns.Add(driveIdentifier, new List<string> { regexPattern });
         }
 
         private static string ParseDriveIdentifierFromRegexPatternPattern(string regexPattern)
         {
             string fallbackDriveIdentifier = ".:";
-            Regex MatchDrive = new Regex(@"(^.:).*", RegexOptions.IgnoreCase);
-            Match driveMatch = MatchDrive.Match(regexPattern);
+            Regex matchDrive = new Regex(@"(^.:).*", RegexOptions.IgnoreCase);
+            Match driveMatch = matchDrive.Match(regexPattern);
             if (driveMatch.Success)
             {
                 return driveMatch.Groups[1].Value.ToUpperInvariant();
             }
-            else
-            {
-               return fallbackDriveIdentifier;
-            }
+
+            return fallbackDriveIdentifier;
         }
 
         public static void ShowPatternsUsedByDrive()
         {
-            foreach (String drive in Configuration.DriveFileSearchPatterns.Keys)
+            foreach (String drive in DriveFileSearchPatterns.Keys)
             {
-                Configuration.DriveFileSearchPatterns.TryGetValue(drive, out List<string> patterns);
-                foreach (String pattern in patterns)
-                {
-                    logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ", LogLevel.VERBOSE);
-                }
+                DriveFileSearchPatterns.TryGetValue(drive, out List<string> patterns);
+                if (patterns != null)
+                    foreach (String pattern in patterns)
+                    {
+                        Logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ",
+                            LogLevel.Verbose);
+                    }
             }
         }
 
@@ -85,9 +81,9 @@ namespace Slurper
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "Slurper.slurper.cfg.txt";
 
-            using (System.IO.Stream stream = assembly.GetManifestResourceStream(resourceName))
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             {
-                System.IO.StreamReader reader = new System.IO.StreamReader(stream);
+                StreamReader reader = new StreamReader(stream ?? throw new InvalidOperationException());
                 SampleConfig = reader.ReadToEnd();
             }
         }
@@ -97,11 +93,11 @@ namespace Slurper
             Console.WriteLine("generating sample config file [{0}]", CfgFileName);
             try
             {
-                System.IO.File.WriteAllText(CfgFileName, Configuration.SampleConfig);
+                File.WriteAllText(CfgFileName, SampleConfig);
             }
             catch (Exception e)
             {
-                logger.Log($"generateConfig: failed to generate [{CfgFileName}][{e.Message}]", LogLevel.ERROR);
+                Logger.Log($"generateConfig: failed to generate [{CfgFileName}][{e.Message}]", LogLevel.Error);
             }
         }
 
@@ -109,18 +105,17 @@ namespace Slurper
         {
             try
             {
-                using (StreamReader streamReader = new StreamReader(Configuration.CfgFileName))
+                using (StreamReader streamReader = new StreamReader(CfgFileName))
                 {
                     while (!streamReader.EndOfStream)
                     {
                         ParseConfigLines(streamReader.ReadLine());
                     }
                 }
-                return;
             }
             catch (Exception e)
             {
-                logger.Log($"LoadConfigFile: Could not read[{Configuration.CfgFileName}] [{e.Message}]", LogLevel.ERROR);
+                Logger.Log($"LoadConfigFile: Could not read[{CfgFileName}] [{e.Message}]", LogLevel.Error);
             }
         }
 
@@ -129,12 +124,12 @@ namespace Slurper
             // pattern to match valid lines from config file   <driveLetter:><remaining-regex>
             String ValidConfigLine = @"^([^#]:)\s*(.*)";
 
-            Regex PatternToMatchValidConfigLine = new Regex(ValidConfigLine);
-            Match matchedConfigurationLine = PatternToMatchValidConfigLine.Match(line);
+            Regex patternToMatchValidConfigLine = new Regex(ValidConfigLine);
+            Match matchedConfigurationLine = patternToMatchValidConfigLine.Match(line);
 
             if (!matchedConfigurationLine.Success)
             {
-                logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", LogLevel.VERBOSE);
+                Logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", LogLevel.Verbose);
                 return;
             }
 
@@ -142,7 +137,7 @@ namespace Slurper
             String regex = matchedConfigurationLine.Groups[2].Value;
 
             StoreRegexToSearchByDrive(drive, regex);
-            logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", LogLevel.VERBOSE);
+            Logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", LogLevel.Verbose);
         }
 
         private static void StoreRegexToSearchByDrive(string drive, string regex)
@@ -151,15 +146,19 @@ namespace Slurper
             if (DriveFileSearchPatterns.ContainsKey(drive))
                 DriveFileSearchPatterns.TryGetValue(drive, out driveFilePatterns);
 
-            driveFilePatterns.Add(regex);
-            DriveFileSearchPatterns[drive] = driveFilePatterns;
+            if (driveFilePatterns != null)
+            {
+                driveFilePatterns.Add(regex);
+                DriveFileSearchPatterns[drive] = driveFilePatterns;
+            }
         }
 
-        public static bool IsValidRegex(string pattern)
+        private static bool IsValidRegex(string pattern)
         {
             if (string.IsNullOrEmpty(pattern)) return false;
             try
             {
+                // ReSharper disable once ObjectCreationAsStatement
                 new Regex(pattern);
             } catch (ArgumentException)
             {
@@ -177,7 +176,7 @@ namespace Slurper
                 if (argument.StartsWith("/") || argument.StartsWith("-"))
                 {
                     CommandLineFlagProcessor.ProcessArgumentFlags(argument);
-                    if (cmdLineFlagSet.Contains(CmdLineFlag.GENERATE)) {
+                    if (CmdLineFlagSet.Contains(CmdLineFlag.Generate)) {
                         GenerateSampleConfigFile();
                         Environment.Exit(0);
                     }

@@ -3,7 +3,6 @@ using Slurper.Contracts;
 using Slurper.Logic;
 using Slurper.Providers;
 
-
 [assembly: CLSCompliant(true)]
 namespace Slurper
 {
@@ -18,7 +17,7 @@ namespace Slurper
          *           => suggested use is to run this program from an portable location (USB/HD) 
          *           
          */
-        private static readonly IFileSearcher _fileSearcher = new FileSearcher();
+        private static readonly IFileSearcher FileSearcher = new FileSearcher();
 
         static void Main(string[] args)
         {
@@ -28,7 +27,7 @@ namespace Slurper
             // handle arguments
             Configuration.ProcessArguments(args);
 
-            if (Configuration.cmdLineFlagSet.Contains(CmdLineFlag.GENERATE)) {
+            if (Configuration.CmdLineFlagSet.Contains(CmdLineFlag.Generate)) {
                 Configuration.GenerateSampleConfigFile();
                 Environment.Exit(0);
             }
@@ -44,7 +43,7 @@ namespace Slurper
             SystemLayer.GetDriveInfo();
 
             // find files matching pattern(s) from all applicable drives, and copy them to the targetLocation
-            _fileSearcher.DispatchDriveSearchers();
+            FileSearcher.DispatchDriveSearchers();
         }
     }
 }

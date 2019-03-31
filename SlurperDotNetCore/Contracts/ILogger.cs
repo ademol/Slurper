@@ -1,17 +1,17 @@
-﻿namespace SlurperDotNetCore
+﻿namespace SlurperDotNetCore.Contracts
 {
     public interface ILogger
     {
-        void Log(string Message, logLevel Level);
-        void Log(string Message);
+        void Log(string message, LogLevel level);
+        void Log(string message);
     }
-    public enum logLevel
+    public enum LogLevel
     {
-        TRACE,
-        LOG,
-        VERBOSE,
-        WARN,
-        ERROR
+        Trace,
+        Log,
+        Verbose,
+        Warn,
+        Error
     }
 
 }

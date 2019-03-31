@@ -1,6 +1,7 @@
 ﻿using System;
+using Slurper.Logic;
 
-namespace Slurper
+namespace Slurper.Output
 {
     static class DisplayMessages
     {
