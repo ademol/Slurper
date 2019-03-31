@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,15 +14,16 @@ namespace Slurper.Logic
     {
         private static readonly ILogger Logger = LogProvider.Logger;
 
-        public static readonly List<CmdLineFlag> CmdLineFlagSet = new List<CmdLineFlag>();
+        public static readonly Collection<CmdLineFlag> CmdLineFlagSet = new Collection<CmdLineFlag>();
 
         public static string SampleConfig { get; set; }
         public static String CfgFileName { get; set; } = "slurper.cfg";                        
         public static string RipDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
         public static string DefaultDriveRegexPattern { get; set; } = @".*\.jpg";
         public static string ManualDriveRegexPattern { get; set; }
-        public static List<string> DrivesToSearch { get; } = new List<string>();                // actual drives to search (excludes the drive that the program is run from..)
-        public static Dictionary<string, List<string>> DriveFileSearchPatterns { get; } = new Dictionary<string, List<string>>();   // hash of drive keys with their pattern values 
+        public static Collection<string> DrivesToSearch { get; } = new Collection<string>();    // actual drives to search (excludes the drive that the program is run from..)
+        public static Dictionary<string, List<string>> DriveFileSearchPatterns { get; } =
+            new Dictionary<string, List<string>>(); // hash of drive keys with their pattern values 
 
         public static void Configure()
         {
@@ -88,6 +90,7 @@ namespace Slurper.Logic
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public static void GenerateSampleConfigFile()
         {
             Console.WriteLine("generating sample config file [{0}]", CfgFileName);
@@ -101,6 +104,7 @@ namespace Slurper.Logic
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public static void LoadConfigFile()
         {
             try

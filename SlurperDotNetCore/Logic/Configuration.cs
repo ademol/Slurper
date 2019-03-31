@@ -37,8 +37,7 @@ namespace SlurperDotNetCore.Logic
                     $"or no valid patterns in file found => using default pattern [{DefaultRegexPattern}]", LogLevel.Warn);
 
                 //todo: check => add to driveFilePatternsTolookfor
-                ArrayList defPattern = new ArrayList();
-                defPattern.Add(DefaultRegexPattern);
+                ArrayList defPattern = new ArrayList {DefaultRegexPattern};
                 DriveFilePatternsTolookfor.Add(".:", defPattern);
             }
             // show patterns used
@@ -46,8 +45,7 @@ namespace SlurperDotNetCore.Logic
             {
                 foreach (String drive in DriveFilePatternsTolookfor.Keys)
                 {
-                    ArrayList patterns;
-                    DriveFilePatternsTolookfor.TryGetValue(drive, out patterns);
+                    DriveFilePatternsTolookfor.TryGetValue(drive, out var patterns);
                     if (patterns != null)
                         foreach (String pattern in patterns)
                         {
@@ -119,14 +117,12 @@ namespace SlurperDotNetCore.Logic
                                 if (DriveFilePatternsTolookfor.ContainsKey(drive))
                                 {
                                     // add to existing key
-                                    ArrayList t;
-                                    DriveFilePatternsTolookfor.TryGetValue(drive, out t);
+                                    DriveFilePatternsTolookfor.TryGetValue(drive, out var t);
                                     if (t != null) t.Add(regex);
                                 }
                                 else
                                 {
-                                    ArrayList t = new ArrayList();
-                                    t.Add(regex);
+                                    ArrayList t = new ArrayList {regex};
                                     DriveFilePatternsTolookfor.Add(drive, t);
                                 }
                             }

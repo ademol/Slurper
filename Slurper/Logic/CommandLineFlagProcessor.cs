@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Linq;
 using Slurper.Contracts;
 using Slurper.Output;
 using Slurper.Providers;
@@ -8,7 +9,7 @@ namespace Slurper.Logic
 {
     public enum CmdLineFlag { Silent, Includemydrive, Verbose, Dryrun, Trace, Generate }
 
-    public class CommandLineFlagProcessor
+    public static class CommandLineFlagProcessor
     {
         private static readonly ILogger Logger = LogProvider.Logger;
 

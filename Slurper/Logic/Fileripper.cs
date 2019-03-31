@@ -11,6 +11,7 @@ namespace Slurper.Logic
         static readonly ILogger Logger = LogProvider.Logger;
         const string LongPathPrefix = "\\\\?\\";
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void RipFile(String soureFilePath)
         {
             String targetPath = BuildTargetPath(soureFilePath);
@@ -31,14 +32,14 @@ namespace Slurper.Logic
             }
         }
 
-        private string BuildTargetPath(string filename)
+        private static string BuildTargetPath(string filename)
         {
             String targetRelativePath = Path.GetDirectoryName(filename);
             targetRelativePath = SanitizePath(targetRelativePath);
             return SystemLayer.TargetDirBasePath + SystemLayer.PathSep + targetRelativePath + SystemLayer.PathSep;
         }
 
-        private string SanitizePath(string path)
+        private static string SanitizePath(string path)
         {
             return path.Replace(':', '_');
         }

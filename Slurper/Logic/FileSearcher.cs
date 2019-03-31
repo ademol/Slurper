@@ -117,7 +117,8 @@ namespace Slurper.Logic
             return false;
         }
 
-        public String[] GetFiles(string currentDirectory)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        public static String[] GetFiles(string currentDirectory)
         {
             string[] filesystemEntries;
             try
@@ -137,7 +138,8 @@ namespace Slurper.Logic
             return filesystemEntries;
         }
 
-        public String[] GetDirs(string currentDirectory)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        public static String[] GetDirs(string currentDirectory)
         {
             string[] filesystemEntries;
             try

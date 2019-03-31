@@ -39,18 +39,18 @@ namespace Slurper.Output
             }
         }
 
-        private string GetCallingMember()
+        private static string GetCallingMember()
         {
             StackFrame frame = new StackFrame(2, true);
             return frame.GetMethod().ToString();
         }
 
-        private void RestoreForeGroundcolor()
+        private static void RestoreForeGroundcolor()
         {
             Console.ForegroundColor = ForeGroundColor;
         }
 
-        private void SetForeGroundColorForLogLevel(LogLevel level)
+        private static void SetForeGroundColorForLogLevel(LogLevel level)
         {
             if (ConsoleLevelColor.TryGetValue(level, out ConsoleColor foregroundColor))
             {

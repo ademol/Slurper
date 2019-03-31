@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28010.2041
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slurper", "Slurper\Slurper.csproj", "{7B395CB8-BE52-4C04-B77C-293E1849D473}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlurperDotNetCore", "SlurperDotNetCore\SlurperDotNetCore.csproj", "{BEE572DC-3F0A-48F1-8A7F-6FFE37F4A6AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SlurperDotNetCore", "SlurperDotNetCore\SlurperDotNetCore.csproj", "{BEE572DC-3F0A-48F1-8A7F-6FFE37F4A6AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
