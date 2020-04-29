@@ -29,8 +29,7 @@ namespace Slurper
             Configuration.ProcessArguments(args);
 
             FileSystemLayer = ChoseFileSystemLayer();
-
-
+            
             // determine & create target directory
             FileSystemLayer.CreateTargetLocation();
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -77,40 +76,28 @@ namespace Slurper.Providers
 
             foreach (var d in mountpoints)
             {
-                var mountPoint = d.Name.Substring(0,1).ToUpper();
-
-                // check if drive will be included
-                var driveToBeIncluded = false;
-                var reason = "configuration";
-
-                // check for wildcard
-                if (Configuration.PatternsToMatch.ContainsKey(".") && IsValidMountPoint(d))
-                {
-                    driveToBeIncluded = true;
-                    reason = "configuration for drive mapping .";
-                }
-
-                // check for specific drive
-                if (Configuration.PatternsToMatch.ContainsKey(mountPoint))
-                {
-                    driveToBeIncluded = true;
-                    reason = "configuration for drive " + mountPoint;
-                }
-
-                // skip the drive i'm running from
+                var toBeIncluded = true;
+                var reason = string.Empty;
+                
                 if (runMountPoint.Equals(d.Name) && ! Configuration.Force)
                 {
-                    driveToBeIncluded = false;
+                    toBeIncluded = false;
                     reason = "this the drive i'm running from";
                 }
-
-                // include this drive
-                if (driveToBeIncluded)
+                
+                if (IsValidMountPoint(d))
+                {
+                    toBeIncluded = false;
+                    reason = "not applicable for this mountpoint/fs-type";
+                }
+                
+                
+                if (toBeIncluded)
                 {
                     Configuration.PathList.Add(d.Name);
                 }
 
-                Logger.Log($"GetDriveInfo: found mount point [{mountPoint}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", LogLevel.Verbose);
+                Logger.Log($"GetDriveInfo: found mount point [{d.Name}]\t included? [{toBeIncluded}]\t reason[{reason}]", LogLevel.Verbose);
             }
         }
     }

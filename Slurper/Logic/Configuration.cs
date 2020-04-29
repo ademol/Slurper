@@ -22,10 +22,10 @@ namespace Slurper.Logic
         private static string CfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
         public static string RipDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
 
-        private static string DefaultRegexPattern { get; set; } = @"(?i).*\.jpg";                // the default pattern that is used to search for jpg files
+        private static string DefaultRegexPattern { get; set; } = @"(?i).*\.jpg$";                // the default pattern that is used to search for jpg files
 
-        public static ArrayList PathList { get; } = new ArrayList();                      // actual drives to search (always excludes the drive that the program is run from..)
-        public static Dictionary<string, ArrayList> PatternsToMatch { get; } = new Dictionary<string, ArrayList>();   // hash of drive keys with their pattern values 
+        public static List<string> PathList { get; } = new List<string>();                
+        public static List<string> PatternsToMatch { get; } = new List<string>();   
 
         public static void Configure()
         {
@@ -35,22 +35,14 @@ namespace Slurper.Logic
                 Logger.Log($"Configure: config file [{CfgFileName}] not found, " +
                     $"or no valid patterns in file found => using default pattern [{DefaultRegexPattern}]", LogLevel.Warn);
 
-                //todo: check => add to driveFilePatternsTolookfor
-                var defPattern = new ArrayList {DefaultRegexPattern};
-                PatternsToMatch.Add(".:", defPattern);
+                PatternsToMatch.Add(DefaultRegexPattern);
             }
 
             // show patterns used
             if (!Verbose) return;
-            foreach (var path in PatternsToMatch.Keys)
+            foreach (var pattern in PatternsToMatch)
             {
-                PatternsToMatch.TryGetValue(path, out var patterns);
-                if (patterns == null) continue;
-                foreach (string pattern in patterns)
-                {
-                    Logger.Log($"Configure: Pattern to use: path [{path}]  pattern [{pattern}] ",
-                        LogLevel.Verbose);
-                }
+                Logger.Log($"Configure: Pattern to use: [{pattern}] ", LogLevel.Verbose);
             }
         }
 
@@ -58,8 +50,8 @@ namespace Slurper.Logic
         {
             // sample config
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "Slurper_Archived.slurper.cfg.txt";
-
+            var resourceName = "Slurper.slurper.cfg.txt";
+            
             using var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream == null) return;
             try
@@ -73,7 +65,7 @@ namespace Slurper.Logic
             }
         }
 
-        private static void GenerateConfig()
+        private static void GenerateSampleConfig()
         {
             Console.WriteLine("generating sample config file [{0}]", CfgFileName);
             try
@@ -91,11 +83,10 @@ namespace Slurper.Logic
             if (!File.Exists(CfgFileName)) return false;
 
             var cfgLoaded = false;
-            const string regexPattern = @"^([^#]+:) (.*)"; // pattern to match valid lines from config file   <driveLetter|path>:<regex>
+            const string regexPattern = @"^([^#].*)";
             var r = new Regex(regexPattern);
             try
             {
-                //todo: also move to alphafs ?
                 using (var sr = new StreamReader(CfgFileName))
                 {
                     while (!sr.EndOfStream)
@@ -104,24 +95,10 @@ namespace Slurper.Logic
                         var m = r.Match(line ?? throw new InvalidOperationException());
                         if (m.Success)
                         {
-                            var path = m.Groups[1].Value;
-                            var regex = m.Groups[2].Value;
-                            // FilePatternsTolookfor.Add(regex);
-                            // DrivesRequestedToBeSearched.Add(drive);
-                            Logger.Log($"LoadConfigFile: [{line}] => for path:[{path}] regex:[{regex}]", LogLevel.Verbose);
+                            var regex = m.Groups[1].Value;
+                            Logger.Log($"LoadConfigFile: [{line}] => for regex:[{regex}]", LogLevel.Verbose);
 
-                            // add to hash
-                            if (PatternsToMatch.ContainsKey(path))
-                            {
-                                // add to existing key
-                                PatternsToMatch.TryGetValue(path, out var t);
-                                t?.Add(regex);
-                            }
-                            else
-                            {
-                                var t = new ArrayList {regex};
-                                PatternsToMatch.Add(path, t);
-                            }
+                            PatternsToMatch.Add(regex);
                         }
                         else
                         {
@@ -166,7 +143,7 @@ namespace Slurper.Logic
                     case '-':
                         break;
                     case 'g':
-                        GenerateConfig();
+                        GenerateSampleConfig();
                         Environment.Exit(0);
                         break;
                     case 'f':

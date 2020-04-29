@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Slurper.Contracts;
@@ -11,48 +11,18 @@ namespace Slurper.Logic
     public class Searcher
     {
         private static readonly ILogger Logger = LogProvider.Logger;
-        private readonly ArrayList _patterns;
-
-        private Searcher(string startPath)
-        {
-            _patterns = GetPattern(startPath);
-        }
-
+        private readonly List<string> _patterns = Configuration.PatternsToMatch;
+        
         public static void SearchAndCopyFiles()
         {
             // process each drive
             foreach (string path in Configuration.PathList)
             {
-                var searcher = new Searcher(path);
+                var searcher = new Searcher();
                 searcher.DirSearch(path);
             }
         }
-
-        private static ArrayList GetPattern(string path)
-        {
-            //Patterns
-            // make sure to only use the patterns for the path requested
-            var patterns = new ArrayList();
-
-
-            // add patterns for specific path
-            Configuration.PatternsToMatch.TryGetValue(path, out var v);
-            if (v != null)
-            {
-                patterns.AddRange(v);
-            }
-            
-            // add patterns for any path
-            Configuration.PatternsToMatch.TryGetValue(".", out v);
-            if (v != null)
-            {
-                patterns.AddRange(v);
-            }
-
-            return patterns;
-        }
-
-
+        
         private void DirSearch(string path)
         {
             // long live the 'null-coalescing' operator ?? to handle cases of 'null'  :)

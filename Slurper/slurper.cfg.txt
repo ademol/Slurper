@@ -1,30 +1,7 @@
-﻿#################################
-# sample config file windows    #
-#################################
-C:(?i).*\.jpg
-F:(?i).*\.doc
-.:(?i).*\.mp3
-C:(?i).*\.txt
-#################################
-#
-# This searches for:
-#    jpg & txt files on the C: drive
-#    doc files on the F: drive
-#    mp3 files on all (.:) drives (excluding drive where process is running from)
-#
-# note: you need to use uppercase drive letters
-
-#################################
-# sample config file linux    #
-#################################
-/usr/local:(?i).*\.jpg
-/root:(?i).*\.doc
-.:(?i).*\.mp3
-/usr/loca/bin:(?i).*\.txt
-#################################
-#
-# This searches for:
-#    jpg & txt files on the /usr/local mountpoint
-#    doc files on the /root mountpoint 
-#    mp3 files on (.:) all mountpoints (excluding mountpoint where process is running from) 
-#
+﻿######################
+# sample config file #
+######################
+(?i).*\.jpg$
+(?i).*\.doc$
+(?i).*\.mp3$
+######################
