@@ -87,14 +87,14 @@ namespace Slurper.Providers
                 var reason = "configuration";
 
                 // check for wildcard
-                if (Configuration.DriveFilePatternsTolookfor.ContainsKey(".:") && IsValidMountPoint(d))
+                if (Configuration.PatternsToMatch.ContainsKey(".:") && IsValidMountPoint(d))
                 {
                     driveToBeIncluded = true;
                     reason = "configuration for drive mapping .:";
                 }
 
                 // check for specific drive
-                if (Configuration.DriveFilePatternsTolookfor.ContainsKey(mountPoint))
+                if (Configuration.PatternsToMatch.ContainsKey(mountPoint))
                 {
                     driveToBeIncluded = true;
                     reason = "configuration for drive " + mountPoint;
@@ -115,11 +115,6 @@ namespace Slurper.Providers
 
                 Logger.Log($"GetDriveInfo: found mount point [{mountPoint}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", LogLevel.Verbose);
             }
-        }
-
-        public ArrayList GetPattern(string sDir)
-        {
-            throw new NotImplementedException();
         }
     }
 }

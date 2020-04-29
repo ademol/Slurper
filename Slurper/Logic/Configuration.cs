@@ -25,11 +25,11 @@ namespace Slurper.Logic
         private static string DefaultRegexPattern { get; set; } = @"(?i).*\.jpg";                // the default pattern that is used to search for jpg files
 
         public static ArrayList PathList { get; } = new ArrayList();                      // actual drives to search (always excludes the drive that the program is run from..)
-        public static Dictionary<string, ArrayList> DriveFilePatternsTolookfor { get; } = new Dictionary<string, ArrayList>();   // hash of drive keys with their pattern values 
+        public static Dictionary<string, ArrayList> PatternsToMatch { get; } = new Dictionary<string, ArrayList>();   // hash of drive keys with their pattern values 
 
         public static void Configure()
         {
-            if (!LoadConfigFile() || DriveFilePatternsTolookfor.Count == 0)
+            if (!LoadConfigFile() || PatternsToMatch.Count == 0)
             {
                 // default config            
                 Logger.Log($"Configure: config file [{CfgFileName}] not found, " +
@@ -37,15 +37,15 @@ namespace Slurper.Logic
 
                 //todo: check => add to driveFilePatternsTolookfor
                 var defPattern = new ArrayList {DefaultRegexPattern};
-                DriveFilePatternsTolookfor.Add(".:", defPattern);
+                PatternsToMatch.Add(".:", defPattern);
             }
 
             // show patterns used
             if (Verbose)
             {
-                foreach (var drive in DriveFilePatternsTolookfor.Keys)
+                foreach (var drive in PatternsToMatch.Keys)
                 {
-                    DriveFilePatternsTolookfor.TryGetValue(drive, out var patterns);
+                    PatternsToMatch.TryGetValue(drive, out var patterns);
                     if (patterns != null)
                         foreach (String pattern in patterns)
                         {
@@ -113,16 +113,16 @@ namespace Slurper.Logic
                                 Logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", LogLevel.Verbose);
 
                                 // add to hash
-                                if (DriveFilePatternsTolookfor.ContainsKey(drive))
+                                if (PatternsToMatch.ContainsKey(drive))
                                 {
                                     // add to existing key
-                                    DriveFilePatternsTolookfor.TryGetValue(drive, out var t);
+                                    PatternsToMatch.TryGetValue(drive, out var t);
                                     t?.Add(regex);
                                 }
                                 else
                                 {
                                     var t = new ArrayList {regex};
-                                    DriveFilePatternsTolookfor.Add(drive, t);
+                                    PatternsToMatch.Add(drive, t);
                                 }
                             }
                             else

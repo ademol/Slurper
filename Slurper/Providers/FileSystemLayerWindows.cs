@@ -56,14 +56,14 @@ namespace Slurper.Providers
                 var reason = "configuration";
 
                 // check for wildcard
-                if (Configuration.DriveFilePatternsTolookfor.ContainsKey(".:"))
+                if (Configuration.PatternsToMatch.ContainsKey(".:"))
                 {
                     driveToBeIncluded = true;
                     reason = "configuration for drive .:";
                 }
 
                 // check for specific drive
-                if (Configuration.DriveFilePatternsTolookfor.ContainsKey(driveId))
+                if (Configuration.PatternsToMatch.ContainsKey(driveId))
                 {
                     driveToBeIncluded = true;
                     reason = "configuration for drive " + driveId;
@@ -86,41 +86,6 @@ namespace Slurper.Providers
                     $"GetDriveInfo: found drive [{driveId}]\t included? [{driveToBeIncluded}]\t reason[{reason}]",
                     LogLevel.Verbose);
             }
-        }
-
-        public ArrayList GetPattern(string sDir)
-        {
-            //driveFilePatternsTolookfor
-            // make sure to only use the patterns for the drives requested
-            var thisDrivePatternsToLookFor = new ArrayList();
-            // drive to search
-            // String curDrive = sDir.Substring(0, 2);    // aka c: 
-
-            var rx = new Regex(@"^([^:]+:)");
-            var curDrive = rx.Matches(sDir)[0].Value;
-
-
-            if (curDrive.Length == 1)
-            {
-                curDrive = curDrive.ToUpper();
-            }
-
-            // add patterns for specific drive
-            ArrayList v;
-            Configuration.DriveFilePatternsTolookfor.TryGetValue(curDrive, out v);
-            if (v != null)
-            {
-                thisDrivePatternsToLookFor.AddRange(v);
-            }
-
-            // add patterns for all drives
-            Configuration.DriveFilePatternsTolookfor.TryGetValue(".:", out v);
-            if (v != null)
-            {
-                thisDrivePatternsToLookFor.AddRange(v);
-            }
-
-            return thisDrivePatternsToLookFor;
         }
     }
 }

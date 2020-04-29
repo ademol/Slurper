@@ -11,10 +11,5 @@ namespace Slurper.Contracts
         void CreateTargetLocation();
 
         void GetMountedPartitionInfo();
-
-        ArrayList GetPattern(string sDir);
-
-
-
     }
 }

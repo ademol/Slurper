@@ -10,15 +10,14 @@ namespace Slurper.Logic
 {
     public class Searcher
     {
-        private static readonly IFileSystemLayer FileSystemLayer = Program.ChoseFileSystemLayer();
         private static readonly ILogger Logger = LogProvider.Logger;
-        private readonly ArrayList _thisDrivePatternsToLookFor;
+        private readonly ArrayList _patterns;
 
-        public Searcher(string startPath)
+        private Searcher(string startPath)
         {
-            _thisDrivePatternsToLookFor = FileSystemLayer.GetPattern(startPath);
+            _patterns = GetPattern(startPath);
         }
-        
+
         public static void SearchAndCopyFiles()
         {
             // process each drive
@@ -29,10 +28,35 @@ namespace Slurper.Logic
             }
         }
 
-        private void DirSearch(string Path)
+        private static ArrayList GetPattern(string path)
+        {
+            //Patterns
+            // make sure to only use the patterns for the path requested
+            var patterns = new ArrayList();
+
+
+            // add patterns for specific path
+            Configuration.PatternsToMatch.TryGetValue(path, out var v);
+            if (v != null)
+            {
+                patterns.AddRange(v);
+            }
+            
+            // add patterns for any path
+            Configuration.PatternsToMatch.TryGetValue(".:", out v);
+            if (v != null)
+            {
+                patterns.AddRange(v);
+            }
+
+            return patterns;
+        }
+
+
+        private void DirSearch(string path)
         {
             // long live the 'null-coalescing' operator ?? to handle cases of 'null'  :)
-            foreach (var d in GetDirs(Path) ?? new String[0])
+            foreach (var d in GetDirs(path) ?? new String[0])
             {
                 if (IsSymbolic(d))
                 {
@@ -50,9 +74,13 @@ namespace Slurper.Logic
                     Logger.Log($"[{f}]", LogLevel.Trace);
 
                     // check if file is wanted by any of the specified patterns
-                    foreach (String p in _thisDrivePatternsToLookFor)
+                    foreach (String p in _patterns)
                     {
-                        if ((new Regex(p).Match(f)).Success) { FileRipper.RipFile(f); break; }
+                        if ((new Regex(p).Match(f)).Success)
+                        {
+                            FileRipper.RipFile(f);
+                            break;
+                        }
                     }
                 }
 
