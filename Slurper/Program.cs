@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Slurper.Contracts;
 using Slurper.Logic;
 using Slurper.Providers;
 
+[assembly:InternalsVisibleTo("SlurperTests")]
 namespace Slurper
 {
     static class Program
@@ -18,9 +20,9 @@ namespace Slurper
         */
 
 
-        public static  IFileSystemLayer FileSystemLayer { get; private set; }
+        public static IFileSystemLayer FileSystemLayer { get; private set; }
 
-        private static void Main(string[] args)
+        internal static void Main(string[] args)
         {
             // init
             Configuration.InitSampleConfig();
@@ -43,10 +45,10 @@ namespace Slurper
             Searcher.SearchAndCopyFiles();
         }
 
-        private static IFileSystemLayer ChoseFileSystemLayer()
+        internal static IFileSystemLayer ChoseFileSystemLayer()
         {
             IFileSystemLayer fileSystemLayer;
-            switch (Environment.OSVersion.Platform)
+            switch (new EnvironmentService().GetOsPlatform())
             {
                 case PlatformID.Win32NT:
                     fileSystemLayer = new FileSystemLayerWindows();
