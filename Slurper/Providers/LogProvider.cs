@@ -1,5 +1,4 @@
-﻿
-using Slurper.Contracts;
+﻿using Slurper.Contracts;
 using Slurper.Output;
 
 namespace Slurper.Providers

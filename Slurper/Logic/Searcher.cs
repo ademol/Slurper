@@ -21,17 +21,16 @@ namespace Slurper.Logic
             }
         }
 
-        public static void DirSearch(string sDir)
+        private static void DirSearch(string sDir)
         {
-
             //driveFilePatternsTolookfor
             // make sure to only use the patterns for the drives requested
-            ArrayList thisDrivePatternsToLookFor = new ArrayList();
+            var thisDrivePatternsToLookFor = new ArrayList();
             // drive to search
             // String curDrive = sDir.Substring(0, 2);    // aka c: 
 
-            Regex rx = new Regex(@"^([^:]+)");
-            string curDrive = rx.Matches(sDir)[0].Value;
+            var rx = new Regex(@"^([^:]+)");
+            var curDrive = rx.Matches(sDir)[0].Value;
 
 
             if (curDrive.Length == 1) { curDrive = curDrive.ToUpper(); }
@@ -46,27 +45,30 @@ namespace Slurper.Logic
             if (v != null) { thisDrivePatternsToLookFor.AddRange(v); }
 
             // long live the 'null-coalescing' operator ?? to handle cases of 'null'  :)
-            foreach (string d in GetDirs(sDir) ?? new String[0])
+            foreach (var d in GetDirs(sDir) ?? new String[0])
             {
                 if (IsSymbolic(d))
                 {
                     continue;
                 }
-                foreach (string f in GetFiles(d) ?? new String[0])
+
+                foreach (var f in GetFiles(d) ?? new String[0])
                 {
                     if (IsSymbolic(f))
                     {
                         continue;
                     }
+
                     Spinner.Spin();
                     Logger.Log($"[{f}]", LogLevel.Trace);
 
                     // check if file is wanted by any of the specified patterns
                     foreach (String p in thisDrivePatternsToLookFor)
                     {
-                        if ((new Regex(p).Match(f)).Success) { Fileripper.RipFile(f); break; }
+                        if ((new Regex(p).Match(f)).Success) { FileRipper.RipFile(f); break; }
                     }
                 }
+
                 try
                 {
                     DirSearch(d);
@@ -79,19 +81,17 @@ namespace Slurper.Logic
         }
 
 
-
         private static bool IsSymbolic(string pathName)
         {
             return File.GetAttributes(pathName).HasFlag(FileAttributes.ReparsePoint);
         }
 
 
-
-        static String[] GetFiles(string dir)
+        private static string[] GetFiles(string dir)
         {
             try
             {
-                String[] files = Directory.GetFiles(dir, "*.*");
+                var files = Directory.GetFiles(dir, "*.*");
                 return files;
             }
             catch (UnauthorizedAccessException e)
@@ -102,14 +102,15 @@ namespace Slurper.Logic
             {
                 Logger.Log($"getFiles: Failed to retrieve fileList from [{dir}][{e.Message}]", LogLevel.Error);
             }
+
             return null;
         }
 
-        static String[] GetDirs(string sDir)
+        private static string[] GetDirs(string sDir)
         {
             try
             {
-                string[] dirs = Directory.GetDirectories(sDir);
+                var dirs = Directory.GetDirectories(sDir);
                 return dirs;
             }
             catch (UnauthorizedAccessException e)
@@ -120,6 +121,7 @@ namespace Slurper.Logic
             {
                 Logger.Log($"getDirs: Failed to retrieve dirList from [{sDir}][{e.Message}]", LogLevel.Error);
             }
+
             return null;
         }
     }

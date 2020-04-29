@@ -5,49 +5,53 @@ using Slurper.Logic;
 
 namespace Slurper.Providers
 {
-    public class FileSystemLayerWindows : IFileSystemLayer 
+    public class FileSystemLayerWindows : IFileSystemLayer
     {
         public ILogger Logger { get; } = LogProvider.Logger;
 
-        public String TargetDirBasePath { get; set; }                             // relative directory for file to be copied to
+        public string TargetDirBasePath { get; set; } // relative directory for file to be copied to
 
-        public  char PathSep { get; }  = Path.DirectorySeparatorChar;
+        public char PathSep { get; } = Path.DirectorySeparatorChar;
 
         public void CreateTargetLocation()
         {
-            String curDir = Directory.GetCurrentDirectory();
-            String hostname = (Environment.MachineName).ToLower();
-            String dateTime = String.Format("{0:yyyyMMdd_HH-mm-ss}", DateTime.Now);
+            var curDir = Directory.GetCurrentDirectory();
+            var hostname = (Environment.MachineName).ToLower();
+            var dateTime = $"{DateTime.Now:yyyyMMdd_HH-mm-ss}";
 
             TargetDirBasePath = string.Concat(curDir, PathSep, Configuration.RipDir, PathSep, hostname, "_", dateTime);
-            Logger.Log($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]", LogLevel.Verbose);
+            Logger.Log($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]",
+                LogLevel.Verbose);
 
             try
             {
-                if (!Configuration.Dryrun) { Directory.CreateDirectory(TargetDirBasePath); }
+                if (!Configuration.DryRun)
+                {
+                    Directory.CreateDirectory(TargetDirBasePath);
+                }
             }
-                catch (Exception e)
+            catch (Exception e)
             {
-                Logger.Log($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]", LogLevel.Error);
+                Logger.Log($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]",
+                    LogLevel.Error);
             }
         }
 
         public void GetMountedPartitionInfo()
         {
-            DriveInfo[] allDrives = DriveInfo.GetDrives();
+            var allDrives = DriveInfo.GetDrives();
+            
+            var myDrive = Path.GetPathRoot(Directory.GetCurrentDirectory());
+            Logger.Log($"GetDriveInfo: myDrive = [{myDrive}]", LogLevel.Verbose);
 
-            // mydrive
-            String mydrive = Path.GetPathRoot(Directory.GetCurrentDirectory());
-            Logger.Log($"GetDriveInfo: mydrive = [{mydrive}]", LogLevel.Verbose);
-
-            foreach (DriveInfo d in allDrives)
+            foreach (var d in allDrives)
             {
                 // D:\  -> D:
-                String driveId = d.Name.Substring(0, 2).ToUpper();
+                var driveId = d.Name.Substring(0, 2).ToUpper();
 
                 // check if drive will be included
-                Boolean driveToBeIncluded = false;
-                String reason = "configuration";
+                var driveToBeIncluded = false;
+                var reason = "configuration";
 
                 // check for wildcard
                 if (Configuration.DriveFilePatternsTolookfor.ContainsKey(".:"))
@@ -55,14 +59,16 @@ namespace Slurper.Providers
                     driveToBeIncluded = true;
                     reason = "configuration for drive .:";
                 }
+
                 // check for specific drive
                 if (Configuration.DriveFilePatternsTolookfor.ContainsKey(driveId))
                 {
                     driveToBeIncluded = true;
                     reason = "configuration for drive " + driveId;
                 }
+
                 // skip the drive i'm running from
-                if ((mydrive.ToUpper()).Equals(d.Name.ToUpper()))
+                if (myDrive != null && (myDrive.ToUpper()).Equals(d.Name.ToUpper()))
                 {
                     driveToBeIncluded = false;
                     reason = "this the drive i'm running from";
@@ -73,7 +79,10 @@ namespace Slurper.Providers
                 {
                     Configuration.DrivesToSearch.Add(d.Name);
                 }
-                Logger.Log($"GetDriveInfo: found drive [{driveId}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", LogLevel.Verbose);
+
+                Logger.Log(
+                    $"GetDriveInfo: found drive [{driveId}]\t included? [{driveToBeIncluded}]\t reason[{reason}]",
+                    LogLevel.Verbose);
             }
         }
     }

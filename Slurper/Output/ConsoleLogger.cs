@@ -6,20 +6,20 @@ namespace Slurper.Output
 {
    public class ConsoleLogger : ILogger
     {
-
-        public void Log(string message, LogLevel level)
+        public void Log(string message, LogLevel level = LogLevel.Log)
         {
             var previousColor = Console.ForegroundColor;
-            ConsoleColor color = previousColor;
+            var color = previousColor;
 
-            bool displayLog = false;
+            var displayLog = false;
             switch (level)
             {
                 case LogLevel.Trace:
                     if ( Configuration.Trace ) {
                         displayLog = true;
                         color = ConsoleColor.DarkRed;
-                    } 
+                    }
+
                     break;
                 case LogLevel.Log:
                     displayLog = true;
@@ -29,6 +29,7 @@ namespace Slurper.Output
                         displayLog = true;
                         color = ConsoleColor.DarkYellow;
                     }
+
                     break;
                 case LogLevel.Error:
                     displayLog = true;
@@ -46,12 +47,6 @@ namespace Slurper.Output
                 Console.WriteLine("[{0}][{1}]", level, message);
                 Console.ForegroundColor = previousColor;
             }
-
-        }
-
-        public void Log(string message)
-        {
-            Log(message, LogLevel.Log);
         }
     }
 }

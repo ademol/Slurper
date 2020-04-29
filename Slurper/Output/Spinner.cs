@@ -15,7 +15,7 @@ namespace Slurper.Output
             else
             { _spinCharIdx++; }
 
-            char spinChar = SpinChars[_spinCharIdx];
+            var spinChar = SpinChars[_spinCharIdx];
 
             //set the spinner position
             Console.CursorLeft = 0;
@@ -23,6 +23,5 @@ namespace Slurper.Output
             //write the new character to the console
             Console.Write(spinChar);
         }
-
     }
 }
