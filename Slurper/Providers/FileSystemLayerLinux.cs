@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -109,11 +110,16 @@ namespace Slurper.Providers
                 // include this drive
                 if (driveToBeIncluded)
                 {
-                    Configuration.DrivesToSearch.Add(d.Name);
+                    Configuration.PathList.Add(d.Name);
                 }
 
                 Logger.Log($"GetDriveInfo: found mount point [{mountPoint}]\t included? [{driveToBeIncluded}]\t reason[{reason}]", LogLevel.Verbose);
             }
+        }
+
+        public ArrayList GetPattern(string sDir)
+        {
+            throw new NotImplementedException();
         }
     }
 }

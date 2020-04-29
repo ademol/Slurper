@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
+using System.Text.RegularExpressions;
 using Slurper.Contracts;
 using Slurper.Logic;
 
@@ -77,13 +79,48 @@ namespace Slurper.Providers
                 // include this drive
                 if (driveToBeIncluded)
                 {
-                    Configuration.DrivesToSearch.Add(d.Name);
+                    Configuration.PathList.Add(d.Name);
                 }
 
                 Logger.Log(
                     $"GetDriveInfo: found drive [{driveId}]\t included? [{driveToBeIncluded}]\t reason[{reason}]",
                     LogLevel.Verbose);
             }
+        }
+
+        public ArrayList GetPattern(string sDir)
+        {
+            //driveFilePatternsTolookfor
+            // make sure to only use the patterns for the drives requested
+            var thisDrivePatternsToLookFor = new ArrayList();
+            // drive to search
+            // String curDrive = sDir.Substring(0, 2);    // aka c: 
+
+            var rx = new Regex(@"^([^:]+:)");
+            var curDrive = rx.Matches(sDir)[0].Value;
+
+
+            if (curDrive.Length == 1)
+            {
+                curDrive = curDrive.ToUpper();
+            }
+
+            // add patterns for specific drive
+            ArrayList v;
+            Configuration.DriveFilePatternsTolookfor.TryGetValue(curDrive, out v);
+            if (v != null)
+            {
+                thisDrivePatternsToLookFor.AddRange(v);
+            }
+
+            // add patterns for all drives
+            Configuration.DriveFilePatternsTolookfor.TryGetValue(".:", out v);
+            if (v != null)
+            {
+                thisDrivePatternsToLookFor.AddRange(v);
+            }
+
+            return thisDrivePatternsToLookFor;
         }
     }
 }

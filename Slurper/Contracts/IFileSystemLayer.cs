@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace Slurper.Contracts
 {
     public interface IFileSystemLayer
@@ -9,10 +11,10 @@ namespace Slurper.Contracts
         void CreateTargetLocation();
 
         void GetMountedPartitionInfo();
-        
-        
-        
-        
-        
+
+        ArrayList GetPattern(string sDir);
+
+
+
     }
 }

@@ -24,7 +24,7 @@ namespace Slurper.Logic
 
         private static string DefaultRegexPattern { get; set; } = @"(?i).*\.jpg";                // the default pattern that is used to search for jpg files
 
-        public static ArrayList DrivesToSearch { get; } = new ArrayList();                      // actual drives to search (always excludes the drive that the program is run from..)
+        public static ArrayList PathList { get; } = new ArrayList();                      // actual drives to search (always excludes the drive that the program is run from..)
         public static Dictionary<string, ArrayList> DriveFilePatternsTolookfor { get; } = new Dictionary<string, ArrayList>();   // hash of drive keys with their pattern values 
 
         public static void Configure()

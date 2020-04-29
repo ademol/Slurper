@@ -8,44 +8,31 @@ using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    static class Searcher
+    public class Searcher
     {
-        static readonly ILogger Logger = LogProvider.Logger;
+        private static readonly IFileSystemLayer FileSystemLayer = Program.ChoseFileSystemLayer();
+        private static readonly ILogger Logger = LogProvider.Logger;
+        private readonly ArrayList _thisDrivePatternsToLookFor;
 
+        public Searcher(string startPath)
+        {
+            _thisDrivePatternsToLookFor = FileSystemLayer.GetPattern(startPath);
+        }
+        
         public static void SearchAndCopyFiles()
         {
             // process each drive
-            foreach (String drive in Configuration.DrivesToSearch)
+            foreach (string path in Configuration.PathList)
             {
-                DirSearch(drive);
+                var searcher = new Searcher(path);
+                searcher.DirSearch(path);
             }
         }
 
-        private static void DirSearch(string sDir)
+        private void DirSearch(string Path)
         {
-            //driveFilePatternsTolookfor
-            // make sure to only use the patterns for the drives requested
-            var thisDrivePatternsToLookFor = new ArrayList();
-            // drive to search
-            // String curDrive = sDir.Substring(0, 2);    // aka c: 
-
-            var rx = new Regex(@"^([^:]+:)");
-            var curDrive = rx.Matches(sDir)[0].Value;
-
-
-            if (curDrive.Length == 1) { curDrive = curDrive.ToUpper(); }
-
-            // add patterns for specific drive
-            ArrayList v;
-            Configuration.DriveFilePatternsTolookfor.TryGetValue(curDrive, out v);
-            if (v != null) { thisDrivePatternsToLookFor.AddRange(v); }
-
-            // add patterns for all drives
-            Configuration.DriveFilePatternsTolookfor.TryGetValue(".:", out v);
-            if (v != null) { thisDrivePatternsToLookFor.AddRange(v); }
-
             // long live the 'null-coalescing' operator ?? to handle cases of 'null'  :)
-            foreach (var d in GetDirs(sDir) ?? new String[0])
+            foreach (var d in GetDirs(Path) ?? new String[0])
             {
                 if (IsSymbolic(d))
                 {
@@ -63,7 +50,7 @@ namespace Slurper.Logic
                     Logger.Log($"[{f}]", LogLevel.Trace);
 
                     // check if file is wanted by any of the specified patterns
-                    foreach (String p in thisDrivePatternsToLookFor)
+                    foreach (String p in _thisDrivePatternsToLookFor)
                     {
                         if ((new Regex(p).Match(f)).Success) { FileRipper.RipFile(f); break; }
                     }
@@ -87,39 +74,39 @@ namespace Slurper.Logic
         }
 
 
-        private static string[] GetFiles(string dir)
+        private static string[] GetFiles(string path)
         {
             try
             {
-                var files = Directory.GetFiles(dir, "*.*");
+                var files = Directory.GetFiles(path, "*.*");
                 return files;
             }
             catch (UnauthorizedAccessException e)
             {
-                Logger.Log($"getFiles: Unauthorized to retrieve fileList from [{dir}][{e.Message}]", LogLevel.Error);
+                Logger.Log($"getFiles: Unauthorized to retrieve fileList from [{path}][{e.Message}]", LogLevel.Error);
             }
             catch (Exception e)
             {
-                Logger.Log($"getFiles: Failed to retrieve fileList from [{dir}][{e.Message}]", LogLevel.Error);
+                Logger.Log($"getFiles: Failed to retrieve fileList from [{path}][{e.Message}]", LogLevel.Error);
             }
 
             return null;
         }
 
-        private static string[] GetDirs(string sDir)
+        private static string[] GetDirs(string path)
         {
             try
             {
-                var dirs = Directory.GetDirectories(sDir);
+                var dirs = Directory.GetDirectories(path);
                 return dirs;
             }
             catch (UnauthorizedAccessException e)
             {
-                Logger.Log($"getFiles: Unauthorized to retrieve dirList from [{sDir}][{e.Message}]", LogLevel.Error);
+                Logger.Log($"getFiles: Unauthorized to retrieve dirList from [{path}][{e.Message}]", LogLevel.Error);
             }
             catch (Exception e)
             {
-                Logger.Log($"getDirs: Failed to retrieve dirList from [{sDir}][{e.Message}]", LogLevel.Error);
+                Logger.Log($"getDirs: Failed to retrieve dirList from [{path}][{e.Message}]", LogLevel.Error);
             }
 
             return null;
