@@ -9,5 +9,10 @@ namespace Slurper.Contracts
         void CreateTargetLocation();
 
         void GetMountedPartitionInfo();
+        
+        
+        
+        
+        
     }
 }

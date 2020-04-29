@@ -68,7 +68,7 @@ namespace Slurper.Providers
                 }
 
                 // skip the drive i'm running from
-                if (myDrive != null && (myDrive.ToUpper()).Equals(d.Name.ToUpper()))
+                if (myDrive != null && (myDrive.ToUpper()).Equals(d.Name.ToUpper()) && ! Configuration.Force)
                 {
                     driveToBeIncluded = false;
                     reason = "this the drive i'm running from";

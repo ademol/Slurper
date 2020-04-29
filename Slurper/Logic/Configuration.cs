@@ -15,6 +15,7 @@ namespace Slurper.Logic
         static readonly ILogger Logger = LogProvider.Logger;
 
         public static string SampleConfig { get; set; }
+        public static bool Force { get; set; } // undocumented: forces disk/mp running from to be considered 
         public static bool Verbose { get; set; } // show additional output what is done
         public static bool DryRun { get; set; } // (only) show what will be done (has implicit VERBOSE)
         public static bool Trace { get; set; } // VERBOSE + show also unmatched files 
@@ -170,6 +171,9 @@ namespace Slurper.Logic
                     case 'g':
                         GenerateConfig();
                         Environment.Exit(0);
+                        break;
+                    case 'f':
+                        Force = true;
                         break;
                     default:
                         Console.WriteLine("option [{0}] not supported", c);
