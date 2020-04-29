@@ -1,8 +1,8 @@
 ﻿
-using SlurperDotNetCore.Contracts;
-using SlurperDotNetCore.Output;
+using Slurper.Contracts;
+using Slurper.Output;
 
-namespace SlurperDotNetCore.Providers
+namespace Slurper.Providers
 {
    public static class LogProvider
     {

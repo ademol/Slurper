@@ -1,0 +1,20 @@
+﻿#####################################
+# sample config file                #
+#####################################
+# <filenameregex>					#
+#####################################
+c:.*\.jpg
+f:.*\.doc
+.:.*\.mp3
+c:.*\.txt
+#####################################
+#
+# This searches for:
+#    jpg & txt files on the c: drive
+#    doc files on the f: drive
+#    mp3 files on all (.:) drives
+#
+# notes:
+# - start regex with actual drive or '.' 
+# - all regexes are considered case-insensitive
+ 

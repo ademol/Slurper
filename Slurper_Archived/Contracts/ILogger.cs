@@ -1,4 +1,5 @@
-﻿namespace SlurperDotNetCore.Contracts
+﻿
+namespace Slurper.Contracts
 {
     public interface ILogger
     {
@@ -13,5 +14,4 @@
         Warn,
         Error
     }
-
 }

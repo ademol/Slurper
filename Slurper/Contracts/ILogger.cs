@@ -1,5 +1,4 @@
-﻿
-namespace Slurper.Contracts
+﻿namespace Slurper.Contracts
 {
     public interface ILogger
     {
@@ -14,4 +13,5 @@ namespace Slurper.Contracts
         Warn,
         Error
     }
+
 }

@@ -1,11 +1,10 @@
-namespace SlurperDotNetCore.Contracts
+namespace Slurper.Contracts
 {
     public interface IFileSystemLayer
     {
-         
         ILogger Logger {get;}
 
-        string TargetDirBasePath { get; set; }                             // relative directory for file to be copied to
+        string TargetDirBasePath { get; set; }
 
         char PathSep { get; } 
 

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using Slurper.Contracts;
 using Slurper.Logic;
 
@@ -8,54 +6,47 @@ namespace Slurper.Output
 {
    public class ConsoleLogger : ILogger
     {
-        private static readonly Dictionary<LogLevel, ConsoleColor> ConsoleLevelColor = new Dictionary<LogLevel, ConsoleColor>
+
+        public void Log(string message, LogLevel level)
         {
-            { LogLevel.Trace, ConsoleColor.DarkRed },
-            { LogLevel.Log, ConsoleColor.White },
-            { LogLevel.Verbose, ConsoleColor.Yellow },
-            { LogLevel.Error, ConsoleColor.Red },
-            { LogLevel.Warn, ConsoleColor.DarkYellow }
-        };
+            var previousColor = Console.ForegroundColor;
+            ConsoleColor color = previousColor;
 
-        private static readonly ConsoleColor ForeGroundColor = Console.ForegroundColor;
-
-        public void Log(string message, LogLevel messageLogLevel)
-        {
-            if (Configuration.CmdLineFlagSet.Contains(CmdLineFlag.Silent)) return;
-            if (messageLogLevel == LogLevel.Trace && !Configuration.CmdLineFlagSet.Contains(CmdLineFlag.Trace)) return;
-            if (messageLogLevel == LogLevel.Verbose && !Configuration.CmdLineFlagSet.Contains(CmdLineFlag.Verbose)) return;
-
-            SetForeGroundColorForLogLevel(messageLogLevel);
-            WriteToConsole(GetCallingMember(), messageLogLevel, message);
-            RestoreForeGroundcolor();
-        }
-
-        private void WriteToConsole(string callingMethod, LogLevel level, string logMessage)
-        {
-
-            lock (this)
+            bool displayLog = false;
+            switch (level)
             {
-                Console.WriteLine($"[{callingMethod}][{level.ToString()}][{logMessage}]");
+                case LogLevel.Trace:
+                    if ( Configuration.Trace ) {
+                        displayLog = true;
+                        color = ConsoleColor.DarkRed;
+                    } 
+                    break;
+                case LogLevel.Log:
+                    displayLog = true;
+                    break;
+                case LogLevel.Verbose:
+                    if ( Configuration.Verbose ) {
+                        displayLog = true;
+                        color = ConsoleColor.DarkYellow;
+                    }
+                    break;
+                case LogLevel.Error:
+                    displayLog = true;
+                    color = ConsoleColor.Red;
+                    break;
+                case LogLevel.Warn:
+                    displayLog = true;
+                    color = ConsoleColor.Yellow;
+                    break;
             }
-        }
 
-        private static string GetCallingMember()
-        {
-            StackFrame frame = new StackFrame(2, true);
-            return frame.GetMethod().ToString();
-        }
-
-        private static void RestoreForeGroundcolor()
-        {
-            Console.ForegroundColor = ForeGroundColor;
-        }
-
-        private static void SetForeGroundColorForLogLevel(LogLevel level)
-        {
-            if (ConsoleLevelColor.TryGetValue(level, out ConsoleColor foregroundColor))
+            if (displayLog)
             {
-                Console.ForegroundColor = foregroundColor;
+                Console.ForegroundColor = color;
+                Console.WriteLine("[{0}][{1}]", level, message);
+                Console.ForegroundColor = previousColor;
             }
+
         }
 
         public void Log(string message)

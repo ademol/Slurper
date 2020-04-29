@@ -1,47 +1,41 @@
 ﻿using System;
 using System.IO;
 using Slurper.Contracts;
-using Slurper.Output;
 using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    class Fileripper : IFileripper
+    static class Fileripper
     {
         static readonly ILogger Logger = LogProvider.Logger;
-        const string LongPathPrefix = "\\\\?\\";
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public void RipFile(String soureFilePath)
+    
+        public static void RipFile(String filename)
         {
-            String targetPath = BuildTargetPath(soureFilePath);
-            String targetFilePath = targetPath + Path.GetFileName(soureFilePath);
+            String targetFileName = Path.GetFileName(filename); 
+            String targetRelativePath = Path.GetDirectoryName(filename);
 
-            Spinner.RipSpin();
-            Logger.Log($"RipFile: ripping [{soureFilePath}] => [{targetFilePath}]", LogLevel.Verbose);
+            targetRelativePath = targetRelativePath.Replace(':', '_');
+            String targetPath = Program.FileSystemLayer.TargetDirBasePath 
+            + Program.FileSystemLayer.PathSep 
+            + targetRelativePath + Program.FileSystemLayer.PathSep;
 
-            if (Configuration.CmdLineFlagSet.Contains(CmdLineFlag.Dryrun)) { return; }
+            String targetFileNameFullPath = targetPath + targetFileName;
+
+            Logger.Log($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]", LogLevel.Verbose);
+
             try
             {
-                Directory.CreateDirectory(LongPathPrefix + targetPath);
-                File.Copy(LongPathPrefix + soureFilePath, LongPathPrefix + targetFilePath);
+                // do the filecopy unless this is a dryrun
+                if (!Configuration.Dryrun)
+                {
+                    Directory.CreateDirectory(targetPath);
+                    File.Copy(filename, targetFileNameFullPath);
+                }
             }
             catch (Exception e)
             {
-                Logger.Log($"RipFile: copy of [{soureFilePath}] failed with [{e.Message}]", LogLevel.Error);
+                Logger.Log($"RipFile: copy of [{filename}] failed with [{e.Message}]", LogLevel.Error);
             }
-        }
-
-        private static string BuildTargetPath(string filename)
-        {
-            String targetRelativePath = Path.GetDirectoryName(filename);
-            targetRelativePath = SanitizePath(targetRelativePath);
-            return SystemLayer.TargetDirBasePath + SystemLayer.PathSep + targetRelativePath + SystemLayer.PathSep;
-        }
-
-        private static string SanitizePath(string path)
-        {
-            return path.Replace(':', '_');
         }
     }
 }

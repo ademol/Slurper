@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using SlurperDotNetCore.Contracts;
-using SlurperDotNetCore.Logic;
+using Slurper.Contracts;
+using Slurper.Logic;
 
-namespace SlurperDotNetCore.Providers
+namespace Slurper.Providers
 {
     public class FileSystemLayerLinux : IFileSystemLayer
     {

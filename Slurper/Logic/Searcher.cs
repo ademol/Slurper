@@ -2,11 +2,11 @@
 using System.Collections;
 using System.IO;
 using System.Text.RegularExpressions;
-using SlurperDotNetCore.Contracts;
-using SlurperDotNetCore.Output;
-using SlurperDotNetCore.Providers;
+using Slurper.Contracts;
+using Slurper.Output;
+using Slurper.Providers;
 
-namespace SlurperDotNetCore.Logic
+namespace Slurper.Logic
 {
     static class Searcher
     {

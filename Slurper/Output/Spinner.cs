@@ -4,27 +4,25 @@ namespace Slurper.Output
 {
     static class Spinner
     {
-        private static char _lastSearchChar = '/';
-        private static char _lastRipChar = '-';
+        private static readonly char[] SpinChars = { '|', '/', '-', '\\' };
+        private static int _spinCharIdx;
 
-        public static void SearchSpin()
+        public static void Spin()
         {
-            Flip(ref _lastSearchChar, '/', '\\');
-        }
+            // fold back to begin char when needed
+            if (_spinCharIdx + 1 == SpinChars.Length)
+            { _spinCharIdx = 0; }
+            else
+            { _spinCharIdx++; }
 
-        public static void RipSpin()
-        {
-            Flip(ref _lastRipChar, '-', '|');
-        }
+            char spinChar = SpinChars[_spinCharIdx];
 
-        public static void Flip(ref char lastChar,char lhChar, char rhChar)
-        {
-            char newChar = (lastChar == lhChar) ? rhChar : lhChar;
             //set the spinner position
             Console.CursorLeft = 0;
+
             //write the new character to the console
-            Console.Write(newChar);
-            lastChar = newChar;
+            Console.Write(spinChar);
         }
+
     }
 }
