@@ -43,7 +43,7 @@ namespace Slurper.Logic
             }
             
             // add patterns for any path
-            Configuration.PatternsToMatch.TryGetValue(".:", out v);
+            Configuration.PatternsToMatch.TryGetValue(".", out v);
             if (v != null)
             {
                 patterns.AddRange(v);

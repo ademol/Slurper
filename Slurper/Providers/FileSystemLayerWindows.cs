@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
-using System.Text.RegularExpressions;
 using Slurper.Contracts;
 using Slurper.Logic;
 
@@ -48,18 +46,17 @@ namespace Slurper.Providers
 
             foreach (var d in allDrives)
             {
-                // D:\  -> D:
-                var driveId = d.Name.Substring(0, 2).ToUpper();
+                var driveId = d.Name.Substring(0, 1).ToUpper();
 
                 // check if drive will be included
                 var driveToBeIncluded = false;
                 var reason = "configuration";
 
                 // check for wildcard
-                if (Configuration.PatternsToMatch.ContainsKey(".:"))
+                if (Configuration.PatternsToMatch.ContainsKey("."))
                 {
                     driveToBeIncluded = true;
-                    reason = "configuration for drive .:";
+                    reason = "configuration for drive '.' ";
                 }
 
                 // check for specific drive
@@ -79,7 +76,7 @@ namespace Slurper.Providers
                 // include this drive
                 if (driveToBeIncluded)
                 {
-                    Configuration.PathList.Add(d.Name);
+                    Configuration.PathList.Add(driveId);
                 }
 
                 Logger.Log(

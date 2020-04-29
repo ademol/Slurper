@@ -77,20 +77,17 @@ namespace Slurper.Providers
 
             foreach (var d in mountpoints)
             {
-                // D:\  -> D:
-                //String driveID = d.Name.Substring(0, 2).ToUpper();
-
-                var mountPoint = d.Name;
+                var mountPoint = d.Name.Substring(0,1).ToUpper();
 
                 // check if drive will be included
                 var driveToBeIncluded = false;
                 var reason = "configuration";
 
                 // check for wildcard
-                if (Configuration.PatternsToMatch.ContainsKey(".:") && IsValidMountPoint(d))
+                if (Configuration.PatternsToMatch.ContainsKey(".") && IsValidMountPoint(d))
                 {
                     driveToBeIncluded = true;
-                    reason = "configuration for drive mapping .:";
+                    reason = "configuration for drive mapping .";
                 }
 
                 // check for specific drive

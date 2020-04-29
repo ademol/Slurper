@@ -41,17 +41,15 @@ namespace Slurper.Logic
             }
 
             // show patterns used
-            if (Verbose)
+            if (!Verbose) return;
+            foreach (var path in PatternsToMatch.Keys)
             {
-                foreach (var drive in PatternsToMatch.Keys)
+                PatternsToMatch.TryGetValue(path, out var patterns);
+                if (patterns == null) continue;
+                foreach (string pattern in patterns)
                 {
-                    PatternsToMatch.TryGetValue(drive, out var patterns);
-                    if (patterns != null)
-                        foreach (String pattern in patterns)
-                        {
-                            Logger.Log($"Configure: Pattern to use: disk [{drive}]  pattern [{pattern}] ",
-                                LogLevel.Verbose);
-                        }
+                    Logger.Log($"Configure: Pattern to use: path [{path}]  pattern [{pattern}] ",
+                        LogLevel.Verbose);
                 }
             }
         }
@@ -90,54 +88,53 @@ namespace Slurper.Logic
 
         private static bool LoadConfigFile()
         {
-            var cfgLoaded = false;
-            if (File.Exists(CfgFileName))
-            {
-                const string regexPattern = @"^([^#]:)(.*)"; // pattern to match valid lines from config file   <driveLetter:><regex>
-                var r = new Regex(regexPattern);
-                try
-                {
-                    //todo: also move to alphafs ?
-                    using (var sr = new StreamReader(CfgFileName))
-                    {
-                        while (!sr.EndOfStream)
-                        {
-                            var line = sr.ReadLine();
-                            var m = r.Match(line ?? throw new InvalidOperationException());
-                            if (m.Success)
-                            {
-                                var drive = m.Groups[1].Value.ToUpper();
-                                var regex = m.Groups[2].Value;
-                                // FilePatternsTolookfor.Add(regex);
-                                // DrivesRequestedToBeSearched.Add(drive);
-                                Logger.Log($"LoadConfigFile: [{line}] => for drive:[{drive}] regex:[{regex}]", LogLevel.Verbose);
+            if (!File.Exists(CfgFileName)) return false;
 
-                                // add to hash
-                                if (PatternsToMatch.ContainsKey(drive))
-                                {
-                                    // add to existing key
-                                    PatternsToMatch.TryGetValue(drive, out var t);
-                                    t?.Add(regex);
-                                }
-                                else
-                                {
-                                    var t = new ArrayList {regex};
-                                    PatternsToMatch.Add(drive, t);
-                                }
+            var cfgLoaded = false;
+            const string regexPattern = @"^([^#]+:) (.*)"; // pattern to match valid lines from config file   <driveLetter|path>:<regex>
+            var r = new Regex(regexPattern);
+            try
+            {
+                //todo: also move to alphafs ?
+                using (var sr = new StreamReader(CfgFileName))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        var line = sr.ReadLine();
+                        var m = r.Match(line ?? throw new InvalidOperationException());
+                        if (m.Success)
+                        {
+                            var path = m.Groups[1].Value;
+                            var regex = m.Groups[2].Value;
+                            // FilePatternsTolookfor.Add(regex);
+                            // DrivesRequestedToBeSearched.Add(drive);
+                            Logger.Log($"LoadConfigFile: [{line}] => for path:[{path}] regex:[{regex}]", LogLevel.Verbose);
+
+                            // add to hash
+                            if (PatternsToMatch.ContainsKey(path))
+                            {
+                                // add to existing key
+                                PatternsToMatch.TryGetValue(path, out var t);
+                                t?.Add(regex);
                             }
                             else
                             {
-                                Logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", LogLevel.Verbose);
+                                var t = new ArrayList {regex};
+                                PatternsToMatch.Add(path, t);
                             }
                         }
+                        else
+                        {
+                            Logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", LogLevel.Verbose);
+                        }
                     }
+                }
 
-                    cfgLoaded = true;
-                }
-                catch (Exception e)
-                {
-                    Logger.Log($"LoadConfigFile: Could not read[{CfgFileName}] [{e.Message}]", LogLevel.Error);
-                }
+                cfgLoaded = true;
+            }
+            catch (Exception e)
+            {
+                Logger.Log($"LoadConfigFile: Could not read[{CfgFileName}] [{e.Message}]", LogLevel.Error);
             }
 
             return cfgLoaded;
