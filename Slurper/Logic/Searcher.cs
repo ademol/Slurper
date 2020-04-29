@@ -29,7 +29,7 @@ namespace Slurper.Logic
             // drive to search
             // String curDrive = sDir.Substring(0, 2);    // aka c: 
 
-            var rx = new Regex(@"^([^:]+)");
+            var rx = new Regex(@"^([^:]+:)");
             var curDrive = rx.Matches(sDir)[0].Value;
 
 
