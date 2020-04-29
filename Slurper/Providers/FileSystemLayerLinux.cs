@@ -8,17 +8,16 @@ namespace Slurper.Providers
 {
     public class FileSystemLayerLinux : IFileSystemLayer
     {
-        public ILogger Logger { get; } = LogProvider.Logger;
+        private ILogger Logger { get; } = LogProvider.Logger;
 
-        public String TargetDirBasePath { get; set; }                             // relative directory for file to be copied to
-
-        public char PathSep { get; } = Path.DirectorySeparatorChar;
+       public string TargetDirBasePath { get; set; }
+       public char PathSep { get; } = Path.DirectorySeparatorChar;
 
         public void CreateTargetLocation()
         {
             var curDir = Directory.GetCurrentDirectory();
             var hostname = (Environment.MachineName).ToLower();
-            var dateTime = String.Format("{0:yyyyMMdd_HH-mm-ss}", DateTime.Now);
+            var dateTime = $"{DateTime.Now:yyyyMMdd_HH-mm-ss}";
 
             TargetDirBasePath = string.Concat(curDir, PathSep, Configuration.RipDir, PathSep, hostname, "_", dateTime);
             Logger.Log($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]", LogLevel.Verbose);

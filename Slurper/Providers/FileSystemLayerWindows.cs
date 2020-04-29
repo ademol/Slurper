@@ -7,7 +7,7 @@ namespace Slurper.Providers
 {
     public class FileSystemLayerWindows : IFileSystemLayer
     {
-        public ILogger Logger { get; } = LogProvider.Logger;
+        private ILogger Logger { get; } = LogProvider.Logger;
 
         public string TargetDirBasePath { get; set; } // relative directory for file to be copied to
 
