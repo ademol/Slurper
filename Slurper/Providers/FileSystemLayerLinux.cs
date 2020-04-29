@@ -85,7 +85,7 @@ namespace Slurper.Providers
                     reason = "this the drive i'm running from";
                 }
                 
-                if (IsValidMountPoint(d))
+                if (! IsValidMountPoint(d))
                 {
                     toBeIncluded = false;
                     reason = "not applicable for this mountpoint/fs-type";
