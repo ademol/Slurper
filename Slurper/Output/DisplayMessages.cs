@@ -3,7 +3,7 @@ using Slurper.Logic;
 
 namespace Slurper.Output
 {
-    static class DisplayMessages
+    internal static class DisplayMessages
     {
         public static void Help()
         {

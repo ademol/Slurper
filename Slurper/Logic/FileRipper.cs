@@ -5,9 +5,9 @@ using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    static class FileRipper
+    internal static class FileRipper
     {
-        static readonly ILogger Logger = LogProvider.Logger;
+        private static readonly ILogger Logger = LogProvider.Logger;
     
         public static void RipFile(String filename)
         {

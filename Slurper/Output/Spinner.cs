@@ -2,7 +2,7 @@
 
 namespace Slurper.Output
 {
-    static class Spinner
+    internal static class Spinner
     {
         private static readonly char[] SpinChars = { '|', '/', '-', '\\' };
         private static int _spinCharIdx;

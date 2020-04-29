@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -13,17 +12,14 @@ namespace Slurper.Logic
     public static class Configuration
     {
         static readonly ILogger Logger = LogProvider.Logger;
-
-        public static string SampleConfig { get; set; }
-        public static bool Force { get; set; } // undocumented: forces disk/mp running from to be considered 
-        public static bool Verbose { get; set; } // show additional output what is done
-        public static bool DryRun { get; set; } // (only) show what will be done (has implicit VERBOSE)
-        public static bool Trace { get; set; } // VERBOSE + show also unmatched files 
-        private static string CfgFileName { get; set; } = "slurper.cfg";                         // regex pattern(s) configuration file
-        public static string RipDir { get; set; } = "rip";                                      // relative root directory for files to be copied to
-
-        private static string DefaultRegexPattern { get; set; } = @"(?i).*\.jpg$";                // the default pattern that is used to search for jpg files
-
+        public static string SampleConfig { get; private set; }
+        public static bool Force { get; private set; }                  // undocumented: forces disk/mp running from to be considered 
+        public static bool Verbose { get; private set; }                // show additional output what is done
+        public static bool DryRun { get; private set; }                 // (only) show what will be done (has implicit VERBOSE)
+        public static bool Trace { get; private set; }                 // VERBOSE + show also unmatched files 
+        private static string CfgFileName { get; } = "slurper.cfg";    // regex pattern(s) configuration file
+        public static string RipDir { get; } = "rip";                  // relative root directory for files to be copied to
+        private static string DefaultPattern { get; } = @"(?i).*\.jpg$";     // the default pattern
         public static List<string> PathList { get; } = new List<string>();                
         public static List<string> PatternsToMatch { get; } = new List<string>();   
 
@@ -33,9 +29,9 @@ namespace Slurper.Logic
             {
                 // default config            
                 Logger.Log($"Configure: config file [{CfgFileName}] not found, " +
-                    $"or no valid patterns in file found => using default pattern [{DefaultRegexPattern}]", LogLevel.Warn);
+                    $"or no valid patterns in file found => using default pattern [{DefaultPattern}]", LogLevel.Warn);
 
-                PatternsToMatch.Add(DefaultRegexPattern);
+                PatternsToMatch.Add(DefaultPattern);
             }
 
             // show patterns used
@@ -45,7 +41,7 @@ namespace Slurper.Logic
                 Logger.Log($"Configure: Pattern to use: [{pattern}] ", LogLevel.Verbose);
             }
         }
-
+        
         public static void InitSampleConfig()
         {
             // sample config

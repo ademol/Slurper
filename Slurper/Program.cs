@@ -43,7 +43,7 @@ namespace Slurper
             Searcher.SearchAndCopyFiles();
         }
 
-        public static IFileSystemLayer ChoseFileSystemLayer()
+        private static IFileSystemLayer ChoseFileSystemLayer()
         {
             IFileSystemLayer fileSystemLayer;
             switch (Environment.OSVersion.Platform)

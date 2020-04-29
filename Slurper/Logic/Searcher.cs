@@ -16,7 +16,7 @@ namespace Slurper.Logic
         public static void SearchAndCopyFiles()
         {
             // process each drive
-            foreach (string path in Configuration.PathList)
+            foreach (var path in Configuration.PathList)
             {
                 var searcher = new Searcher();
                 searcher.DirSearch(path);
@@ -46,7 +46,7 @@ namespace Slurper.Logic
                     // check if file is wanted by any of the specified patterns
                     foreach (String p in _patterns)
                     {
-                        if ((new Regex(p).Match(f)).Success)
+                        if (new Regex(p).Match(f).Success)
                         {
                             FileRipper.RipFile(f);
                             break;

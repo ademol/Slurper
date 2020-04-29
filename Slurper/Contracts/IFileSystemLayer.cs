@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace Slurper.Contracts
 {
     public interface IFileSystemLayer

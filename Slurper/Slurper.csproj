@@ -18,8 +18,4 @@
     <EmbeddedResource Include="slurper.cfg.txt" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models" />
-  </ItemGroup>
-
 </Project>
