@@ -1,5 +1,5 @@
 ﻿#################################
-# sample config file            #
+# sample config file windows    #
 #################################
 c:(?i).*\.jpg
 f:(?i).*\.doc
@@ -10,5 +10,20 @@ c:(?i).*\.txt
 # This searches for:
 #    jpg & txt files on the c: drive
 #    doc files on the f: drive
-#    mp3 files on all (.:) drives
+#    mp3 files on all (.:) drives (excluding drive where process is running from)
+#
+
+#################################
+# sample config file linux    #
+#################################
+/usr/local:(?i).*\.jpg
+/root:(?i).*\.doc
+.:(?i).*\.mp3
+/usr/loca/bin:(?i).*\.txt
+#################################
+#
+# This searches for:
+#    jpg & txt files on the /usr/local mountpoint
+#    doc files on the /root mountpoint 
+#    mp3 files on (.:) all mountpoints (excluding mountpoint where process is running from) 
 #
