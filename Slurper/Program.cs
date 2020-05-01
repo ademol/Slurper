@@ -4,51 +4,39 @@ using Slurper.Contracts;
 using Slurper.Logic;
 using Slurper.Providers;
 
-[assembly:InternalsVisibleTo("SlurperTests")]
+[assembly: InternalsVisibleTo("SlurperTests")]
+
 namespace Slurper
 {
-    static class Program
+    internal static class Program
     {
-        /*
-        * Sluper: Utility to search for files on a Windows computer that match one or more regex patterns. 
-        *         The files found are then copied to a subdirectory in the location from where the program is run.
-        *         
-        *         note: 
-        *         The drive that the program is run from, is excluded from searching.
-        *           => suggested use is to run this program from an portable location (USB/HD) 
-        *           
-        */
-
-
         public static IFileSystemLayer FileSystemLayer { get; private set; }
 
         internal static void Main(string[] args)
         {
-            // init
             Configuration.InitSampleConfig();
 
-            // handle arguments
             Configuration.ProcessArguments(args);
 
             FileSystemLayer = ChoseFileSystemLayer();
-            
-            // determine & create target directory
+
             FileSystemLayer.CreateTargetLocation();
 
-            // configuration 
             Configuration.Configure();
 
-            // get drives to search
-            FileSystemLayer.GetMountedPartitionInfo();
+            FileSystemLayer.GetFileSystemInformation();
 
-            // find files matching pattern(s) from all applicable drives, and copy them to the targetLocation
             Searcher.SearchAndCopyFiles();
         }
 
-        internal static IFileSystemLayer ChoseFileSystemLayer()
+        private static IFileSystemLayer ChoseFileSystemLayer()
         {
             IFileSystemLayer fileSystemLayer;
-            switch (new EnvironmentService().GetOsPlatform())
+
+            var platformId = Environment.OSVersion.Platform;
+
+            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+            switch (platformId)
             {
                 case PlatformID.Win32NT:
                     fileSystemLayer = new FileSystemLayerWindows();
@@ -60,7 +48,7 @@ namespace Slurper
                     fileSystemLayer = new FileSystemLayerLinux();
                     break;
                 default:
-                    Console.WriteLine("This OS and/or its filesystem is not supported");
+                    Console.WriteLine($"This [{platformId}] OS and/or its filesystem is not supported");
                     throw new NotSupportedException();
             }
 

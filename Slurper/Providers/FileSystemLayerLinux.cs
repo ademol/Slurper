@@ -38,7 +38,7 @@ namespace Slurper.Providers
             return !IsOnExcludedTopLevelPath(drive.Name) && IsValidFileSystem(drive.DriveFormat);
         }
 
-        private bool IsOnExcludedTopLevelPath(string path)
+        private static bool IsOnExcludedTopLevelPath(string path)
         {
             var topLevelRegex = new Regex("^(/[^/]*)", RegexOptions.IgnoreCase);
             var matcher = topLevelRegex.Match(path);
@@ -53,7 +53,7 @@ namespace Slurper.Providers
         }
 
 
-        private bool IsValidFileSystem(string driveFormat)
+        private static bool IsValidFileSystem(string driveFormat)
         {
             if (driveFormat == null) { return false; }
 
@@ -64,7 +64,7 @@ namespace Slurper.Providers
             return fileSystemValid;
         }
 
-        public void GetMountedPartitionInfo()
+        public void GetFileSystemInformation()
         {
             var mountpoints = DriveInfo.GetDrives();
             

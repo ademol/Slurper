@@ -37,7 +37,7 @@ namespace Slurper.Providers
             }
         }
 
-        public void GetMountedPartitionInfo()
+        public void GetFileSystemInformation()
         {
             var allDrives = DriveInfo.GetDrives();
             
@@ -47,7 +47,7 @@ namespace Slurper.Providers
             foreach (var d in allDrives)
             {
                 var driveToBeIncluded = true;
-                var reason = String.Empty;
+                var reason = string.Empty;
                 
                 // skip the drive i'm running from
                 if (myDrive != null && (myDrive.ToUpper()).Equals(d.Name.ToUpper()) && ! Configuration.Force)

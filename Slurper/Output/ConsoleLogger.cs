@@ -41,12 +41,10 @@ namespace Slurper.Output
                     break;
             }
 
-            if (displayLog)
-            {
-                Console.ForegroundColor = color;
-                Console.WriteLine("[{0}][{1}]", level, message);
-                Console.ForegroundColor = previousColor;
-            }
+            if (!displayLog) return;
+            Console.ForegroundColor = color;
+            Console.WriteLine("[{0}][{1}]", level, message);
+            Console.ForegroundColor = previousColor;
         }
     }
 }

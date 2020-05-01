@@ -8,6 +8,6 @@ namespace Slurper.Contracts
 
         void CreateTargetLocation();
 
-        void GetMountedPartitionInfo();
+        void GetFileSystemInformation();
     }
 }
