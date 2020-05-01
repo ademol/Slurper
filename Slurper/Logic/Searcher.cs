@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Slurper.Contracts;
 using Slurper.Output;
@@ -11,29 +12,34 @@ namespace Slurper.Logic
     public class Searcher
     {
         private static readonly ILogger Logger = LogProvider.Logger;
-        private readonly List<string> _patterns = Configuration.PatternsToMatch;
-        
+        private readonly List<string> _patterns = ConfigurationService.PatternsToMatch;
+        private readonly string _curPath = Directory.GetCurrentDirectory();
+
         public static void SearchAndCopyFiles()
         {
-            // process each drive
-            foreach (var path in Configuration.PathList)
+            foreach (var path in ConfigurationService.PathList)
             {
                 var searcher = new Searcher();
                 searcher.DirSearch(path);
             }
         }
-        
+
         private void DirSearch(string path)
         {
-            // long live the 'null-coalescing' operator ?? to handle cases of 'null'  :)
-            foreach (var d in GetDirs(path) ?? new String[0])
+            foreach (var d in GetDirs(path) ?? new string[0])
             {
                 if (IsSymbolic(d))
                 {
                     continue;
                 }
 
-                foreach (var f in GetFiles(d) ?? new String[0])
+                if (IsCurrentPath(d))
+                {
+                    Logger.Log($"Skipping my path[{d}]", LogLevel.Error);
+                    continue;
+                }
+
+                foreach (var f in GetFiles(d) ?? new string[0])
                 {
                     if (IsSymbolic(f))
                     {
@@ -43,14 +49,9 @@ namespace Slurper.Logic
                     Spinner.Spin();
                     Logger.Log($"[{f}]", LogLevel.Trace);
 
-                    // check if file is wanted by any of the specified patterns
-                    foreach (String p in _patterns)
+                    if (_patterns.Any(p => new Regex(p).Match(f).Success))
                     {
-                        if (new Regex(p).Match(f).Success)
-                        {
-                            FileRipper.RipFile(f);
-                            break;
-                        }
+                        FileRipper.RipFile(f);
                     }
                 }
 
@@ -63,6 +64,11 @@ namespace Slurper.Logic
                     Logger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", LogLevel.Error);
                 }
             }
+        }
+
+        private bool IsCurrentPath(string path)
+        {
+            return path.Equals(_curPath);
         }
 
 
@@ -95,8 +101,7 @@ namespace Slurper.Logic
         {
             try
             {
-                var dirs = Directory.GetDirectories(path);
-                return dirs;
+                return Directory.GetDirectories(path);
             }
             catch (UnauthorizedAccessException e)
             {

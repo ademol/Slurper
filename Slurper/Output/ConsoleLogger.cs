@@ -4,7 +4,7 @@ using Slurper.Logic;
 
 namespace Slurper.Output
 {
-   public class ConsoleLogger : ILogger
+    public class ConsoleLogger : ILogger
     {
         public void Log(string message, LogLevel level = LogLevel.Log)
         {
@@ -15,7 +15,8 @@ namespace Slurper.Output
             switch (level)
             {
                 case LogLevel.Trace:
-                    if ( Configuration.Trace ) {
+                    if (ConfigurationService.Trace)
+                    {
                         displayLog = true;
                         color = ConsoleColor.DarkRed;
                     }
@@ -25,7 +26,8 @@ namespace Slurper.Output
                     displayLog = true;
                     break;
                 case LogLevel.Verbose:
-                    if ( Configuration.Verbose ) {
+                    if (ConfigurationService.Verbose)
+                    {
                         displayLog = true;
                         color = ConsoleColor.DarkYellow;
                     }

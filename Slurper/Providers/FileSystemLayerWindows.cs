@@ -9,7 +9,7 @@ namespace Slurper.Providers
     {
         private ILogger Logger { get; } = LogProvider.Logger;
 
-        public string TargetDirBasePath { get; set; } // relative directory for file to be copied to
+        public string TargetDirBasePath { get; private set; } // relative directory for file to be copied to
 
         public char PathSep { get; } = Path.DirectorySeparatorChar;
 
@@ -19,13 +19,14 @@ namespace Slurper.Providers
             var hostname = (Environment.MachineName).ToLower();
             var dateTime = $"{DateTime.Now:yyyyMMdd_HH-mm-ss}";
 
-            TargetDirBasePath = string.Concat(curDir, PathSep, Configuration.RipDir, PathSep, hostname, "_", dateTime);
+            TargetDirBasePath = string.Concat(curDir, PathSep, ConfigurationService.DestinationDirectory, PathSep,
+                hostname, "_", dateTime);
             Logger.Log($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]",
                 LogLevel.Verbose);
 
             try
             {
-                if (!Configuration.DryRun)
+                if (!ConfigurationService.DryRun)
                 {
                     Directory.CreateDirectory(TargetDirBasePath);
                 }
@@ -37,10 +38,10 @@ namespace Slurper.Providers
             }
         }
 
-        public void GetFileSystemInformation()
+        public void SetSourcePaths()
         {
             var allDrives = DriveInfo.GetDrives();
-            
+
             var myDrive = Path.GetPathRoot(Directory.GetCurrentDirectory());
             Logger.Log($"GetDriveInfo: myDrive = [{myDrive}]", LogLevel.Verbose);
 
@@ -48,9 +49,9 @@ namespace Slurper.Providers
             {
                 var driveToBeIncluded = true;
                 var reason = string.Empty;
-                
+
                 // skip the drive i'm running from
-                if (myDrive != null && (myDrive.ToUpper()).Equals(d.Name.ToUpper()) && ! Configuration.Force)
+                if (myDrive != null && (myDrive.ToUpper()).Equals(d.Name.ToUpper()) && !ConfigurationService.Force)
                 {
                     driveToBeIncluded = false;
                     reason = "this the drive i'm running from";
@@ -59,13 +60,18 @@ namespace Slurper.Providers
                 // include this drive
                 if (driveToBeIncluded)
                 {
-                    Configuration.PathList.Add(d.Name);
+                    ConfigurationService.PathList.Add(d.Name);
                 }
 
                 Logger.Log(
                     $"GetDriveInfo: found drive [{d.Name}]\t included? [{driveToBeIncluded}]\t reason[{reason}]",
                     LogLevel.Verbose);
             }
+        }
+
+        public string SanitizePath(string path)
+        {
+            return path.Replace(':', '_');
         }
     }
 }

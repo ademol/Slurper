@@ -2,12 +2,14 @@ namespace Slurper.Contracts
 {
     public interface IFileSystemLayer
     {
-        string TargetDirBasePath { get; set; }
+        string TargetDirBasePath { get; }
 
-        char PathSep { get; } 
+        char PathSep { get; }
 
         void CreateTargetLocation();
 
-        void GetFileSystemInformation();
+        void SetSourcePaths();
+
+        string SanitizePath(string path);
     }
 }

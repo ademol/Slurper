@@ -15,12 +15,17 @@ namespace Slurper.Output
             txt += "use the /t flag for trace => slurper.exe /t    (note: setting trace sets verbose) \n";
             txt += "use the /g flag to generate a sample cfg file\n";
             txt += "\n";
-            txt += "(optional) when a config file exits (./slurper.cfg) it is used to specify custom regexs to match \n";
+            txt +=
+                "(optional) when a config file exits (./slurper.cfg) it is used to specify custom regexs to match \n";
             txt += "\n";
-            txt += Configuration.SampleConfig;
+            txt += ConfigurationService.SampleConfig;
 
-            Console.WriteLine(txt);
-            Environment.Exit(0);
+            DisplayMessage(txt);
+        }
+
+        private static void DisplayMessage(string message)
+        {
+            Console.WriteLine(message);
         }
     }
 }

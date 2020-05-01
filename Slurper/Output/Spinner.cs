@@ -4,16 +4,20 @@ namespace Slurper.Output
 {
     internal static class Spinner
     {
-        private static readonly char[] SpinChars = { '|', '/', '-', '\\' };
+        private static readonly char[] SpinChars = {'|', '/', '-', '\\'};
         private static int _spinCharIdx;
 
         public static void Spin()
         {
             // fold back to begin char when needed
             if (_spinCharIdx + 1 == SpinChars.Length)
-            { _spinCharIdx = 0; }
+            {
+                _spinCharIdx = 0;
+            }
             else
-            { _spinCharIdx++; }
+            {
+                _spinCharIdx++;
+            }
 
             var spinChar = SpinChars[_spinCharIdx];
 
