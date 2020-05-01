@@ -50,9 +50,7 @@ namespace Slurper.Logic
         private static void LogPatterns()
         {
             foreach (var pattern in PatternsToMatch)
-            {
                 Logger.Log($"Configure: Pattern to use: [{pattern}] ", LogLevel.Verbose);
-            }
         }
 
         public static void InitSampleConfig()
@@ -120,9 +118,8 @@ namespace Slurper.Logic
 
         public static void ProcessArguments(string[] args)
         {
-            var charArguments = String.Join("", args);
+            var charArguments = string.Join("", args);
             foreach (var c in charArguments)
-            {
                 switch (c)
                 {
                     case 'h':
@@ -153,7 +150,6 @@ namespace Slurper.Logic
                         Environment.Exit(0);
                         break;
                 }
-            }
 
             Logger.Log($"Arguments: VERBOSE[{Verbose}] DRYRUN[{DryRun}] TRACE[{Trace}]", LogLevel.Verbose);
         }

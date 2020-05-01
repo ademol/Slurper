@@ -12,6 +12,7 @@ namespace Slurper.Output
             var color = previousColor;
 
             var displayLog = false;
+            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (level)
             {
                 case LogLevel.Trace:

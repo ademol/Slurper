@@ -11,13 +11,9 @@ namespace Slurper.Output
         {
             // fold back to begin char when needed
             if (_spinCharIdx + 1 == SpinChars.Length)
-            {
                 _spinCharIdx = 0;
-            }
             else
-            {
                 _spinCharIdx++;
-            }
 
             var spinChar = SpinChars[_spinCharIdx];
 

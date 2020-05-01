@@ -17,7 +17,7 @@ namespace Slurper.Providers
         public void CreateTargetLocation()
         {
             var curDir = Directory.GetCurrentDirectory();
-            var hostname = (Environment.MachineName).ToLower();
+            var hostname = Environment.MachineName.ToLower();
             var dateTime = $"{DateTime.Now:yyyyMMdd_HH-mm-ss}";
 
             TargetDirBasePath = string.Concat(curDir, PathSep, ConfigurationService.DestinationDirectory, PathSep,
@@ -27,53 +27,13 @@ namespace Slurper.Providers
 
             try
             {
-                if (!ConfigurationService.DryRun)
-                {
-                    Directory.CreateDirectory(TargetDirBasePath);
-                }
+                if (!ConfigurationService.DryRun) Directory.CreateDirectory(TargetDirBasePath);
             }
             catch (Exception e)
             {
                 Logger.Log($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]",
                     LogLevel.Error);
             }
-        }
-
-        private static bool IsValidMountPoint(DriveInfo drive)
-        {
-            return !IsOnExcludedTopLevelPath(drive.Name) && IsValidFileSystem(drive.DriveFormat);
-        }
-
-        private static bool IsOnExcludedTopLevelPath(string path)
-        {
-            var topLevelRegex = new Regex("^(/[^/]*)", RegexOptions.IgnoreCase);
-            var matcher = topLevelRegex.Match(path);
-            var topLevelPath = path;
-            if (matcher.Success)
-            {
-                topLevelPath = matcher.Value;
-            }
-
-            string[] excluded = {"/proc", "/sys", "/run"};
-            return excluded.Contains(topLevelPath);
-        }
-
-
-        private static bool IsValidFileSystem(string driveFormat)
-        {
-            if (driveFormat == null)
-            {
-                return false;
-            }
-
-            string[] fileSystemsToSkip =
-            {
-                "sysfs", "proc", "tmpfs", "devpts",
-                "cgroupfs", "securityfs", "pstorefs", "mqueue", "debugfs", "hugetlbfs", "fusectl",
-                "fusectl", "isofs", "binfmt_misc", "rpc_pipefs", "bpf", "cgroup", "cgroup2"
-            };
-            var fileSystemValid = !fileSystemsToSkip.Contains(driveFormat);
-            return fileSystemValid;
         }
 
         public void SetSourcePaths()
@@ -96,11 +56,8 @@ namespace Slurper.Providers
                     toBeIncluded = false;
                     reason = "not applicable for this mountpoint/fs-type";
                 }
-                
-                if (toBeIncluded)
-                {
-                    ConfigurationService.PathList.Add(d.Name);
-                }
+
+                if (toBeIncluded) ConfigurationService.PathList.Add(d.Name);
 
                 Logger.Log(
                     $"GetDriveInfo: found mount point [{d.Name}]\t included? [{toBeIncluded}]\t reason[{reason}]",
@@ -111,6 +68,37 @@ namespace Slurper.Providers
         public string SanitizePath(string path)
         {
             return path;
+        }
+
+        private static bool IsValidMountPoint(DriveInfo drive)
+        {
+            return !IsOnExcludedTopLevelPath(drive.Name) && IsValidFileSystem(drive.DriveFormat);
+        }
+
+        private static bool IsOnExcludedTopLevelPath(string path)
+        {
+            var topLevelRegex = new Regex("^(/[^/]*)", RegexOptions.IgnoreCase);
+            var matcher = topLevelRegex.Match(path);
+            var topLevelPath = path;
+            if (matcher.Success) topLevelPath = matcher.Value;
+
+            string[] excluded = {"/proc", "/sys", "/run"};
+            return excluded.Contains(topLevelPath);
+        }
+
+
+        private static bool IsValidFileSystem(string driveFormat)
+        {
+            if (driveFormat == null) return false;
+
+            string[] fileSystemsToSkip =
+            {
+                "sysfs", "proc", "tmpfs", "devpts",
+                "cgroupfs", "securityfs", "pstorefs", "mqueue", "debugfs", "hugetlbfs", "fusectl",
+                "fusectl", "isofs", "binfmt_misc", "rpc_pipefs", "bpf", "cgroup", "cgroup2"
+            };
+            var fileSystemValid = !fileSystemsToSkip.Contains(driveFormat);
+            return fileSystemValid;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Slurper.Logic
         public static void RipFile(string filename)
         {
             var targetPath = TargetPath(filename);
-            var targetFileNameFullPath = targetPath +  Path.GetFileName(filename);
+            var targetFileNameFullPath = targetPath + Path.GetFileName(filename);
 
             Logger.Log($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]", LogLevel.Verbose);
 
@@ -33,10 +33,10 @@ namespace Slurper.Logic
             var targetRelativePath = Path.GetDirectoryName(filename);
             targetRelativePath = Program.FileSystemLayer.SanitizePath(targetRelativePath);
 
-            var sep= Program.FileSystemLayer.PathSep;
+            var sep = Program.FileSystemLayer.PathSep;
             var targetDirBasePath = Program.FileSystemLayer.TargetDirBasePath;
-            
-            return  $"{targetDirBasePath}{sep}{targetRelativePath}{sep}";
+
+            return $"{targetDirBasePath}{sep}{targetRelativePath}{sep}";
         }
     }
 }

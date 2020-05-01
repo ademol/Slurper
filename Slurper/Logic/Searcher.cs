@@ -12,8 +12,8 @@ namespace Slurper.Logic
     public class Searcher
     {
         private static readonly ILogger Logger = LogProvider.Logger;
-        private readonly List<string> _patterns = ConfigurationService.PatternsToMatch;
         private readonly string _curPath = Directory.GetCurrentDirectory();
+        private readonly List<string> _patterns = ConfigurationService.PatternsToMatch;
 
         public static void SearchAndCopyFiles()
         {
@@ -28,10 +28,7 @@ namespace Slurper.Logic
         {
             foreach (var d in GetDirs(path) ?? new string[0])
             {
-                if (IsSymbolic(d))
-                {
-                    continue;
-                }
+                if (IsSymbolic(d)) continue;
 
                 if (IsCurrentPath(d))
                 {
@@ -41,18 +38,12 @@ namespace Slurper.Logic
 
                 foreach (var f in GetFiles(d) ?? new string[0])
                 {
-                    if (IsSymbolic(f))
-                    {
-                        continue;
-                    }
+                    if (IsSymbolic(f)) continue;
 
                     Spinner.Spin();
                     Logger.Log($"[{f}]", LogLevel.Trace);
 
-                    if (_patterns.Any(p => new Regex(p).Match(f).Success))
-                    {
-                        FileRipper.RipFile(f);
-                    }
+                    if (_patterns.Any(p => new Regex(p).Match(f).Success)) FileRipper.RipFile(f);
                 }
 
                 try

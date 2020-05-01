@@ -25,7 +25,7 @@ namespace Slurper
             ConfigurationService.InitSampleConfig();
             ConfigurationService.ProcessArguments(args);
             ConfigurationService.Configure();
-            
+
             FileSystemLayer = ConfigurationService.ChoseFileSystemLayer();
         }
     }

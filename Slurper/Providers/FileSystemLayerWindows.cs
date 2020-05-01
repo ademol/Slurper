@@ -16,7 +16,7 @@ namespace Slurper.Providers
         public void CreateTargetLocation()
         {
             var curDir = Directory.GetCurrentDirectory();
-            var hostname = (Environment.MachineName).ToLower();
+            var hostname = Environment.MachineName.ToLower();
             var dateTime = $"{DateTime.Now:yyyyMMdd_HH-mm-ss}";
 
             TargetDirBasePath = string.Concat(curDir, PathSep, ConfigurationService.DestinationDirectory, PathSep,
@@ -26,10 +26,7 @@ namespace Slurper.Providers
 
             try
             {
-                if (!ConfigurationService.DryRun)
-                {
-                    Directory.CreateDirectory(TargetDirBasePath);
-                }
+                if (!ConfigurationService.DryRun) Directory.CreateDirectory(TargetDirBasePath);
             }
             catch (Exception e)
             {
@@ -48,7 +45,7 @@ namespace Slurper.Providers
             foreach (var d in allDrives)
             {
                 ConfigurationService.PathList.Add(d.Name);
-                
+
                 Logger.Log($"GetDriveInfo: found drive [{d.Name}]", LogLevel.Verbose);
             }
         }
