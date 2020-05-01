@@ -1,43 +1,70 @@
-﻿using System.IO;
+﻿using System;
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using Slurper.Contracts;
+using Slurper.Logic;
+using Slurper.Providers;
 
 [assembly:InternalsVisibleTo("SlurperTests")]
 namespace Slurper
 {
-    public static class Program
+    static class Program
     {
-        static void Main(string[] args)
+        /*
+        * Sluper: Utility to search for files on a Windows computer that match one or more regex patterns. 
+        *         The files found are then copied to a subdirectory in the location from where the program is run.
+        *         
+        *         note: 
+        *         The drive that the program is run from, is excluded from searching.
+        *           => suggested use is to run this program from an portable location (USB/HD) 
+        *           
+        */
+
+
+        public static IFileSystemLayer FileSystemLayer { get; private set; }
+
+        internal static void Main(string[] args)
         {
-            var services = ConfigureServices();
+            // init
+            Configuration.InitSampleConfig();
 
-            var serviceProvider = services.BuildServiceProvider();
+            // handle arguments
+            Configuration.ProcessArguments(args);
 
-            // calls the Run method in App, which is replacing Main
-            serviceProvider.GetService<App>().Run(args);
-        }
-
-        private static IServiceCollection ConfigureServices()
-        {
-            IServiceCollection services = new ServiceCollection();
-
-            var config = LoadConfiguration();
-            services.AddSingleton(config);
-
-            // required to run the application
-            services.AddTransient<App>();
+            FileSystemLayer = ChoseFileSystemLayer();
             
-            return services;
+            // determine & create target directory
+            FileSystemLayer.CreateTargetLocation();
+
+            // configuration 
+            Configuration.Configure();
+
+            // get drives to search
+            FileSystemLayer.GetMountedPartitionInfo();
+
+            // find files matching pattern(s) from all applicable drives, and copy them to the targetLocation
+            Searcher.SearchAndCopyFiles();
         }
 
-        public static IConfiguration LoadConfiguration()
+        internal static IFileSystemLayer ChoseFileSystemLayer()
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            IFileSystemLayer fileSystemLayer;
+            switch (new EnvironmentService().GetOsPlatform())
+            {
+                case PlatformID.Win32NT:
+                    fileSystemLayer = new FileSystemLayerWindows();
+                    break;
+                case PlatformID.Unix:
+                    fileSystemLayer = new FileSystemLayerLinux();
+                    break;
+                case PlatformID.MacOSX:
+                    fileSystemLayer = new FileSystemLayerLinux();
+                    break;
+                default:
+                    Console.WriteLine("This OS and/or its filesystem is not supported");
+                    throw new NotSupportedException();
+            }
 
-            return builder.Build();
+            return fileSystemLayer;
         }
     }
 }

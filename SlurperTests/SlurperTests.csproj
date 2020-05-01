@@ -10,6 +10,7 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
         <PackageReference Include="NSubstitute" Version="4.2.1" />
         <PackageReference Include="System.Security.Permissions" Version="5.0.0-preview.3.20214.6" />
+        <PackageReference Include="Typemock.Isolator" Version="8.9.2" />
         <PackageReference Include="xunit" Version="2.4.0" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
         <PackageReference Include="coverlet.collector" Version="1.2.0" />

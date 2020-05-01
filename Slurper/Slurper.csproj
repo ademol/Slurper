@@ -8,9 +8,6 @@
   <ItemGroup>
     <None Remove="icons\Ahmadhania-Spherical-File-download.ico" />
     <None Remove="slurper.cfg.txt" />
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -19,13 +16,6 @@
 
   <ItemGroup>
     <EmbeddedResource Include="slurper.cfg.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.3" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.3" />
   </ItemGroup>
 
 </Project>

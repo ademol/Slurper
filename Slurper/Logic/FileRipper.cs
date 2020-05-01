@@ -15,9 +15,9 @@ namespace Slurper.Logic
             var targetRelativePath = Path.GetDirectoryName(filename);
 
             targetRelativePath = targetRelativePath?.Replace(':', '_');
-            var targetPath = App.FileSystemLayer.TargetDirBasePath 
-                             + App.FileSystemLayer.PathSep 
-                             + targetRelativePath + App.FileSystemLayer.PathSep;
+            var targetPath = Program.FileSystemLayer.TargetDirBasePath 
+                             + Program.FileSystemLayer.PathSep 
+                             + targetRelativePath + Program.FileSystemLayer.PathSep;
 
             var targetFileNameFullPath = targetPath + targetFileName;
 
