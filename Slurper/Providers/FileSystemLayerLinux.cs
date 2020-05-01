@@ -91,19 +91,12 @@ namespace Slurper.Providers
                 var toBeIncluded = true;
                 var reason = string.Empty;
 
-                if (runMountPoint.Equals(d.Name) && !ConfigurationService.Force)
-                {
-                    toBeIncluded = false;
-                    reason = "this the drive i'm running from";
-                }
-
                 if (!IsValidMountPoint(d))
                 {
                     toBeIncluded = false;
                     reason = "not applicable for this mountpoint/fs-type";
                 }
-
-
+                
                 if (toBeIncluded)
                 {
                     ConfigurationService.PathList.Add(d.Name);

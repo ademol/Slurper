@@ -13,8 +13,6 @@ namespace Slurper.Logic
     {
         private static readonly ILogger Logger = LogProvider.Logger;
         public static string SampleConfig { get; private set; }
-
-        public static bool Force { get; private set; } 
         public static bool Verbose { get; private set; }
         public static bool DryRun { get; private set; }
         public static bool Trace { get; private set; }
@@ -148,9 +146,6 @@ namespace Slurper.Logic
                     case 'g':
                         GenerateSampleConfig();
                         Environment.Exit(0);
-                        break;
-                    case 'f':
-                        Force = true;
                         break;
                     default:
                         Console.WriteLine("option [{0}] not supported", c);

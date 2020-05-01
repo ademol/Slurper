@@ -47,25 +47,9 @@ namespace Slurper.Providers
 
             foreach (var d in allDrives)
             {
-                var driveToBeIncluded = true;
-                var reason = string.Empty;
-
-                // skip the drive i'm running from
-                if (myDrive != null && (myDrive.ToUpper()).Equals(d.Name.ToUpper()) && !ConfigurationService.Force)
-                {
-                    driveToBeIncluded = false;
-                    reason = "this the drive i'm running from";
-                }
-
-                // include this drive
-                if (driveToBeIncluded)
-                {
-                    ConfigurationService.PathList.Add(d.Name);
-                }
-
-                Logger.Log(
-                    $"GetDriveInfo: found drive [{d.Name}]\t included? [{driveToBeIncluded}]\t reason[{reason}]",
-                    LogLevel.Verbose);
+                ConfigurationService.PathList.Add(d.Name);
+                
+                Logger.Log($"GetDriveInfo: found drive [{d.Name}]", LogLevel.Verbose);
             }
         }
 
