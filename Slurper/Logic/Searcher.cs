@@ -28,32 +28,53 @@ namespace Slurper.Logic
         {
             foreach (var d in GetDirs(path) ?? new string[0])
             {
-                if (IsSymbolic(d)) continue;
+                if (SkipDirectory(d)) continue;
 
-                if (IsCurrentPath(d))
-                {
-                    Logger.Log($"Skipping my path[{d}]", LogLevel.Error);
-                    continue;
-                }
+                GetFilesInCurrentDirectory(d);
 
-                foreach (var f in GetFiles(d) ?? new string[0])
-                {
-                    if (IsSymbolic(f)) continue;
+                GetSubDirectories(d);
+            }
+        }
 
-                    Spinner.Spin();
-                    Logger.Log($"[{f}]", LogLevel.Trace);
+        private bool SkipDirectory(string d)
+        {
+            if (IsSymbolic(d))
+            {
+                Logger.Log($"Skip symbolic link [{d}]", LogLevel.Trace);
+                return true;
+            }
 
-                    if (_patterns.Any(p => new Regex(p).Match(f).Success)) FileRipper.RipFile(f);
-                }
+            if (IsCurrentPath(d))
+            {    
+                Logger.Log($"Skipping my path[{d}]", LogLevel.Trace);
+                return true;
+            }
 
-                try
-                {
-                    DirSearch(d);
-                }
-                catch (Exception e)
-                {
-                    Logger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", LogLevel.Error);
-                }
+            return false;
+        }
+
+        private void GetSubDirectories(string d)
+        {
+            try
+            {
+                DirSearch(d);
+            }
+            catch (Exception e)
+            {
+                Logger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", LogLevel.Error);
+            }
+        }
+
+        private void GetFilesInCurrentDirectory(string d)
+        {
+            foreach (var f in GetFiles(d) ?? new string[0])
+            {
+                if (IsSymbolic(f)) continue;
+
+                Spinner.Spin();
+                Logger.Log($"[{f}]", LogLevel.Trace);
+
+                if (_patterns.Any(p => new Regex(p).Match(f).Success)) FileRipper.RipFile(f);
             }
         }
 
