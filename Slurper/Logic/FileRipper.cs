@@ -1,15 +1,16 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Slurper.Contracts;
 using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    internal static class FileRipper
+    public class FileRipper
     {
         private static readonly ILogger Logger = LogProvider.Logger;
 
-        public static void RipFile(string filename)
+        public async Task RipFile(string filename)
         {
             var targetPath = TargetPath(filename);
             var targetFileNameFullPath = targetPath + Path.GetFileName(filename);
@@ -20,7 +21,7 @@ namespace Slurper.Logic
             {
                 if (ConfigurationService.DryRun) return;
                 Directory.CreateDirectory(targetPath);
-                File.Copy(filename, targetFileNameFullPath);
+                await Task.Run(() => File.Copy(filename, targetFileNameFullPath));
             }
             catch (Exception e)
             {
@@ -28,7 +29,7 @@ namespace Slurper.Logic
             }
         }
 
-        private static string TargetPath(string filename)
+        private string TargetPath(string filename)
         {
             var targetRelativePath = Path.GetDirectoryName(filename);
             targetRelativePath = Program.FileSystemLayer.SanitizePath(targetRelativePath);

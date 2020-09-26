@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Slurper.Contracts;
 using Slurper.Output;
 using Slurper.Providers;
@@ -14,14 +16,21 @@ namespace Slurper.Logic
         private static readonly ILogger Logger = LogProvider.Logger;
         private readonly string _curPath = Directory.GetCurrentDirectory();
         private readonly List<string> _patterns = ConfigurationService.PatternsToMatch;
+        private readonly FileRipper _fileRipper = new FileRipper();
 
         public static void SearchAndCopyFiles()
         {
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            var tasks = new List<Task>();
             foreach (var path in ConfigurationService.PathList)
             {
-                var searcher = new Searcher();
-                searcher.DirSearch(path);
+                tasks.Add( Task.Run(() => new Searcher().DirSearch(path)));
             }
+
+            Task.WaitAll(tasks.ToArray());
+            Console.WriteLine($"done in {stopWatch.Elapsed}");
+            stopWatch.Stop();
         }
 
         private void DirSearch(string path)
@@ -45,7 +54,7 @@ namespace Slurper.Logic
             }
 
             if (IsCurrentPath(d))
-            {    
+            {
                 Logger.Log($"Skipping my path[{d}]", LogLevel.Trace);
                 return true;
             }
@@ -67,6 +76,8 @@ namespace Slurper.Logic
 
         private void GetFilesInCurrentDirectory(string d)
         {
+            var tasks = new List<Task>();
+
             foreach (var f in GetFiles(d) ?? new string[0])
             {
                 if (IsSymbolic(f)) continue;
@@ -74,8 +85,13 @@ namespace Slurper.Logic
                 Spinner.Spin();
                 Logger.Log($"[{f}]", LogLevel.Trace);
 
-                if (_patterns.Any(p => new Regex(p).Match(f).Success)) FileRipper.RipFile(f);
+                if (_patterns.Any(p => new Regex(p).Match(f).Success))
+                {
+                    tasks.Add(_fileRipper.RipFile(f));
+                }
             }
+
+            Task.WaitAll(tasks.ToArray());
         }
 
         private bool IsCurrentPath(string path)
@@ -128,3 +144,4 @@ namespace Slurper.Logic
         }
     }
 }
+

@@ -44,6 +44,12 @@ namespace Slurper.Providers
 
             foreach (var d in allDrives)
             {
+                if (d.Name.Equals(myDrive?.ToUpper()))
+                {
+                    Logger.Log($"GetDriveInfo: found drive [{d.Name}], but skipped i'm running from it", LogLevel.Verbose);
+                    continue;
+                }
+
                 ConfigurationService.PathList.Add(d.Name);
 
                 Logger.Log($"GetDriveInfo: found drive [{d.Name}]", LogLevel.Verbose);

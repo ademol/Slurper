@@ -57,6 +57,12 @@ namespace Slurper.Providers
                     reason = "not applicable for this mountpoint/fs-type";
                 }
 
+                if (d.Name.Equals(runMountPoint))
+                {
+                    toBeIncluded = false;
+                    reason = "cannot rip from target mount point";
+                }
+
                 if (toBeIncluded) ConfigurationService.PathList.Add(d.Name);
 
                 Logger.Log(
