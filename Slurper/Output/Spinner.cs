@@ -25,7 +25,7 @@ namespace Slurper.Output
                 //write the new character to the console
                 Console.Write(spinChar);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 _spinCharIdx = 0;
             }
