@@ -2,14 +2,20 @@
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 using Slurper.Contracts;
 using Slurper.Logic;
 
 namespace Slurper.Providers
 {
-    public class FileSystemLayerLinux : IFileSystemLayer
+    public class OperatingSystemLayerLinux : IOperatingSystemLayer
     {
-        private ILogger Logger { get; } = LogProvider.Logger;
+        private readonly ILogger<OperatingSystemLayerLinux> _logger;
+
+        public OperatingSystemLayerLinux(ILogger<OperatingSystemLayerLinux> logger)
+        {
+            _logger = logger;
+        }
 
         public string TargetDirBasePath { get; private set; }
         public char PathSep { get; } = Path.DirectorySeparatorChar;
@@ -22,8 +28,7 @@ namespace Slurper.Providers
 
             TargetDirBasePath = string.Concat(curDir, PathSep, ConfigurationService.DestinationDirectory, PathSep,
                 hostname, "_", dateTime);
-            Logger.Log($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]",
-                LogLevel.Verbose);
+            _logger.LogInformation($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]");
 
             try
             {
@@ -31,8 +36,7 @@ namespace Slurper.Providers
             }
             catch (Exception e)
             {
-                Logger.Log($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]",
-                    LogLevel.Error);
+                _logger.LogInformation($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]");
             }
         }
 
@@ -44,7 +48,7 @@ namespace Slurper.Providers
             var runMountPoint =
                 mountpoints.Where(j => runLocation.Contains(j.Name)).Max(j => j.Name);
 
-            Logger.Log($"GetDriveInfo: [{runMountPoint}]", LogLevel.Verbose);
+            _logger.LogInformation($"GetDriveInfo: [{runMountPoint}]");
 
             foreach (var d in mountpoints)
             {
@@ -65,9 +69,7 @@ namespace Slurper.Providers
 
                 if (toBeIncluded) ConfigurationService.PathList.Add(d.Name);
 
-                Logger.Log(
-                    $"GetDriveInfo: found mount point [{d.Name}]\t included? [{toBeIncluded}]\t reason[{reason}]",
-                    LogLevel.Verbose);
+                _logger.LogInformation($"GetDriveInfo: found mount point [{d.Name}]\t included? [{toBeIncluded}]\t reason[{reason}]");
             }
         }
 

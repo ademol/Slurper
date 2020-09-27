@@ -5,27 +5,32 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Slurper.Contracts;
+using Microsoft.Extensions.Logging;
 using Slurper.Output;
-using Slurper.Providers;
 
 namespace Slurper.Logic
 {
     public class Searcher
     {
-        private static readonly ILogger Logger = LogProvider.Logger;
+        private readonly ILogger<Searcher> _logger;
         private readonly string _curPath = Directory.GetCurrentDirectory();
         private readonly List<string> _patterns = ConfigurationService.PatternsToMatch;
-        private readonly FileRipper _fileRipper = new FileRipper();
+        private readonly FileRipper _fileRipper;
 
-        public static void SearchAndCopyFiles()
+        public Searcher(ILogger<Searcher> logger, FileRipper fileRipper)
+        {
+            _logger = logger;
+            _fileRipper = fileRipper;
+        }
+
+        public void SearchAndCopyFiles()
         {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             var tasks = new List<Task>();
             foreach (var path in ConfigurationService.PathList)
             {
-                tasks.Add( Task.Run(() => new Searcher().DirSearch(path)));
+                tasks.Add( Task.Run(() => DirSearch(path)));
             }
 
             Task.WaitAll(tasks.ToArray());
@@ -49,13 +54,13 @@ namespace Slurper.Logic
         {
             if (IsSymbolic(d))
             {
-                Logger.Log($"Skip symbolic link [{d}]", LogLevel.Trace);
+                _logger.LogTrace($"Skip symbolic link [{d}]");
                 return true;
             }
 
             if (IsCurrentPath(d))
             {
-                Logger.Log($"Skipping my path[{d}]", LogLevel.Trace);
+                _logger.LogTrace($"Skipping my path[{d}]");
                 return true;
             }
 
@@ -70,7 +75,7 @@ namespace Slurper.Logic
             }
             catch (Exception e)
             {
-                Logger.Log($"DirSearch: Could not read dir [{d}][{e.Message}]", LogLevel.Error);
+                _logger.LogError($"DirSearch: Could not read dir [{d}][{e.Message}]");
             }
         }
 
@@ -83,7 +88,7 @@ namespace Slurper.Logic
                 if (IsSymbolic(f)) continue;
 
                 Spinner.Spin();
-                Logger.Log($"[{f}]", LogLevel.Trace);
+                _logger.LogTrace($"[{f}]");
 
                 if (_patterns.Any(p => new Regex(p).Match(f).Success))
                 {
@@ -106,7 +111,7 @@ namespace Slurper.Logic
         }
 
 
-        private static string[] GetFiles(string path)
+        private string[] GetFiles(string path)
         {
             try
             {
@@ -115,17 +120,17 @@ namespace Slurper.Logic
             }
             catch (UnauthorizedAccessException e)
             {
-                Logger.Log($"getFiles: Unauthorized to retrieve fileList from [{path}][{e.Message}]", LogLevel.Error);
+                _logger.LogError($"getFiles: Unauthorized to retrieve fileList from [{path}][{e.Message}]");
             }
             catch (Exception e)
             {
-                Logger.Log($"getFiles: Failed to retrieve fileList from [{path}][{e.Message}]", LogLevel.Error);
+                _logger.LogError($"getFiles: Failed to retrieve fileList from [{path}][{e.Message}]");
             }
 
             return null;
         }
 
-        private static string[] GetDirs(string path)
+        private string[] GetDirs(string path)
         {
             try
             {
@@ -133,11 +138,11 @@ namespace Slurper.Logic
             }
             catch (UnauthorizedAccessException e)
             {
-                Logger.Log($"getFiles: Unauthorized to retrieve dirList from [{path}][{e.Message}]", LogLevel.Error);
+                _logger.LogError($"getFiles: Unauthorized to retrieve dirList from [{path}][{e.Message}]");
             }
             catch (Exception e)
             {
-                Logger.Log($"getDirs: Failed to retrieve dirList from [{path}][{e.Message}]", LogLevel.Error);
+                _logger.LogError($"getDirs: Failed to retrieve dirList from [{path}][{e.Message}]");
             }
 
             return null;

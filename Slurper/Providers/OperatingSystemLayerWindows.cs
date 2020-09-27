@@ -1,13 +1,19 @@
 ﻿using System;
 using System.IO;
+using Microsoft.Extensions.Logging;
 using Slurper.Contracts;
 using Slurper.Logic;
 
 namespace Slurper.Providers
 {
-    public class FileSystemLayerWindows : IFileSystemLayer
+    public class OperatingSystemLayerWindows : IOperatingSystemLayer
     {
-        private ILogger Logger { get; } = LogProvider.Logger;
+        private readonly ILogger<OperatingSystemLayerWindows> _logger;
+
+        public OperatingSystemLayerWindows(ILogger<OperatingSystemLayerWindows> logger)
+        {
+            _logger = logger;
+        }
 
         public string TargetDirBasePath { get; private set; } // relative directory for file to be copied to
 
@@ -21,8 +27,7 @@ namespace Slurper.Providers
 
             TargetDirBasePath = string.Concat(curDir, PathSep, ConfigurationService.DestinationDirectory, PathSep,
                 hostname, "_", dateTime);
-            Logger.Log($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]",
-                LogLevel.Verbose);
+            _logger.LogInformation($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]");
 
             try
             {
@@ -30,8 +35,7 @@ namespace Slurper.Providers
             }
             catch (Exception e)
             {
-                Logger.Log($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]",
-                    LogLevel.Error);
+                _logger.LogInformation($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]");
             }
         }
 
@@ -40,19 +44,19 @@ namespace Slurper.Providers
             var allDrives = DriveInfo.GetDrives();
 
             var myDrive = Path.GetPathRoot(Directory.GetCurrentDirectory());
-            Logger.Log($"GetDriveInfo: myDrive = [{myDrive}]", LogLevel.Verbose);
+            _logger.LogInformation($"GetDriveInfo: myDrive = [{myDrive}]");
 
             foreach (var d in allDrives)
             {
                 if (d.Name.Equals(myDrive?.ToUpper()))
                 {
-                    Logger.Log($"GetDriveInfo: found drive [{d.Name}], but skipped i'm running from it", LogLevel.Verbose);
+                    _logger.LogInformation($"GetDriveInfo: found drive [{d.Name}], but skipped i'm running from it");
                     continue;
                 }
 
                 ConfigurationService.PathList.Add(d.Name);
 
-                Logger.Log($"GetDriveInfo: found drive [{d.Name}]", LogLevel.Verbose);
+                _logger.LogInformation($"GetDriveInfo: found drive [{d.Name}]");
             }
         }
 

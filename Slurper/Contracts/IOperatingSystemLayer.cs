@@ -1,6 +1,6 @@
 namespace Slurper.Contracts
 {
-    public interface IFileSystemLayer
+    public interface IOperatingSystemLayer
     {
         string TargetDirBasePath { get; }
 

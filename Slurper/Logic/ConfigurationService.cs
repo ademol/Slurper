@@ -3,15 +3,23 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 using Slurper.Contracts;
 using Slurper.Output;
 using Slurper.Providers;
 
 namespace Slurper.Logic
 {
-    public static class ConfigurationService
+    public interface IConfigurationService
     {
-        private static readonly ILogger Logger = LogProvider.Logger;
+        void Configure();
+        void InitSampleConfig();
+        void ProcessArguments(string[] args);
+        IOperatingSystemLayer ChoseFileSystemLayer();
+    }
+
+    public class ConfigurationService : IConfigurationService
+    {
         public static string SampleConfig { get; private set; }
         public static bool Verbose { get; private set; }
         public static bool DryRun { get; private set; }
@@ -22,7 +30,19 @@ namespace Slurper.Logic
         public static List<string> PathList { get; } = new List<string>();
         public static List<string> PatternsToMatch { get; } = new List<string>();
 
-        public static void Configure()
+        private readonly ILogger<ConfigurationService> _logger;
+
+        private readonly OperatingSystemLayerWindows _operatingSystemLayerWindows;
+        private readonly OperatingSystemLayerLinux _operatingSystemLayerLinux;
+
+        public ConfigurationService(ILogger<ConfigurationService> logger, OperatingSystemLayerWindows operatingSystemLayerWindows, OperatingSystemLayerLinux operatingSystemLayerLinux)
+        {
+            _logger = logger;
+            _operatingSystemLayerWindows = operatingSystemLayerWindows;
+            _operatingSystemLayerLinux = operatingSystemLayerLinux;
+        }
+
+        public void Configure()
         {
             LoadConfigFile();
 
@@ -33,27 +53,26 @@ namespace Slurper.Logic
             LogPatterns();
         }
 
-        private static bool NoPatternsLoaded()
+        private bool NoPatternsLoaded()
         {
             return PatternsToMatch.Count == 0;
         }
 
-        private static void AddDefaultConfig()
+        private void AddDefaultConfig()
         {
-            Logger.Log($"Configure: config file [{CfgFileName}] not found, " +
-                       $"or no valid patterns in file found => using default pattern [{DefaultPattern}]",
-                LogLevel.Warn);
+            _logger.LogWarning($"Configure: config file [{CfgFileName}] not found, " +
+                        $"or no valid patterns in file found => using default pattern [{DefaultPattern}]");
 
             PatternsToMatch.Add(DefaultPattern);
         }
 
-        private static void LogPatterns()
+        private void LogPatterns()
         {
             foreach (var pattern in PatternsToMatch)
-                Logger.Log($"Configure: Pattern to use: [{pattern}] ", LogLevel.Verbose);
+                _logger.LogInformation($"Configure: Pattern to use: [{pattern}] ");
         }
 
-        public static void InitSampleConfig()
+        public void InitSampleConfig()
         {
             var assembly = Assembly.GetExecutingAssembly();
             const string resourceName = "Slurper.slurper.cfg.txt";
@@ -71,7 +90,7 @@ namespace Slurper.Logic
             }
         }
 
-        private static void GenerateSampleConfig()
+        private void GenerateSampleConfig()
         {
             Console.WriteLine("generating sample config file [{0}]", CfgFileName);
             try
@@ -80,11 +99,11 @@ namespace Slurper.Logic
             }
             catch (Exception e)
             {
-                Logger.Log($"generateConfig: failed to generate [{CfgFileName}][{e.Message}]", LogLevel.Error);
+                _logger.LogError($"generateConfig: failed to generate [{CfgFileName}][{e.Message}]");
             }
         }
 
-        private static void LoadConfigFile()
+        private void LoadConfigFile()
         {
             if (!File.Exists(CfgFileName)) return;
 
@@ -100,23 +119,23 @@ namespace Slurper.Logic
                     if (m.Success)
                     {
                         var regex = m.Groups[1].Value;
-                        Logger.Log($"LoadConfigFile: [{line}] => for regex:[{regex}]", LogLevel.Verbose);
+                        _logger.LogInformation($"LoadConfigFile: [{line}] => for regex:[{regex}]");
 
                         PatternsToMatch.Add(regex);
                     }
                     else
                     {
-                        Logger.Log($"LoadConfigFile: [{line}] => regex:[---skipped---]", LogLevel.Verbose);
+                        _logger.LogInformation($"LoadConfigFile: [{line}] => regex:[---skipped---]");
                     }
                 }
             }
             catch (Exception e)
             {
-                Logger.Log($"LoadConfigFile: Could not read[{CfgFileName}] [{e.Message}]", LogLevel.Error);
+                _logger.LogError($"LoadConfigFile: Could not read[{CfgFileName}] [{e.Message}]");
             }
         }
 
-        public static void ProcessArguments(string[] args)
+        public void ProcessArguments(string[] args)
         {
             var charArguments = string.Join("", args);
             foreach (var c in charArguments)
@@ -151,12 +170,12 @@ namespace Slurper.Logic
                         break;
                 }
 
-            Logger.Log($"Arguments: VERBOSE[{Verbose}] DRYRUN[{DryRun}] TRACE[{Trace}]", LogLevel.Verbose);
+            _logger.LogInformation($"Arguments: VERBOSE[{Verbose}] DRYRUN[{DryRun}] TRACE[{Trace}]");
         }
 
-        public static IFileSystemLayer ChoseFileSystemLayer()
+        public IOperatingSystemLayer ChoseFileSystemLayer()
         {
-            IFileSystemLayer fileSystemLayer;
+            IOperatingSystemLayer operatingSystemLayer;
 
             var platformId = Environment.OSVersion.Platform;
 
@@ -164,20 +183,20 @@ namespace Slurper.Logic
             switch (platformId)
             {
                 case PlatformID.Win32NT:
-                    fileSystemLayer = new FileSystemLayerWindows();
+                    operatingSystemLayer = _operatingSystemLayerWindows;
                     break;
                 case PlatformID.Unix:
-                    fileSystemLayer = new FileSystemLayerLinux();
+                    operatingSystemLayer = _operatingSystemLayerWindows;
                     break;
                 case PlatformID.MacOSX:
-                    fileSystemLayer = new FileSystemLayerLinux();
+                    operatingSystemLayer = _operatingSystemLayerLinux;
                     break;
                 default:
                     Console.WriteLine($"This [{platformId}] OS and/or its filesystem is not supported");
                     throw new NotSupportedException();
             }
 
-            return fileSystemLayer;
+            return operatingSystemLayer;
         }
     }
 }

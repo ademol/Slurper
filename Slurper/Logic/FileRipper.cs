@@ -1,21 +1,26 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Slurper.Contracts;
-using Slurper.Providers;
+using Microsoft.Extensions.Logging;
+
 
 namespace Slurper.Logic
 {
     public class FileRipper
     {
-        private static readonly ILogger Logger = LogProvider.Logger;
+        private readonly ILogger<FileRipper> _logger;
+
+        public FileRipper(ILogger<FileRipper> logger)
+        {
+            _logger = logger;
+        }
 
         public async Task RipFile(string filename)
         {
             var targetPath = TargetPath(filename);
             var targetFileNameFullPath = targetPath + Path.GetFileName(filename);
 
-            Logger.Log($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]", LogLevel.Verbose);
+            _logger.LogInformation($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]");
 
             try
             {
@@ -25,17 +30,17 @@ namespace Slurper.Logic
             }
             catch (Exception e)
             {
-                Logger.Log($"RipFile: copy of [{filename}] failed with [{e.Message}]", LogLevel.Error);
+                _logger.LogError($"RipFile: copy of [{filename}] failed with [{e.Message}]");
             }
         }
 
         private string TargetPath(string filename)
         {
             var targetRelativePath = Path.GetDirectoryName(filename);
-            targetRelativePath = Program.FileSystemLayer.SanitizePath(targetRelativePath);
+            targetRelativePath = SlurperApp.OperatingSystemLayer.SanitizePath(targetRelativePath);
 
-            var sep = Program.FileSystemLayer.PathSep;
-            var targetDirBasePath = Program.FileSystemLayer.TargetDirBasePath;
+            var sep = SlurperApp.OperatingSystemLayer.PathSep;
+            var targetDirBasePath = SlurperApp.OperatingSystemLayer.TargetDirBasePath;
 
             return $"{targetDirBasePath}{sep}{targetRelativePath}{sep}";
         }
