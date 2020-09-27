@@ -34,7 +34,6 @@ namespace Slurper
         private void Configure(string[] args)
         {
             _configurationService.InitSampleConfig();
-            _configurationService.ProcessArguments(args);
             _configurationService.Configure();
 
             OperatingSystemLayer = _configurationService.ChoseFileSystemLayer();

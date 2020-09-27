@@ -20,7 +20,7 @@ namespace Slurper.Logic
             var targetPath = TargetPath(filename);
             var targetFileNameFullPath = targetPath + Path.GetFileName(filename);
 
-            _logger.LogInformation($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]");
+            _logger.LogDebug($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]");
 
             try
             {

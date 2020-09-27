@@ -27,7 +27,7 @@ namespace Slurper.Providers
 
             TargetDirBasePath = string.Concat(curDir, PathSep, ConfigurationService.DestinationDirectory, PathSep,
                 hostname, "_", dateTime);
-            _logger.LogInformation($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]");
+            _logger.LogDebug($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]");
 
             try
             {
@@ -35,7 +35,7 @@ namespace Slurper.Providers
             }
             catch (Exception e)
             {
-                _logger.LogInformation($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]");
+                _logger.LogError($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]");
             }
         }
 
@@ -44,19 +44,19 @@ namespace Slurper.Providers
             var allDrives = DriveInfo.GetDrives();
 
             var myDrive = Path.GetPathRoot(Directory.GetCurrentDirectory());
-            _logger.LogInformation($"GetDriveInfo: myDrive = [{myDrive}]");
+            _logger.LogDebug($"GetDriveInfo: myDrive = [{myDrive}]");
 
             foreach (var d in allDrives)
             {
                 if (d.Name.Equals(myDrive?.ToUpper()))
                 {
-                    _logger.LogInformation($"GetDriveInfo: found drive [{d.Name}], but skipped i'm running from it");
+                    _logger.LogDebug($"GetDriveInfo: found drive [{d.Name}], but skipped i'm running from it");
                     continue;
                 }
 
                 ConfigurationService.PathList.Add(d.Name);
 
-                _logger.LogInformation($"GetDriveInfo: found drive [{d.Name}]");
+                _logger.LogDebug($"GetDriveInfo: found drive [{d.Name}]");
             }
         }
 

@@ -28,7 +28,7 @@ namespace Slurper.Providers
 
             TargetDirBasePath = string.Concat(curDir, PathSep, ConfigurationService.DestinationDirectory, PathSep,
                 hostname, "_", dateTime);
-            _logger.LogInformation($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]");
+            _logger.LogDebug($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]");
 
             try
             {
@@ -36,7 +36,7 @@ namespace Slurper.Providers
             }
             catch (Exception e)
             {
-                _logger.LogInformation($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]");
+                _logger.LogError($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]");
             }
         }
 
@@ -48,7 +48,7 @@ namespace Slurper.Providers
             var runMountPoint =
                 mountpoints.Where(j => runLocation.Contains(j.Name)).Max(j => j.Name);
 
-            _logger.LogInformation($"GetDriveInfo: [{runMountPoint}]");
+            _logger.LogDebug($"GetDriveInfo: [{runMountPoint}]");
 
             foreach (var d in mountpoints)
             {

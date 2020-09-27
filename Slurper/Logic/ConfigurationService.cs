@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Slurper.Contracts;
-using Slurper.Output;
 using Slurper.Providers;
 
 namespace Slurper.Logic
@@ -14,7 +13,6 @@ namespace Slurper.Logic
     {
         void Configure();
         void InitSampleConfig();
-        void ProcessArguments(string[] args);
         IOperatingSystemLayer ChoseFileSystemLayer();
     }
 
@@ -22,7 +20,7 @@ namespace Slurper.Logic
     {
         public static string SampleConfig { get; private set; }
         public static bool Verbose { get; private set; }
-        public static bool DryRun { get; private set; }
+        public static bool DryRun { get; set; }
         public static bool Trace { get; private set; }
         private static string CfgFileName { get; } = "slurper.cfg";
         public static string DestinationDirectory { get; } = "rip";
@@ -69,7 +67,7 @@ namespace Slurper.Logic
         private void LogPatterns()
         {
             foreach (var pattern in PatternsToMatch)
-                _logger.LogInformation($"Configure: Pattern to use: [{pattern}] ");
+                _logger.LogDebug($"Configure: Pattern to use: [{pattern}] ");
         }
 
         public void InitSampleConfig()
@@ -90,7 +88,7 @@ namespace Slurper.Logic
             }
         }
 
-        private void GenerateSampleConfig()
+        public static void GenerateSampleConfig()
         {
             Console.WriteLine("generating sample config file [{0}]", CfgFileName);
             try
@@ -99,7 +97,7 @@ namespace Slurper.Logic
             }
             catch (Exception e)
             {
-                _logger.LogError($"generateConfig: failed to generate [{CfgFileName}][{e.Message}]");
+                Console.WriteLine($"generateConfig: failed to generate [{CfgFileName}][{e.Message}]");
             }
         }
 
@@ -119,13 +117,13 @@ namespace Slurper.Logic
                     if (m.Success)
                     {
                         var regex = m.Groups[1].Value;
-                        _logger.LogInformation($"LoadConfigFile: [{line}] => for regex:[{regex}]");
+                        _logger.LogDebug($"LoadConfigFile: [{line}] => for regex:[{regex}]");
 
                         PatternsToMatch.Add(regex);
                     }
                     else
                     {
-                        _logger.LogInformation($"LoadConfigFile: [{line}] => regex:[---skipped---]");
+                        _logger.LogDebug($"LoadConfigFile: [{line}] => regex:[---skipped---]");
                     }
                 }
             }
@@ -135,43 +133,6 @@ namespace Slurper.Logic
             }
         }
 
-        public void ProcessArguments(string[] args)
-        {
-            var charArguments = string.Join("", args);
-            foreach (var c in charArguments)
-                switch (c)
-                {
-                    case 'h':
-                        DisplayMessages.Help();
-                        Environment.Exit(0);
-                        break;
-                    case 'v':
-                        Verbose = true;
-                        break;
-                    case 'd':
-                        DryRun = true;
-                        break;
-                    case 't':
-                        Trace = true;
-                        Verbose = true;
-                        break;
-                    case '/':
-                        break;
-                    case '-':
-                        break;
-                    case 'g':
-                        GenerateSampleConfig();
-                        Environment.Exit(0);
-                        break;
-                    default:
-                        Console.WriteLine("option [{0}] not supported", c);
-                        DisplayMessages.Help();
-                        Environment.Exit(0);
-                        break;
-                }
-
-            _logger.LogInformation($"Arguments: VERBOSE[{Verbose}] DRYRUN[{DryRun}] TRACE[{Trace}]");
-        }
 
         public IOperatingSystemLayer ChoseFileSystemLayer()
         {
