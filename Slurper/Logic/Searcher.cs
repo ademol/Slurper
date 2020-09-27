@@ -23,30 +23,28 @@ namespace Slurper.Logic
             _fileRipper = fileRipper;
         }
 
-        public void SearchAndCopyFiles()
+        public async Task SearchAndCopyFiles()
         {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            var tasks = new List<Task>();
-            foreach (var path in ConfigurationService.PathList)
-            {
-                tasks.Add( Task.Run(() => DirSearch(path)));
-            }
 
-            Task.WaitAll(tasks.ToArray());
+            //ConfigurationService.PathList.ForEach( path => tasks.Add(DirSearchAsync(path)));
+            var tasks = ConfigurationService.PathList.Select(path => Task.Run( () => DirSearch(path))).ToList();
+
+            await Task.WhenAll(tasks.ToArray());
             Console.WriteLine($"done in {stopWatch.Elapsed}");
             stopWatch.Stop();
         }
 
-        private void DirSearch(string path)
+        private async Task DirSearch(string path)
         {
             foreach (var d in GetDirs(path) ?? new string[0])
             {
                 if (SkipDirectory(d)) continue;
 
-                GetFilesInCurrentDirectory(d);
+                await GetFilesInCurrentDirectory(d);
 
-                GetSubDirectories(d);
+                await GetSubDirectories(d);
             }
         }
 
@@ -67,11 +65,11 @@ namespace Slurper.Logic
             return false;
         }
 
-        private void GetSubDirectories(string d)
+        private async Task GetSubDirectories(string d)
         {
             try
             {
-                DirSearch(d);
+                await DirSearch(d);
             }
             catch (Exception e)
             {
@@ -79,7 +77,7 @@ namespace Slurper.Logic
             }
         }
 
-        private void GetFilesInCurrentDirectory(string d)
+        private Task GetFilesInCurrentDirectory(string d)
         {
             var tasks = new List<Task>();
 
@@ -96,7 +94,7 @@ namespace Slurper.Logic
                 }
             }
 
-            Task.WaitAll(tasks.ToArray());
+            return Task.WhenAll(tasks.ToArray());
         }
 
         private bool IsCurrentPath(string path)

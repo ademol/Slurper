@@ -34,7 +34,7 @@ namespace Slurper.Logic
             }
         }
 
-        private string TargetPath(string filename)
+        private static string TargetPath(string filename)
         {
             var targetRelativePath = Path.GetDirectoryName(filename);
             targetRelativePath = SlurperApp.OperatingSystemLayer.SanitizePath(targetRelativePath);

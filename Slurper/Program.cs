@@ -22,7 +22,7 @@ namespace Slurper
             var services = new ServiceCollection();
             ConfigureServices(services);
             using var serviceProvider = services.BuildServiceProvider();
-            Task.WaitAll(serviceProvider.GetService<SlurperApp>().Run(args));
+            Task.WaitAll(serviceProvider.GetService<SlurperApp>().Run());
         }
 
         private static void ConfigureServices(IServiceCollection services)

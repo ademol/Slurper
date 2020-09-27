@@ -12,16 +12,13 @@ namespace Slurper.Logic
     public interface IConfigurationService
     {
         void Configure();
-        void InitSampleConfig();
         IOperatingSystemLayer ChoseFileSystemLayer();
     }
 
     public class ConfigurationService : IConfigurationService
     {
         public static string SampleConfig { get; private set; }
-        public static bool Verbose { get; private set; }
         public static bool DryRun { get; set; }
-        public static bool Trace { get; private set; }
         private static string CfgFileName { get; } = "slurper.cfg";
         public static string DestinationDirectory { get; } = "rip";
         private static string DefaultPattern { get; } = @"(?i).*\.jpg$";
@@ -44,16 +41,9 @@ namespace Slurper.Logic
         {
             LoadConfigFile();
 
-            if (NoPatternsLoaded()) AddDefaultConfig();
-
-            if (!Verbose) return;
+            if (PatternsToMatch.Count == 0) AddDefaultConfig();
 
             LogPatterns();
-        }
-
-        private bool NoPatternsLoaded()
-        {
-            return PatternsToMatch.Count == 0;
         }
 
         private void AddDefaultConfig()
@@ -70,7 +60,7 @@ namespace Slurper.Logic
                 _logger.LogDebug($"Configure: Pattern to use: [{pattern}] ");
         }
 
-        public void InitSampleConfig()
+        private static void InitSampleConfig()
         {
             var assembly = Assembly.GetExecutingAssembly();
             const string resourceName = "Slurper.slurper.cfg.txt";
@@ -90,6 +80,8 @@ namespace Slurper.Logic
 
         public static void GenerateSampleConfig()
         {
+            InitSampleConfig();
+
             Console.WriteLine("generating sample config file [{0}]", CfgFileName);
             try
             {
