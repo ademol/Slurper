@@ -36,15 +36,15 @@ namespace Slurper.Logic
             stopWatch.Stop();
         }
 
-        private async Task DirSearch(string path)
+        private void DirSearch(string path)
         {
             foreach (var d in GetDirs(path) ?? new string[0])
             {
                 if (SkipDirectory(d)) continue;
 
-                await GetFilesInCurrentDirectory(d);
+                GetFilesInCurrentDirectory(d);
 
-                await GetSubDirectories(d);
+                GetSubDirectories(d);
             }
         }
 
@@ -65,11 +65,11 @@ namespace Slurper.Logic
             return false;
         }
 
-        private async Task GetSubDirectories(string d)
+        private void GetSubDirectories(string d)
         {
             try
             {
-                await DirSearch(d);
+                DirSearch(d);
             }
             catch (Exception e)
             {
@@ -77,7 +77,7 @@ namespace Slurper.Logic
             }
         }
 
-        private Task GetFilesInCurrentDirectory(string d)
+        private void GetFilesInCurrentDirectory(string d)
         {
             var tasks = new List<Task>();
 
@@ -94,7 +94,7 @@ namespace Slurper.Logic
                 }
             }
 
-            return Task.WhenAll(tasks.ToArray());
+            Task.WaitAll(tasks.ToArray());
         }
 
         private bool IsCurrentPath(string path)
