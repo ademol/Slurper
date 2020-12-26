@@ -15,7 +15,7 @@ namespace Slurper.Providers
             _logger = logger;
         }
 
-        public string TargetDirBasePath { get; private set; } // relative directory for file to be copied to
+        public string? TargetDirBasePath { get; private set; } // relative directory for file to be copied to
 
         public char PathSep { get; } = Path.DirectorySeparatorChar;
 
@@ -60,9 +60,9 @@ namespace Slurper.Providers
             }
         }
 
-        public string SanitizePath(string path)
+        public string SanitizePath(string? path)
         {
-            return path.Replace(':', '_');
+            return path != null ? path.Replace(':', '_') : "";
         }
     }
 }

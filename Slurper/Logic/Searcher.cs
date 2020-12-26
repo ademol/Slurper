@@ -38,7 +38,7 @@ namespace Slurper.Logic
 
         private void DirSearch(string path)
         {
-            foreach (var d in GetDirs(path) ?? new string[0])
+            foreach (var d in GetDirs(path))
             {
                 if (SkipDirectory(d)) continue;
 
@@ -81,7 +81,7 @@ namespace Slurper.Logic
         {
             var tasks = new List<Task>();
 
-            foreach (var f in GetFiles(d) ?? new string[0])
+            foreach (var f in GetFiles(d))
             {
                 if (IsSymbolic(f)) continue;
 
@@ -109,7 +109,7 @@ namespace Slurper.Logic
         }
 
 
-        private string[] GetFiles(string path)
+        private IEnumerable<string> GetFiles(string path)
         {
             try
             {
@@ -125,7 +125,7 @@ namespace Slurper.Logic
                 _logger.LogError($"getFiles: Failed to retrieve fileList from [{path}][{e.Message}]");
             }
 
-            return null;
+            return Array.Empty<string>();
         }
 
         private string[] GetDirs(string path)
@@ -143,7 +143,7 @@ namespace Slurper.Logic
                 _logger.LogError($"getDirs: Failed to retrieve dirList from [{path}][{e.Message}]");
             }
 
-            return null;
+            return Array.Empty<string>();
         }
     }
 }

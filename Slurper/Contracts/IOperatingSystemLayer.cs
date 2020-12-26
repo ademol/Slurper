@@ -2,7 +2,7 @@ namespace Slurper.Contracts
 {
     public interface IOperatingSystemLayer
     {
-        string TargetDirBasePath { get; }
+        string? TargetDirBasePath { get; }
 
         char PathSep { get; }
 
@@ -10,6 +10,6 @@ namespace Slurper.Contracts
 
         void SetSourcePaths();
 
-        string SanitizePath(string path);
+        string? SanitizePath(string? path);
     }
 }

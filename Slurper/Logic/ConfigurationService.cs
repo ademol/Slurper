@@ -17,7 +17,7 @@ namespace Slurper.Logic
 
     public class ConfigurationService : IConfigurationService
     {
-        public static string SampleConfig { get; private set; }
+        public static string? SampleConfig { get; private set; }
         public static bool DryRun { get; set; }
         private static string CfgFileName { get; } = "slurper.cfg";
         public static string DestinationDirectory { get; } = "rip";
@@ -27,14 +27,9 @@ namespace Slurper.Logic
 
         private readonly ILogger<ConfigurationService> _logger;
 
-        private readonly OperatingSystemLayerWindows _operatingSystemLayerWindows;
-        private readonly OperatingSystemLayerLinux _operatingSystemLayerLinux;
-
-        public ConfigurationService(ILogger<ConfigurationService> logger, OperatingSystemLayerWindows operatingSystemLayerWindows, OperatingSystemLayerLinux operatingSystemLayerLinux)
+        public ConfigurationService(ILogger<ConfigurationService> logger)
         {
             _logger = logger;
-            _operatingSystemLayerWindows = operatingSystemLayerWindows;
-            _operatingSystemLayerLinux = operatingSystemLayerLinux;
         }
 
         public void Configure()
@@ -132,17 +127,16 @@ namespace Slurper.Logic
 
             var platformId = Environment.OSVersion.Platform;
 
-            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (platformId)
             {
                 case PlatformID.Win32NT:
-                    operatingSystemLayer = _operatingSystemLayerWindows;
+                    operatingSystemLayer = new OperatingSystemLayerWindows(new Logger<OperatingSystemLayerWindows>(new LoggerFactory()));
                     break;
                 case PlatformID.Unix:
-                    operatingSystemLayer = _operatingSystemLayerWindows;
+                    operatingSystemLayer = new OperatingSystemLayerLinux(new Logger<OperatingSystemLayerLinux>(new LoggerFactory()));
                     break;
                 case PlatformID.MacOSX:
-                    operatingSystemLayer = _operatingSystemLayerLinux;
+                    operatingSystemLayer = new OperatingSystemLayerLinux(new Logger<OperatingSystemLayerLinux>(new LoggerFactory()));
                     break;
                 default:
                     Console.WriteLine($"This [{platformId}] OS and/or its filesystem is not supported");

@@ -36,13 +36,20 @@ namespace Slurper.Logic
 
         private static string TargetPath(string filename)
         {
-            var targetRelativePath = Path.GetDirectoryName(filename);
-            targetRelativePath = SlurperApp.OperatingSystemLayer.SanitizePath(targetRelativePath);
+            try
+            {
+                var targetRelativePath = Path.GetDirectoryName(filename);
+                targetRelativePath = SlurperApp.OperatingSystemLayer?.SanitizePath(targetRelativePath);
 
-            var sep = SlurperApp.OperatingSystemLayer.PathSep;
-            var targetDirBasePath = SlurperApp.OperatingSystemLayer.TargetDirBasePath;
+                var sep = SlurperApp.OperatingSystemLayer?.PathSep;
+                var targetDirBasePath = SlurperApp.OperatingSystemLayer?.TargetDirBasePath;
 
-            return $"{targetDirBasePath}{sep}{targetRelativePath}{sep}";
+                return $"{targetDirBasePath}{sep}{targetRelativePath}{sep}";
+            } catch (Exception ex)
+            {
+                Console.WriteLine($"{ex.Message}\n");
+                throw;
+            }
         }
     }
 }

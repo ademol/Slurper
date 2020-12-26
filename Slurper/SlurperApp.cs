@@ -6,7 +6,7 @@ namespace Slurper
 {
     internal class SlurperApp
     {
-        public static IOperatingSystemLayer OperatingSystemLayer;
+        public static IOperatingSystemLayer? OperatingSystemLayer;
 
         private readonly IConfigurationService _configurationService;
         private readonly Searcher _searcher;
@@ -21,8 +21,8 @@ namespace Slurper
         {
             Configure();
 
-            OperatingSystemLayer.CreateTargetLocation();
-            OperatingSystemLayer.SetSourcePaths();
+            OperatingSystemLayer?.CreateTargetLocation();
+            OperatingSystemLayer?.SetSourcePaths();
             await _searcher.SearchAndCopyFiles();
         }
 

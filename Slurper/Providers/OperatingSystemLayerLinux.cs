@@ -17,7 +17,7 @@ namespace Slurper.Providers
             _logger = logger;
         }
 
-        public string TargetDirBasePath { get; private set; }
+        public string? TargetDirBasePath { get; private set; }
         public char PathSep { get; } = Path.DirectorySeparatorChar;
 
         public void CreateTargetLocation()
@@ -73,7 +73,7 @@ namespace Slurper.Providers
             }
         }
 
-        public string SanitizePath(string path)
+        public string? SanitizePath(string? path)
         {
             return path;
         }
@@ -97,8 +97,6 @@ namespace Slurper.Providers
 
         private static bool IsValidFileSystem(string driveFormat)
         {
-            if (driveFormat == null) return false;
-
             string[] fileSystemsToSkip =
             {
                 "sysfs", "proc", "tmpfs", "devpts",

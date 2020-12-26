@@ -22,7 +22,7 @@ namespace Slurper
             var services = new ServiceCollection();
             ConfigureServices(services);
             using var serviceProvider = services.BuildServiceProvider();
-            Task.WaitAll(serviceProvider.GetService<SlurperApp>().Run());
+            Task.WaitAll(serviceProvider.GetService<SlurperApp>()?.Run()!);
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -36,6 +36,7 @@ namespace Slurper
                 .AddLogging(c => c.AddConsole().SetMinimumLevel(_minLogLevel));
         }
 
+        // ReSharper disable once CognitiveComplexity
         private static void ProcessArguments(string[] args)
         {
             var charArguments = string.Join("", args);
