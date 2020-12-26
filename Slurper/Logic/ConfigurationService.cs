@@ -4,8 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
-using Slurper.Contracts;
-using Slurper.Providers;
+using Slurper.OperatingSystemLayers;
 
 namespace Slurper.Logic
 {

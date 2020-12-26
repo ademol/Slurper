@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
-using Slurper.Contracts;
 using Slurper.Logic;
+using Slurper.OperatingSystemLayers;
 
 namespace Slurper
 {

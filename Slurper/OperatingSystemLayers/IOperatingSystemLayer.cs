@@ -1,4 +1,4 @@
-namespace Slurper.Contracts
+namespace Slurper.OperatingSystemLayers
 {
     public interface IOperatingSystemLayer
     {

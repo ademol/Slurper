@@ -3,10 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
-using Slurper.Contracts;
 using Slurper.Logic;
 
-namespace Slurper.Providers
+namespace Slurper.OperatingSystemLayers
 {
     public class OperatingSystemLayerLinux : IOperatingSystemLayer
     {

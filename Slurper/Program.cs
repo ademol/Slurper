@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Slurper.Logic;
+using Slurper.OperatingSystemLayers;
 using Slurper.Output;
-using Slurper.Providers;
 
 [assembly: InternalsVisibleTo("SlurperTests")]
 
