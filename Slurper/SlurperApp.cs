@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Slurper.Logic;
 using Slurper.OperatingSystemLayers;
@@ -6,8 +7,6 @@ namespace Slurper
 {
     internal class SlurperApp
     {
-        public static IOperatingSystemLayer? OperatingSystemLayer;
-
         private readonly IConfigurationService _configurationService;
         private readonly Searcher _searcher;
 
@@ -19,18 +18,14 @@ namespace Slurper
 
         public async Task Run()
         {
-            Configure();
 
-            OperatingSystemLayer?.CreateTargetLocation();
-            OperatingSystemLayer?.SetSourcePaths();
-            await _searcher.SearchAndCopyFiles();
-        }
-
-        private void Configure()
-        {
             _configurationService.Configure();
 
-            OperatingSystemLayer = _configurationService.ChoseFileSystemLayer();
+            var operatingSystemLayer = OperatingSystemLayerFactory.Create();
+            operatingSystemLayer.CreateTargetLocation();
+            ConfigurationService.PathList = operatingSystemLayer.GetSourcePaths().ToList();
+
+            await _searcher.SearchAndCopyFiles();
         }
     }
 }

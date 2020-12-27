@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using Slurper.Logic;
@@ -38,8 +39,10 @@ namespace Slurper.OperatingSystemLayers
             }
         }
 
-        public void SetSourcePaths()
+        public IEnumerable<string> GetSourcePaths()
         {
+            var paths = new List<string>();
+            
             var allDrives = DriveInfo.GetDrives();
 
             var myDrive = Path.GetPathRoot(Directory.GetCurrentDirectory());
@@ -53,10 +56,12 @@ namespace Slurper.OperatingSystemLayers
                     continue;
                 }
 
-                ConfigurationService.PathList.Add(d.Name);
+                paths.Add(d.Name);
 
                 _logger.LogDebug($"GetDriveInfo: found drive [{d.Name}]");
             }
+
+            return paths;
         }
 
         public string SanitizePath(string? path)

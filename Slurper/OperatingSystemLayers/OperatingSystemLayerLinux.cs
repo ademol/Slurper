@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -16,7 +17,7 @@ namespace Slurper.OperatingSystemLayers
             _logger = logger;
         }
 
-        public string? TargetDirBasePath { get; private set; }
+        public string TargetDirBasePath { get; private set; }
         public char PathSep { get; } = Path.DirectorySeparatorChar;
 
         public void CreateTargetLocation()
@@ -39,8 +40,10 @@ namespace Slurper.OperatingSystemLayers
             }
         }
 
-        public void SetSourcePaths()
+        public IEnumerable<string> GetSourcePaths()
         {
+            var paths = new List<string>();
+            
             var mountpoints = DriveInfo.GetDrives();
 
             var runLocation = Directory.GetCurrentDirectory();
@@ -66,13 +69,15 @@ namespace Slurper.OperatingSystemLayers
                     reason = "cannot rip from target mount point";
                 }
 
-                if (toBeIncluded) ConfigurationService.PathList.Add(d.Name);
+                if (toBeIncluded) paths.Add(d.Name);
 
                 _logger.LogInformation($"GetDriveInfo: found mount point [{d.Name}]\t included? [{toBeIncluded}]\t reason[{reason}]");
             }
+
+            return paths;
         }
 
-        public string? SanitizePath(string? path)
+        public string SanitizePath(string path)
         {
             return path;
         }

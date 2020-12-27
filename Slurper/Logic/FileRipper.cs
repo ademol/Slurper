@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Slurper.OperatingSystemLayers;
 
 
 namespace Slurper.Logic
@@ -9,10 +10,12 @@ namespace Slurper.Logic
     public class FileRipper
     {
         private readonly ILogger<FileRipper> _logger;
+        private readonly IOperatingSystemLayer _operatingSystemLayer;
 
         public FileRipper(ILogger<FileRipper> logger)
         {
             _logger = logger;
+            _operatingSystemLayer = OperatingSystemLayerFactory.Create();
         }
 
         public async Task RipFile(string filename)
@@ -22,9 +25,10 @@ namespace Slurper.Logic
 
             _logger.LogDebug($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]");
 
+            if (ConfigurationService.DryRun) return;
+            
             try
             {
-                if (ConfigurationService.DryRun) return;
                 Directory.CreateDirectory(targetPath);
                 await Task.Run(() => File.Copy(filename, targetFileNameFullPath));
             }
@@ -34,15 +38,15 @@ namespace Slurper.Logic
             }
         }
 
-        private static string TargetPath(string filename)
+        private string TargetPath(string filename)
         {
             try
             {
                 var targetRelativePath = Path.GetDirectoryName(filename);
-                targetRelativePath = SlurperApp.OperatingSystemLayer?.SanitizePath(targetRelativePath);
+                targetRelativePath = _operatingSystemLayer.SanitizePath(targetRelativePath);
 
-                var sep = SlurperApp.OperatingSystemLayer?.PathSep;
-                var targetDirBasePath = SlurperApp.OperatingSystemLayer?.TargetDirBasePath;
+                var sep = _operatingSystemLayer.PathSep;
+                var targetDirBasePath = _operatingSystemLayer.TargetDirBasePath;
 
                 return $"{targetDirBasePath}{sep}{targetRelativePath}{sep}";
             } catch (Exception ex)

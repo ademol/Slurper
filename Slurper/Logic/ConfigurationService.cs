@@ -4,14 +4,12 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
-using Slurper.OperatingSystemLayers;
 
 namespace Slurper.Logic
 {
     public interface IConfigurationService
     {
         void Configure();
-        IOperatingSystemLayer ChoseFileSystemLayer();
     }
 
     public class ConfigurationService : IConfigurationService
@@ -21,7 +19,7 @@ namespace Slurper.Logic
         private static string CfgFileName { get; } = "slurper.cfg";
         public static string DestinationDirectory { get; } = "rip";
         private static string DefaultPattern { get; } = @"(?i).*\.jpg$";
-        public static List<string> PathList { get; } = new List<string>();
+        public static List<string> PathList { get; set; } = new List<string>();
         public static List<string> PatternsToMatch { get; } = new List<string>();
 
         private readonly ILogger<ConfigurationService> _logger;
@@ -43,7 +41,7 @@ namespace Slurper.Logic
         private void AddDefaultConfig()
         {
             _logger.LogWarning($"Configure: config file [{CfgFileName}] not found, " +
-                        $"or no valid patterns in file found => using default pattern [{DefaultPattern}]");
+                               $"or no valid patterns in file found => using default pattern [{DefaultPattern}]");
 
             PatternsToMatch.Add(DefaultPattern);
         }
@@ -117,32 +115,6 @@ namespace Slurper.Logic
             {
                 _logger.LogError($"LoadConfigFile: Could not read[{CfgFileName}] [{e.Message}]");
             }
-        }
-
-
-        public IOperatingSystemLayer ChoseFileSystemLayer()
-        {
-            IOperatingSystemLayer operatingSystemLayer;
-
-            var platformId = Environment.OSVersion.Platform;
-
-            switch (platformId)
-            {
-                case PlatformID.Win32NT:
-                    operatingSystemLayer = new OperatingSystemLayerWindows(new Logger<OperatingSystemLayerWindows>(new LoggerFactory()));
-                    break;
-                case PlatformID.Unix:
-                    operatingSystemLayer = new OperatingSystemLayerLinux(new Logger<OperatingSystemLayerLinux>(new LoggerFactory()));
-                    break;
-                case PlatformID.MacOSX:
-                    operatingSystemLayer = new OperatingSystemLayerLinux(new Logger<OperatingSystemLayerLinux>(new LoggerFactory()));
-                    break;
-                default:
-                    Console.WriteLine($"This [{platformId}] OS and/or its filesystem is not supported");
-                    throw new NotSupportedException();
-            }
-
-            return operatingSystemLayer;
         }
     }
 }

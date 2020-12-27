@@ -1,15 +1,17 @@
+using System.Collections.Generic;
+
 namespace Slurper.OperatingSystemLayers
 {
     public interface IOperatingSystemLayer
     {
-        string? TargetDirBasePath { get; }
+        string TargetDirBasePath { get; }
 
         char PathSep { get; }
 
         void CreateTargetLocation();
 
-        void SetSourcePaths();
+        IEnumerable<string> GetSourcePaths();
 
-        string? SanitizePath(string? path);
+        string SanitizePath(string path);
     }
 }
