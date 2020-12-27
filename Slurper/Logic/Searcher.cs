@@ -28,9 +28,8 @@ namespace Slurper.Logic
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            //ConfigurationService.PathList.ForEach( path => tasks.Add(DirSearchAsync(path)));
             var tasks = ConfigurationService.PathList.Select(path => Task.Run( () => DirSearch(path))).ToList();
-
+            Console.WriteLine($" Task count =  {tasks.Count}");
             await Task.WhenAll(tasks.ToArray());
             Console.WriteLine($"done in {stopWatch.Elapsed}");
             stopWatch.Stop();
@@ -128,7 +127,7 @@ namespace Slurper.Logic
             return Array.Empty<string>();
         }
 
-        private string[] GetDirs(string path)
+        private IEnumerable<string> GetDirs(string path)
         {
             try
             {

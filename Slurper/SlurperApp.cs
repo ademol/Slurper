@@ -18,7 +18,6 @@ namespace Slurper
 
         public async Task Run()
         {
-
             _configurationService.Configure();
 
             var operatingSystemLayer = OperatingSystemLayerFactory.Create();

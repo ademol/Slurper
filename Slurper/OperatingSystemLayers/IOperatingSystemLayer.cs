@@ -4,7 +4,7 @@ namespace Slurper.OperatingSystemLayers
 {
     public interface IOperatingSystemLayer
     {
-        string TargetDirBasePath { get; }
+        string? TargetDirBasePath { get; }
 
         char PathSep { get; }
 
@@ -12,6 +12,6 @@ namespace Slurper.OperatingSystemLayers
 
         IEnumerable<string> GetSourcePaths();
 
-        string SanitizePath(string path);
+        string SanitizePath(string? path);
     }
 }

@@ -26,7 +26,7 @@ namespace Slurper.Logic
             _logger.LogDebug($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]");
 
             if (ConfigurationService.DryRun) return;
-            
+
             try
             {
                 Directory.CreateDirectory(targetPath);
@@ -42,13 +42,14 @@ namespace Slurper.Logic
         {
             try
             {
-                var targetRelativePath = Path.GetDirectoryName(filename);
-                targetRelativePath = _operatingSystemLayer.SanitizePath(targetRelativePath);
+                var relativePath = Path.GetDirectoryName(filename);
+
+                relativePath = _operatingSystemLayer.SanitizePath(relativePath);
 
                 var sep = _operatingSystemLayer.PathSep;
                 var targetDirBasePath = _operatingSystemLayer.TargetDirBasePath;
 
-                return $"{targetDirBasePath}{sep}{targetRelativePath}{sep}";
+                return $"{targetDirBasePath}{sep}{relativePath}{sep}";
             } catch (Exception ex)
             {
                 Console.WriteLine($"{ex.Message}\n");

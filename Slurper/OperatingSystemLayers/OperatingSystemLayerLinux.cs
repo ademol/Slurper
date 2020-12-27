@@ -17,7 +17,7 @@ namespace Slurper.OperatingSystemLayers
             _logger = logger;
         }
 
-        public string TargetDirBasePath { get; private set; }
+        public string? TargetDirBasePath { get; private set; }
         public char PathSep { get; } = Path.DirectorySeparatorChar;
 
         public void CreateTargetLocation()
@@ -43,7 +43,7 @@ namespace Slurper.OperatingSystemLayers
         public IEnumerable<string> GetSourcePaths()
         {
             var paths = new List<string>();
-            
+
             var mountpoints = DriveInfo.GetDrives();
 
             var runLocation = Directory.GetCurrentDirectory();
@@ -77,9 +77,9 @@ namespace Slurper.OperatingSystemLayers
             return paths;
         }
 
-        public string SanitizePath(string path)
+        public string SanitizePath(string? path)
         {
-            return path;
+            return path ?? string.Empty;
         }
 
         private static bool IsValidMountPoint(DriveInfo drive)

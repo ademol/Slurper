@@ -42,7 +42,7 @@ namespace Slurper.OperatingSystemLayers
         public IEnumerable<string> GetSourcePaths()
         {
             var paths = new List<string>();
-            
+
             var allDrives = DriveInfo.GetDrives();
 
             var myDrive = Path.GetPathRoot(Directory.GetCurrentDirectory());
@@ -66,7 +66,7 @@ namespace Slurper.OperatingSystemLayers
 
         public string SanitizePath(string? path)
         {
-            return path != null ? path.Replace(':', '_') : "";
+            return path != null ? path.Replace(':', '_') : string.Empty;
         }
     }
 }
