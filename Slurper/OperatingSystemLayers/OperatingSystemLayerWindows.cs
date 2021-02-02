@@ -25,13 +25,15 @@ namespace Slurper.OperatingSystemLayers
             var hostname = Environment.MachineName.ToLower();
             var dateTime = $"{DateTime.Now:yyyyMMdd_HH-mm-ss}";
 
-            TargetDirBasePath = string.Concat(curDir, PathSep, ConfigurationService.DestinationDirectory, PathSep,
-                hostname, "_", dateTime);
+            TargetDirBasePath = string.Concat(
+                curDir, PathSep, ConfigurationService.DestinationDirectory, PathSep, hostname, "_", dateTime);
             _logger.LogDebug("CreateTargetLocation: [{Hostname}][{CurDir}][{DateTime}][{TargetDirBasePath}]", hostname, curDir, dateTime, TargetDirBasePath);
 
+            if (ConfigurationService.DryRun) return;
+            
             try
             {
-                if (!ConfigurationService.DryRun) Directory.CreateDirectory(TargetDirBasePath);
+                Directory.CreateDirectory(TargetDirBasePath);
             }
             catch (Exception e)
             {
@@ -48,17 +50,17 @@ namespace Slurper.OperatingSystemLayers
             var myDrive = Path.GetPathRoot(Directory.GetCurrentDirectory());
             _logger.LogDebug("GetDriveInfo: myDrive = [{MyDrive}]", myDrive);
 
-            foreach (var d in allDrives)
+            foreach (var driveInfo in allDrives)
             {
-                if (d.Name.Equals(myDrive?.ToUpper()))
+                if (driveInfo.Name.Equals(myDrive?.ToUpper()))
                 {
-                    _logger.LogDebug("GetDriveInfo: found drive [{DriveName}], but skipped i'm running from it", d.Name);
+                    _logger.LogDebug("GetDriveInfo: found drive [{DriveName}], but skipped i'm running from it", driveInfo.Name);
                     continue;
                 }
 
-                paths.Add(d.Name);
+                paths.Add(driveInfo.Name);
 
-                _logger.LogDebug("GetDriveInfo: found drive [{DriveName}]", d.Name);
+                _logger.LogDebug("GetDriveInfo: found drive [{DriveName}]", driveInfo.Name);
             }
 
             return paths;

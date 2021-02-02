@@ -7,7 +7,7 @@ namespace Slurper.Output
     {
         public static void Help()
         {
-            var txt = "";
+            var txt = string.Empty;
             txt += "Copy files that have their filename matched, to ./rip/<hostname><timestamp> directory \n\n";
             txt += "In default mode (without cfg file) it matches jpg files by the jpg extenstion\n";
             txt += "use the /v flag for verbose output => slurper.exe /v \n";

@@ -19,8 +19,8 @@ namespace Slurper.Logic
         private static string CfgFileName { get; } = "slurper.cfg";
         public static string DestinationDirectory { get; } = "rip";
         private static string DefaultPattern { get; } = @"(?i).*\.jpg$";
-        public static List<string> PathList { get; set; } = new List<string>();
-        public static List<string> PatternsToMatch { get; } = new List<string>();
+        public static List<string> PathList { get; set; } = new();
+        public static List<string> PatternsToMatch { get; } = new();
 
         private readonly ILogger<ConfigurationService> _logger;
 
@@ -32,13 +32,13 @@ namespace Slurper.Logic
         public void Configure()
         {
             LoadConfigFile();
-
-            if (PatternsToMatch.Count == 0) AddDefaultConfig();
-
-            LogPatterns();
+            if (NoConfigurationLoaded) AddFallbackConfiguration();
+            LogConfiguration();
         }
 
-        private void AddDefaultConfig()
+        private static bool NoConfigurationLoaded => PatternsToMatch.Count == 0;
+
+        private void AddFallbackConfiguration()
         {
             _logger.LogWarning("Configure: config file [{CfgFileName}] not found, " +
                                "or no valid patterns in file found => using default pattern [{DefaultPattern}]", CfgFileName, DefaultPattern);
@@ -46,7 +46,7 @@ namespace Slurper.Logic
             PatternsToMatch.Add(DefaultPattern);
         }
 
-        private void LogPatterns()
+        private void LogConfiguration()
         {
             foreach (var pattern in PatternsToMatch)
                 _logger.LogDebug("Configure: Pattern to use: [{Pattern}] ", pattern);
@@ -90,17 +90,17 @@ namespace Slurper.Logic
             if (!File.Exists(CfgFileName)) return;
 
             const string regexPattern = @"^([^#].*)";
-            var r = new Regex(regexPattern);
+            var patternRegex = new Regex(regexPattern);
             try
             {
                 using var sr = new StreamReader(CfgFileName);
                 while (!sr.EndOfStream)
                 {
                     var line = sr.ReadLine();
-                    var m = r.Match(line ?? throw new InvalidOperationException());
-                    if (m.Success)
+                    var match = patternRegex.Match(line ?? throw new InvalidOperationException());
+                    if (match.Success)
                     {
-                        var regex = m.Groups[1].Value;
+                        var regex = match.Groups[1].Value;
                         _logger.LogDebug("LoadConfigFile: [{Line}] => for regex:[{Regex}]", line, regex);
 
                         PatternsToMatch.Add(regex);

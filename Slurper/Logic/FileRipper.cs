@@ -20,7 +20,7 @@ namespace Slurper.Logic
 
         public async Task RipFile(string filename)
         {
-            var targetPath = TargetPath(filename);
+            var targetPath = GetTargetPath(filename);
             var targetFileNameFullPath = targetPath + Path.GetFileName(filename);
 
             _logger.LogDebug("RipFile: ripping [{Filename}] => [{TargetFileNameFullPath}]", filename, targetFileNameFullPath);
@@ -38,14 +38,11 @@ namespace Slurper.Logic
             }
         }
 
-        private string TargetPath(string filename)
+        private string GetTargetPath(string filename)
         {
             try
             {
-                var relativePath = Path.GetDirectoryName(filename);
-
-                relativePath = _operatingSystemLayer.SanitizePath(relativePath);
-
+                var relativePath = _operatingSystemLayer.SanitizePath(Path.GetDirectoryName(filename));
                 var sep = _operatingSystemLayer.PathSep;
                 var targetDirBasePath = _operatingSystemLayer.TargetDirBasePath;
 

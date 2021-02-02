@@ -14,13 +14,11 @@ namespace Slurper.OperatingSystemLayers
             switch (platformId)
             {
                 case PlatformID.Win32NT:
-                    operatingSystemLayer =
-                        new OperatingSystemLayerWindows(new Logger<OperatingSystemLayerWindows>(new LoggerFactory()));
+                    operatingSystemLayer = new OperatingSystemLayerWindows(new Logger<OperatingSystemLayerWindows>(new LoggerFactory()));
                     break;
                 case PlatformID.Unix:
                 case PlatformID.MacOSX:
-                    operatingSystemLayer =
-                        new OperatingSystemLayerLinux(new Logger<OperatingSystemLayerLinux>(new LoggerFactory()));
+                    operatingSystemLayer = new OperatingSystemLayerLinux(new Logger<OperatingSystemLayerLinux>(new LoggerFactory()));
                     break;
                 default:
                     Console.WriteLine($"This [{platformId}] OS and/or its filesystem is not supported");

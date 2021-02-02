@@ -52,26 +52,26 @@ namespace Slurper.OperatingSystemLayers
 
             _logger.LogDebug("GetDriveInfo: [{RunMountPoint}]", runMountPoint);
 
-            foreach (var d in mountpoints)
+            foreach (var driveInfo in mountpoints)
             {
                 var toBeIncluded = true;
                 var reason = string.Empty;
 
-                if (!IsValidMountPoint(d))
+                if (!IsValidMountPoint(driveInfo))
                 {
                     toBeIncluded = false;
                     reason = "not applicable for this mountpoint/fs-type";
                 }
 
-                if (d.Name.Equals(runMountPoint))
+                if (driveInfo.Name.Equals(runMountPoint))
                 {
                     toBeIncluded = false;
                     reason = "cannot rip from target mount point";
                 }
 
-                if (toBeIncluded) paths.Add(d.Name);
+                if (toBeIncluded) paths.Add(driveInfo.Name);
 
-                _logger.LogInformation("GetDriveInfo: found mount point [{PathName}]\t included? [{ToBeIncluded}]\t reason[{Reason}]", d.Name, toBeIncluded, reason);
+                _logger.LogInformation("GetDriveInfo: found mount point [{PathName}]\t included? [{ToBeIncluded}]\t reason[{Reason}]", driveInfo.Name, toBeIncluded, reason);
             }
 
             return paths;

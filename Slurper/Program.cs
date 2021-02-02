@@ -27,7 +27,8 @@ namespace Slurper
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<SlurperApp>()
+            services
+                .AddTransient<SlurperApp>()
                 .AddScoped<Searcher>()
                 .AddScoped<FileRipper>()
                 .AddSingleton<OperatingSystemLayerWindows>()

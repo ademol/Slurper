@@ -37,13 +37,13 @@ namespace Slurper.Logic
 
         private void DirSearch(string path)
         {
-            foreach (var d in GetDirs(path))
+            foreach (var directory in GetDirs(path))
             {
-                if (SkipDirectory(d)) continue;
+                if (SkipDirectory(directory)) continue;
 
-                GetFilesInCurrentDirectory(d);
+                GetFilesInCurrentDirectory(directory);
 
-                GetSubDirectories(d);
+                GetSubDirectories(directory);
             }
         }
 
