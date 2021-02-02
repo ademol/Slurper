@@ -40,8 +40,8 @@ namespace Slurper.Logic
 
         private void AddDefaultConfig()
         {
-            _logger.LogWarning($"Configure: config file [{CfgFileName}] not found, " +
-                               $"or no valid patterns in file found => using default pattern [{DefaultPattern}]");
+            _logger.LogWarning("Configure: config file [{CfgFileName}] not found, " +
+                               "or no valid patterns in file found => using default pattern [{DefaultPattern}]", CfgFileName, DefaultPattern);
 
             PatternsToMatch.Add(DefaultPattern);
         }
@@ -49,7 +49,7 @@ namespace Slurper.Logic
         private void LogPatterns()
         {
             foreach (var pattern in PatternsToMatch)
-                _logger.LogDebug($"Configure: Pattern to use: [{pattern}] ");
+                _logger.LogDebug("Configure: Pattern to use: [{Pattern}] ", pattern);
         }
 
         private static void InitSampleConfig()
@@ -101,19 +101,19 @@ namespace Slurper.Logic
                     if (m.Success)
                     {
                         var regex = m.Groups[1].Value;
-                        _logger.LogDebug($"LoadConfigFile: [{line}] => for regex:[{regex}]");
+                        _logger.LogDebug("LoadConfigFile: [{Line}] => for regex:[{Regex}]", line, regex);
 
                         PatternsToMatch.Add(regex);
                     }
                     else
                     {
-                        _logger.LogDebug($"LoadConfigFile: [{line}] => regex:[---skipped---]");
+                        _logger.LogDebug("LoadConfigFile: [{Line}] => regex:[---skipped---]", line);
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                _logger.LogError($"LoadConfigFile: Could not read[{CfgFileName}] [{e.Message}]");
+                _logger.LogError("LoadConfigFile: Could not read[{CfgFileName}] [{e.Message}]", CfgFileName);
             }
         }
     }

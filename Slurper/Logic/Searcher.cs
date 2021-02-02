@@ -47,45 +47,45 @@ namespace Slurper.Logic
             }
         }
 
-        private bool SkipDirectory(string d)
+        private bool SkipDirectory(string directory)
         {
-            if (IsSymbolic(d))
+            if (IsSymbolic(directory))
             {
-                _logger.LogTrace($"Skip symbolic link [{d}]");
+                _logger.LogTrace("Skip symbolic link [{Directory}]", directory);
                 return true;
             }
 
-            if (IsCurrentPath(d))
+            if (IsCurrentPath(directory))
             {
-                _logger.LogTrace($"Skipping my path[{d}]");
+                _logger.LogTrace("Skipping my path[{Directory}]", directory);
                 return true;
             }
 
             return false;
         }
 
-        private void GetSubDirectories(string d)
+        private void GetSubDirectories(string directory)
         {
             try
             {
-                DirSearch(d);
+                DirSearch(directory);
             }
             catch (Exception e)
             {
-                _logger.LogError($"DirSearch: Could not read dir [{d}][{e.Message}]");
+                _logger.LogError("DirSearch: Could not read dir [{Directory}][{Exception}]", directory, e.Message);
             }
         }
 
-        private void GetFilesInCurrentDirectory(string d)
+        private void GetFilesInCurrentDirectory(string directory)
         {
             var tasks = new List<Task>();
 
-            foreach (var f in GetFiles(d))
+            foreach (var f in GetFiles(directory))
             {
                 if (IsSymbolic(f)) continue;
 
                 Spinner.Spin();
-                _logger.LogTrace($"[{f}]");
+                _logger.LogTrace("[{F}]", f);
 
                 if (_patterns.Any(p => new Regex(p).Match(f).Success))
                 {
@@ -117,11 +117,11 @@ namespace Slurper.Logic
             }
             catch (UnauthorizedAccessException e)
             {
-                _logger.LogError($"getFiles: Unauthorized to retrieve fileList from [{path}][{e.Message}]");
+                _logger.LogError("getFiles: Unauthorized to retrieve fileList from [{Path}][{ExceptionMessage}]", path, e.Message);
             }
             catch (Exception e)
             {
-                _logger.LogError($"getFiles: Failed to retrieve fileList from [{path}][{e.Message}]");
+                _logger.LogError("getFiles: Failed to retrieve fileList from [{Path}][{ExceptionMessage}]", path, e.Message);
             }
 
             return Array.Empty<string>();
@@ -135,11 +135,11 @@ namespace Slurper.Logic
             }
             catch (UnauthorizedAccessException e)
             {
-                _logger.LogError($"getFiles: Unauthorized to retrieve dirList from [{path}][{e.Message}]");
+                _logger.LogError("getFiles: Unauthorized to retrieve dirList from [{Path}][{ExceptionMessage}]", path, e.Message);
             }
             catch (Exception e)
             {
-                _logger.LogError($"getDirs: Failed to retrieve dirList from [{path}][{e.Message}]");
+                _logger.LogError("getDirs: Failed to retrieve dirList from [{Path}][{ExceptionMessage}]", path, e.Message);
             }
 
             return Array.Empty<string>();

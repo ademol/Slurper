@@ -28,7 +28,7 @@ namespace Slurper.OperatingSystemLayers
 
             TargetDirBasePath = string.Concat(curDir, PathSep, ConfigurationService.DestinationDirectory, PathSep,
                 hostname, "_", dateTime);
-            _logger.LogDebug($"CreateTargetLocation: [{hostname}][{curDir}][{dateTime}][{TargetDirBasePath}]");
+            _logger.LogDebug("CreateTargetLocation: [{Hostname}][{CurDir}][{DateTime}][{TargetDirBasePath}]", hostname, curDir, dateTime, TargetDirBasePath);
 
             try
             {
@@ -36,7 +36,7 @@ namespace Slurper.OperatingSystemLayers
             }
             catch (Exception e)
             {
-                _logger.LogError($"CreateTargetLocation: failed to create director [{TargetDirBasePath}][{e.Message}]");
+                _logger.LogError("CreateTargetLocation: failed to create director [{TargetDirBasePath}][{ExceptionMessage}]", TargetDirBasePath, e.Message);
             }
         }
 
@@ -50,7 +50,7 @@ namespace Slurper.OperatingSystemLayers
             var runMountPoint =
                 mountpoints.Where(j => runLocation.Contains(j.Name)).Max(j => j.Name);
 
-            _logger.LogDebug($"GetDriveInfo: [{runMountPoint}]");
+            _logger.LogDebug("GetDriveInfo: [{RunMountPoint}]", runMountPoint);
 
             foreach (var d in mountpoints)
             {
@@ -71,7 +71,7 @@ namespace Slurper.OperatingSystemLayers
 
                 if (toBeIncluded) paths.Add(d.Name);
 
-                _logger.LogInformation($"GetDriveInfo: found mount point [{d.Name}]\t included? [{toBeIncluded}]\t reason[{reason}]");
+                _logger.LogInformation("GetDriveInfo: found mount point [{PathName}]\t included? [{ToBeIncluded}]\t reason[{Reason}]", d.Name, toBeIncluded, reason);
             }
 
             return paths;

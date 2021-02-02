@@ -18,9 +18,6 @@ namespace Slurper.OperatingSystemLayers
                         new OperatingSystemLayerWindows(new Logger<OperatingSystemLayerWindows>(new LoggerFactory()));
                     break;
                 case PlatformID.Unix:
-                    operatingSystemLayer =
-                        new OperatingSystemLayerLinux(new Logger<OperatingSystemLayerLinux>(new LoggerFactory()));
-                    break;
                 case PlatformID.MacOSX:
                     operatingSystemLayer =
                         new OperatingSystemLayerLinux(new Logger<OperatingSystemLayerLinux>(new LoggerFactory()));

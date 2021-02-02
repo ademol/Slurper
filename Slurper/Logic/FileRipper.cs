@@ -23,7 +23,7 @@ namespace Slurper.Logic
             var targetPath = TargetPath(filename);
             var targetFileNameFullPath = targetPath + Path.GetFileName(filename);
 
-            _logger.LogDebug($"RipFile: ripping [{filename}] => [{targetFileNameFullPath}]");
+            _logger.LogDebug("RipFile: ripping [{Filename}] => [{TargetFileNameFullPath}]", filename, targetFileNameFullPath);
 
             if (ConfigurationService.DryRun) return;
 
@@ -34,7 +34,7 @@ namespace Slurper.Logic
             }
             catch (Exception e)
             {
-                _logger.LogError($"RipFile: copy of [{filename}] failed with [{e.Message}]");
+                _logger.LogError("RipFile: copy of [{Filename}] failed with [{ExceptionMessage}]", filename, e.Message);
             }
         }
 
